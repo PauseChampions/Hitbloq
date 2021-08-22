@@ -1,0 +1,15 @@
+﻿{
+  "$schema": "https://raw.githubusercontent.com/bsmg/BSIPA-MetadataFileSchema/master/Schema.json",
+  "id": "Hitbloq",
+  "name": "Hitbloq",
+  "author": "Hitbloq",
+  "version": "1.0.0",
+  "description": "Hitbloq offers a unique competitive experience for Beat Saber through its use of map pools and the relative ranking algorithm.",
+  "gameVersion": "1.16.4",
+    "dependsOn": {
+        "BSIPA": "^4.2.0",
+        "BeatSaberMarkupLanguage": "^1.5.3",
+        "SiraUtil": "^2.5.5",
+        "LeaderboardCore": "^1.0.0"
+    }
+}

@@ -1,0 +1,7 @@
+﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+  <horizontal id='container' pref-width='91' horizontal-fit='PreferredSize' vertical-fit='PreferredSize' spacing='3' bg='round-rect-panel' bg-color='#0078B9' pad='2'>
+    <vertical pref-width='70' pref-height='10' spacing='-1'>
+      <text text='Hitbloq' size='10' />
+    </vertical>
+  </horizontal>
+</bg>
