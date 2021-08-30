@@ -16,6 +16,14 @@ namespace Hitbloq.UI
         [UIComponent("leaderboard")]
         internal LeaderboardTableView leaderboard;
 
+        [UIValue("cell-data")]
+        private readonly List<IconSegmentedControl.DataItem> cellData = new List<IconSegmentedControl.DataItem>
+        {
+            new IconSegmentedControl.DataItem(BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.GlobalIcon.png"), "Global"),
+            new IconSegmentedControl.DataItem(BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.PlayerIcon.png"), "Around You"),
+            new IconSegmentedControl.DataItem(BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.FriendsIcon.png"), "Friends")
+        };
+
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
@@ -51,6 +59,12 @@ namespace Hitbloq.UI
         private void PostParse()
         {
             leaderboardTransform.Find("LoadingControl").gameObject.SetActive(false);
+        }
+
+        [UIAction("cell-selected")]
+        private void OnCellSelected(SegmentedControl control, int index)
+        {
+            
         }
     }
 }
