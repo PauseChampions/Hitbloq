@@ -93,6 +93,13 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+	  <Compile Remove="Managers\**" />
+	  <EmbeddedResource Remove="Managers\**" />
+	  <None Remove="Managers\**" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <None Remove="UI\Views\HitbloqMainView.bsml" />
 	  <None Remove="UI\Views\HitbloqPanel.bsml" />
 	  <None Remove="UI\Views\MainLeaderboardView.bsml" />
 	</ItemGroup>
@@ -105,6 +112,6 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <Folder Include="Managers\" />
+	  <Folder Include="Images\" />
 	</ItemGroup>
 </Project>

@@ -1,5 +1,4 @@
-﻿using Hitbloq.UI.ViewControllers;
-using HMUI;
+﻿using HMUI;
 using LeaderboardCore.Managers;
 using LeaderboardCore.Models;
 using System;
@@ -15,7 +14,7 @@ namespace Hitbloq.UI
         private readonly ViewController mainLeaderboardViewController;
         protected override ViewController leaderboardViewController => mainLeaderboardViewController;
 
-        internal HitbloqCustomLeaderboard(HitbloqPanelController hitbloqPanelController, MainLeaderboardViewController mainLeaderboardViewController)
+        internal HitbloqCustomLeaderboard(HitbloqPanelController hitbloqPanelController, HitbloqLeaderboardViewController mainLeaderboardViewController)
         {
             this.hitbloqPanelController = hitbloqPanelController;
             this.mainLeaderboardViewController = mainLeaderboardViewController;
