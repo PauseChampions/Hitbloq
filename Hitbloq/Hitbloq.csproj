@@ -30,6 +30,10 @@
 		  <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins\LeaderboardCore.dll</HintPath>
 		  <Private>False</Private>
 		</Reference>
+		<Reference Include="Unity.TextMeshPro">
+		  <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+		  <Private>False</Private>
+		</Reference>
 		<Reference Include="UnityEngine.CoreModule">
 			<HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
 			<Private>False</Private>
@@ -99,9 +103,9 @@
 	</ItemGroup>
 	
 	<ItemGroup>
+	  <None Remove="UI\Views\HitbloqMainLeaderboardView.bsml" />
 	  <None Remove="UI\Views\HitbloqMainView.bsml" />
 	  <None Remove="UI\Views\HitbloqPanel.bsml" />
-	  <None Remove="UI\Views\MainLeaderboardView.bsml" />
 	</ItemGroup>
 
 	<ItemGroup>
