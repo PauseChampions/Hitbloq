@@ -19,6 +19,7 @@ namespace Hitbloq.Installers
             Container.BindInterfacesTo<HitbloqCustomLeaderboard>().AsSingle();
             Container.BindInterfacesTo<HitbloqDataManager>().AsSingle();
 
+            Container.Bind<LevelInfoSource>().AsSingle();
             Container.BindInterfacesTo<GlobalLeaderboardSource>().AsSingle();
         }
     }

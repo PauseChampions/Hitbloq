@@ -1,6 +1,7 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components.Settings;
 using BeatSaberMarkupLanguage.ViewControllers;
+using Hitbloq.Entries;
 using Hitbloq.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,7 +11,7 @@ namespace Hitbloq.UI
 {
     [HotReload(RelativePathToLayout = @"..\Views\HitbloqPanel.bsml")]
     [ViewDefinition("Hitbloq.UI.Views.HitbloqPanel.bsml")]
-    internal class HitbloqPanelController : BSMLAutomaticViewController, ILeaderboardEntriesUpdater
+    internal class HitbloqPanelController : BSMLAutomaticViewController, IDifficultyBeatmapUpdater
     {
         private HitbloqFlowCoordinator hitbloqFlowCoordinator;
 
@@ -32,15 +33,15 @@ namespace Hitbloq.UI
             hitbloqFlowCoordinator.Show();
         }
 
-        public void LeaderboardEntriesUpdated(List<Entries.LeaderboardEntry> leaderboardEntries)
+        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, LevelInfoEntry levelInfoEntry)
         {
-            if (leaderboardEntries != null && leaderboardEntries.Count != 0)
+            pools = new List<object>();
+            if (levelInfoEntry != null)
             {
-                pools = leaderboardEntries[0].cr.Keys.Cast<object>().ToList();
-            }
-            else
-            {
-                pools = new List<object>();
+                foreach(var pool in levelInfoEntry.pools)
+                {
+                    pools.Add($"{pool.Key} - {pool.Value}⭐");
+                }
             }
 
             if (dropDownListSetting != null)

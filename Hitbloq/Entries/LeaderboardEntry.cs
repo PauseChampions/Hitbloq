@@ -20,6 +20,9 @@ namespace Hitbloq.Entries
         [JsonProperty("username")]
         public string username;
 
+        [JsonProperty("rank")]
+        public string rank;
+
         [JsonProperty("cr")]
         public Dictionary<string, float> cr;
     }

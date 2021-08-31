@@ -1,4 +1,5 @@
-﻿using Hitbloq.Interfaces;
+﻿using Hitbloq.Entries;
+using Hitbloq.Interfaces;
 using Hitbloq.Sources;
 using Hitbloq.UI;
 using System;
@@ -16,13 +17,18 @@ namespace Hitbloq.Managers
         private readonly List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters;
         private readonly List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters;
 
-        private CancellationTokenSource tokenSource;
+        private readonly LevelInfoSource levelInfoSource;
+
+        private CancellationTokenSource levelInfoTokenSource;
+        private CancellationTokenSource leaderboardTokenSource;
 
         public HitbloqDataManager(StandardLevelDetailViewController standardLevelDetailViewController, HitbloqLeaderboardViewController hitbloqLeaderboardViewController, 
-            List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters, List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters)
+            LevelInfoSource levelInfoSource, List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters, List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.hitbloqLeaderboardViewController = hitbloqLeaderboardViewController;
+
+            this.levelInfoSource = levelInfoSource;
 
             this.difficultyBeatmapUpdaters = difficultyBeatmapUpdaters;
             this.leaderboardEntriesUpdaters = leaderboardEntriesUpdaters;
@@ -42,30 +48,36 @@ namespace Hitbloq.Managers
             hitbloqLeaderboardViewController.PageRequested -= OnPageRequested;
         }
 
-        private void OnDifficultyBeatmapChanged(StandardLevelDetailViewController _, IDifficultyBeatmap difficultyBeatmap)
-        {
-            foreach(var difficultyBeatmapUpdater in difficultyBeatmapUpdaters)
-            {
-                difficultyBeatmapUpdater.DifficultyBeatmapUpdated(difficultyBeatmap);
-            }
-        }
+        private void OnDifficultyBeatmapChanged(StandardLevelDetailViewController _, IDifficultyBeatmap difficultyBeatmap) => UpdateDifficultyBeatmap(difficultyBeatmap);
 
         private void OnContentChanged(StandardLevelDetailViewController _, StandardLevelDetailViewController.ContentType contentType)
         {
             if (standardLevelDetailViewController.selectedDifficultyBeatmap != null && (contentType == StandardLevelDetailViewController.ContentType.OwnedAndReady || contentType == StandardLevelDetailViewController.ContentType.Inactive))
             {
+                UpdateDifficultyBeatmap(standardLevelDetailViewController.selectedDifficultyBeatmap);
+            }
+        }
+
+        private async void UpdateDifficultyBeatmap(IDifficultyBeatmap difficultyBeatmap)
+        {
+            levelInfoTokenSource?.Cancel();
+            levelInfoTokenSource = new CancellationTokenSource();
+            LevelInfoEntry levelInfoEntry = await levelInfoSource.GetLevelInfoAsync(difficultyBeatmap, levelInfoTokenSource.Token);
+
+            if (!levelInfoTokenSource.IsCancellationRequested)
+            {
                 foreach (var difficultyBeatmapUpdater in difficultyBeatmapUpdaters)
                 {
-                    difficultyBeatmapUpdater.DifficultyBeatmapUpdated(standardLevelDetailViewController.selectedDifficultyBeatmap);
+                    difficultyBeatmapUpdater.DifficultyBeatmapUpdated(standardLevelDetailViewController.selectedDifficultyBeatmap, levelInfoEntry);
                 }
             }
         }
 
         private async void OnPageRequested(IDifficultyBeatmap difficultyBeatmap, ILeaderboardSource leaderboardSource, int page)
         {
-            tokenSource?.Cancel();
-            tokenSource = new CancellationTokenSource();
-            List<Entries.LeaderboardEntry> leaderboardEntries = await leaderboardSource.GetScoresTask(difficultyBeatmap, tokenSource.Token, page);
+            leaderboardTokenSource?.Cancel();
+            leaderboardTokenSource = new CancellationTokenSource();
+            List<Entries.LeaderboardEntry> leaderboardEntries = await leaderboardSource.GetScoresTask(difficultyBeatmap, leaderboardTokenSource.Token, page);
 
             if (leaderboardEntries != null)
             {

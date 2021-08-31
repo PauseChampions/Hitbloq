@@ -1,5 +1,6 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
+using Hitbloq.Entries;
 using Hitbloq.Interfaces;
 using Hitbloq.Sources;
 using HMUI;
@@ -95,14 +96,21 @@ namespace Hitbloq.UI
             
         }
 
-        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap)
+        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, LevelInfoEntry levelInfoEntry)
         {
             if (leaderboardTransform != null)
             {
                 leaderboard.SetScores(new List<LeaderboardTableView.ScoreData>(), 0);
                 leaderboardTransform.Find("LoadingControl").gameObject.SetActive(true);
             }
-            PageRequested?.Invoke(difficultyBeatmap, leaderboardSources[0], 0);
+            if (levelInfoEntry != null)
+            {
+                PageRequested?.Invoke(difficultyBeatmap, leaderboardSources[0], 0);
+            }
+            else
+            {
+                LeaderboardEntriesUpdated(null);
+            }
         }
 
         public void LeaderboardEntriesUpdated(List<Entries.LeaderboardEntry> leaderboardEntries)

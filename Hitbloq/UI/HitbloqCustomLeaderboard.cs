@@ -1,4 +1,5 @@
-﻿using Hitbloq.Interfaces;
+﻿using Hitbloq.Entries;
+using Hitbloq.Interfaces;
 using HMUI;
 using LeaderboardCore.Managers;
 using LeaderboardCore.Models;
@@ -7,7 +8,7 @@ using System.Collections.Generic;
 
 namespace Hitbloq.UI
 {
-    internal class HitbloqCustomLeaderboard : CustomLeaderboard, IDisposable, ILeaderboardEntriesUpdater
+    internal class HitbloqCustomLeaderboard : CustomLeaderboard, IDisposable, IDifficultyBeatmapUpdater
     {
         private readonly ViewController hitbloqPanelController;
         protected override ViewController panelViewController => hitbloqPanelController;
@@ -29,14 +30,14 @@ namespace Hitbloq.UI
             registered = false;
         }
 
-        public void LeaderboardEntriesUpdated(List<Entries.LeaderboardEntry> leaderboardEntries)
+        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, LevelInfoEntry levelInfoEntry)
         {
-            if (leaderboardEntries != null && !registered)
+            if (levelInfoEntry != null && !registered)
             {
                 CustomLeaderboardManager.instance?.Register(this);
                 registered = true;
             }
-            else if (leaderboardEntries == null && registered)
+            else if (levelInfoEntry == null && registered)
             {
                 CustomLeaderboardManager.instance?.Unregister(this);
                 registered = false;
