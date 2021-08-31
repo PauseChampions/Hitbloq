@@ -101,7 +101,7 @@ namespace Hitbloq.UI
 
                 for(int i = 0; i < leaderboardEntries.Count; i++)
                 {
-                    scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].score, $"<size=85%>{leaderboardEntries[i].username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].accuracy}%</color>)</size></size> - <size=75%> (<color=#6772E5>{leaderboardEntries[i].cr.Values.ToArray()[0]}<size=45%>cr</size></color>)</size>", 
+                    scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].score, $"<size=85%>{leaderboardEntries[i].username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#6772E5>{leaderboardEntries[i].cr.Values.ToArray()[0].ToString("F2")}<size=45%>cr</size></color>)</size>", 
                         leaderboardEntries[i].rank, false));
                     if (leaderboardEntries[i].userID == id)
                     {

@@ -10,7 +10,7 @@ namespace Hitbloq.Sources
         private readonly SiraClient siraClient;
         private readonly IPlatformUserModel platformUserModel;
 
-        private HitbloqUserInfo? hitbloqUserInfo;
+        private HitbloqUserInfo hitbloqUserInfo;
 
         public UserInfoSource(SiraClient siraClient, IPlatformUserModel platformUserModel)
         {
