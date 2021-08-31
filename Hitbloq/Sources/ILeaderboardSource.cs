@@ -10,5 +10,6 @@ namespace Hitbloq.Sources
         public string HoverHint { get; }
         public Sprite Icon { get; }
         public Task<List<Entries.LeaderboardEntry>> GetScoresTask(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null, int page = 0);
+        public bool Scrollable { get; }
     }
 }

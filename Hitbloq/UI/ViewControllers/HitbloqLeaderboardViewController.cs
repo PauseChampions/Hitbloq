@@ -20,6 +20,7 @@ namespace Hitbloq.UI
         public event Action<IDifficultyBeatmap, ILeaderboardSource, int> PageRequested;
 
         private int _pageNumber;
+        private int _selectedCellIndex;
         private IDifficultyBeatmap difficultyBeatmap;
         private List<Entries.LeaderboardEntry> leaderboardEntries;
 
@@ -35,7 +36,17 @@ namespace Hitbloq.UI
                     leaderboard.SetScores(new List<LeaderboardTableView.ScoreData>(), 0);
                     leaderboardTransform.Find("LoadingControl").gameObject.SetActive(true);
                 }
-                PageRequested?.Invoke(difficultyBeatmap, leaderboardSources[0], value);
+                PageRequested?.Invoke(difficultyBeatmap, leaderboardSources[SelectedCellIndex], value);
+            }
+        }
+
+        private int SelectedCellIndex
+        {
+            get => _selectedCellIndex;
+            set
+            {
+                _selectedCellIndex = value;
+                PageNumber = 0;
             }
         }
 
@@ -96,9 +107,9 @@ namespace Hitbloq.UI
         }
 
         [UIAction("cell-selected")]
-        private void OnCellSelected(SegmentedControl control, int index)
+        private void OnCellSelected(SegmentedControl _, int index)
         {
-            
+            SelectedCellIndex = index;
         }
 
         [UIAction("up-clicked")]
@@ -147,9 +158,9 @@ namespace Hitbloq.UI
         }
 
         [UIValue("up-enabled")]
-        private bool UpEnabled => PageNumber != 0;
+        private bool UpEnabled => PageNumber != 0 && leaderboardSources[SelectedCellIndex].Scrollable;
 
         [UIValue("down-enabled")]
-        private bool DownEnabled => leaderboardEntries != null && leaderboardEntries.Count != 0;
+        private bool DownEnabled => leaderboardEntries != null && leaderboardEntries.Count != 0 && leaderboardSources[SelectedCellIndex].Scrollable;
     }
 }

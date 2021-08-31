@@ -20,6 +20,7 @@ namespace Hitbloq.Installers
             Container.BindInterfacesTo<HitbloqDataManager>().AsSingle();
 
             Container.BindInterfacesTo<GlobalLeaderboardSource>().AsSingle();
+            Container.BindInterfacesTo<AroundMeLeaderboardSource>().AsSingle();
         }
     }
 }
