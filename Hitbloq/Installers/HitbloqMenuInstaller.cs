@@ -1,6 +1,8 @@
 ﻿using Zenject;
 using SiraUtil;
 using Hitbloq.UI;
+using Hitbloq.Managers;
+using Hitbloq.Sources;
 
 namespace Hitbloq.Installers
 {
@@ -11,8 +13,13 @@ namespace Hitbloq.Installers
             Container.BindInterfacesAndSelfTo<HitbloqLeaderboardViewController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<HitbloqPanelController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<HitbloqMainViewController>().FromNewComponentAsViewController().AsSingle();
+
             Container.BindInterfacesAndSelfTo<HitbloqFlowCoordinator>().FromNewComponentOnRoot().AsSingle();
+
             Container.BindInterfacesTo<HitbloqCustomLeaderboard>().AsSingle();
+            Container.BindInterfacesTo<HitbloqDataManager>().AsSingle();
+
+            Container.BindInterfacesTo<GlobalLeaderboardSource>().AsSingle();
         }
     }
 }

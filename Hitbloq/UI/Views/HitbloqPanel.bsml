@@ -7,8 +7,8 @@
 		  <image id='separator' src='Hitbloq.Images.Pixel.png' pref-width='0.5' pref-height='10' size-delta-x='0.5' size-delta-y='10' />
 	  </vertical>
 	  <vertical pref-width='70' pref-height='10' spacing='-1'>
-		  <text text='Pool Ranking: #1 (6,942.00cr)' font-size='3.5' />
-		  <dropdown-list-setting text='Map Pool:' font-size='3.5' italics='false' options='pools' size-delta-x='30' anchor-pos-x='-28' />
+		  <text text='Pool Ranking: #1 (6,942.00cr)' font-size='3.5' italics='true' />
+		  <dropdown-list-setting id='dropdown-list' text='Map Pool:' font-size='3.5' italics='true' options='pools' size-delta-x='40' anchor-pos-x='-18' />
 	  </vertical>
   </horizontal>
 </bg>

@@ -1,12 +1,12 @@
 ﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
 	<horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='90' pref-height='70'>
-		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='10' pref-height='50'>
-			<page-button direction='Up' />
+		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='10' pref-height='20'>
 			<vertical-icon-segments data='cell-data' select-cell='cell-selected' />
-			<page-button direction='Down' />
 		</vertical>
-		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='70' pref-height='70'>
+		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='80' pref-height='70'>
 			<leaderboard id='leaderboard' cell-size='5.99' />
 		</vertical>
 	</horizontal>
+	<page-button direction='Up' anchor-pos-x='-40' anchor-pos-y='-5' active='false' />
+	<page-button direction='Down' anchor-pos-x='-40' anchor-pos-y='-35' active='false' />
 </bg>

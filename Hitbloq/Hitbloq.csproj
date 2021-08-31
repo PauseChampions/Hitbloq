@@ -26,6 +26,10 @@
 		  <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Libs\0Harmony.dll</HintPath>
 		  <Private>False</Private>
 		</Reference>
+		<Reference Include="BeatmapCore">
+		  <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
+		  <Private>False</Private>
+		</Reference>
 		<Reference Include="LeaderboardCore">
 		  <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins\LeaderboardCore.dll</HintPath>
 		  <Private>False</Private>
@@ -94,12 +98,6 @@
 		<EmbeddedResource Include="manifest.json" />
 		<EmbeddedResource Include="Images\*.png" />
 		<EmbeddedResource Include="UI\Views\*.bsml" />
-	</ItemGroup>
-	
-	<ItemGroup>
-	  <Compile Remove="Managers\**" />
-	  <EmbeddedResource Remove="Managers\**" />
-	  <None Remove="Managers\**" />
 	</ItemGroup>
 	
 	<ItemGroup>

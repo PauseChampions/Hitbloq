@@ -1,15 +1,24 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
+using Hitbloq.Interfaces;
+using Hitbloq.Sources;
 using HMUI;
+using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using Zenject;
 
 namespace Hitbloq.UI
 {
     [HotReload(RelativePathToLayout = @"..\Views\HitbloqMainLeaderboardView.bsml")]
     [ViewDefinition("Hitbloq.UI.Views.HitbloqMainLeaderboardView.bsml")]
-    internal class HitbloqLeaderboardViewController : BSMLAutomaticViewController
+    internal class HitbloqLeaderboardViewController : BSMLAutomaticViewController, IDifficultyBeatmapUpdater, ILeaderboardEntriesUpdater
     {
+        private List<ILeaderboardSource> leaderboardSources;
+
+        public event Action<IDifficultyBeatmap, ILeaderboardSource, int> PageRequested; 
+
         [UIComponent("leaderboard")]
         private Transform leaderboardTransform;
 
@@ -17,12 +26,24 @@ namespace Hitbloq.UI
         internal LeaderboardTableView leaderboard;
 
         [UIValue("cell-data")]
-        private readonly List<IconSegmentedControl.DataItem> cellData = new List<IconSegmentedControl.DataItem>
+        private List<IconSegmentedControl.DataItem> cellData
         {
-            new IconSegmentedControl.DataItem(BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.GlobalIcon.png"), "Global"),
-            new IconSegmentedControl.DataItem(BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.PlayerIcon.png"), "Around You"),
-            new IconSegmentedControl.DataItem(BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.FriendsIcon.png"), "Friends")
-        };
+            get
+            {
+                List<IconSegmentedControl.DataItem> list = new List<IconSegmentedControl.DataItem>();
+                foreach (var leaderboardSource in leaderboardSources)
+                {
+                    list.Add(new IconSegmentedControl.DataItem(leaderboardSource.Icon, leaderboardSource.HoverHint));
+                }
+                return list;
+            }
+        }
+
+        [Inject]
+        private void Inject(List<ILeaderboardSource> leaderboardSources)
+        {
+            this.leaderboardSources = leaderboardSources;
+        }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
@@ -40,31 +61,53 @@ namespace Hitbloq.UI
                 {
                     leaderboardTableCell.transform.Find("PlayerName").GetComponent<CurvedTextMeshPro>().richText = true;
                 }
+                Destroy(leaderboardTransform.Find("LoadingControl").Find("LoadingContainer").Find("Text").gameObject);
             }
-
-            List<LeaderboardTableView.ScoreData> scores = new List<LeaderboardTableView.ScoreData>();
-            SetScores(scores, 1);
         }
 
-        public void SetScores(List<LeaderboardTableView.ScoreData> scores, int myScorePos)
+        public void SetScores(List<Entries.LeaderboardEntry> leaderboardEntries, int myScorePos)
         {
-            if (scores.Count == 0)
+            List<LeaderboardTableView.ScoreData> scores = new List<LeaderboardTableView.ScoreData>();
+
+            if (leaderboardEntries.Count == 0 || leaderboardEntries == null)
             {
                 scores.Add(new LeaderboardTableView.ScoreData(0, "You haven't set a score on this leaderboard - <size=75%>(<color=#FFD42A>0%</color>)</size>", 0, false));
             }
-            leaderboard.SetScores(scores, myScorePos);
-        }
+            else
+            {
+                for(int i = 0; i < leaderboardEntries.Count; i++)
+                {
+                    scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].score, $"<size=85%>{leaderboardEntries[i].username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].accuracy}%</color>)</size></size> - <size=75%> (<color=#6772E5>{leaderboardEntries[i].cr.Values.ToArray()[0]}<size=45%>cr</size></color>)</size>", 
+                        i + 1, false));
+                }
+            }
 
-        [UIAction("#post-parse")]
-        private void PostParse()
-        {
-            leaderboardTransform.Find("LoadingControl").gameObject.SetActive(false);
+            if (leaderboardTransform != null)
+            {
+                leaderboardTransform.Find("LoadingControl").gameObject.SetActive(false);
+                leaderboard.SetScores(scores, myScorePos);
+            }
         }
 
         [UIAction("cell-selected")]
         private void OnCellSelected(SegmentedControl control, int index)
         {
             
+        }
+
+        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap)
+        {
+            if (leaderboardTransform != null)
+            {
+                leaderboard.SetScores(new List<LeaderboardTableView.ScoreData>(), 0);
+                leaderboardTransform.Find("LoadingControl").gameObject.SetActive(true);
+            }
+            PageRequested?.Invoke(difficultyBeatmap, leaderboardSources[0], 0);
+        }
+
+        public void LeaderboardEntriesUpdated(List<Entries.LeaderboardEntry> leaderboardEntries)
+        {
+            SetScores(leaderboardEntries, -1);
         }
     }
 }
