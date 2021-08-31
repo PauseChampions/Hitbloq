@@ -17,27 +17,33 @@ namespace Hitbloq.UI
     {
         private List<ILeaderboardSource> leaderboardSources;
 
-        public event Action<IDifficultyBeatmap, ILeaderboardSource, int> PageRequested; 
+        public event Action<IDifficultyBeatmap, ILeaderboardSource, int> PageRequested;
+
+        private int _pageNumber;
+        private IDifficultyBeatmap difficultyBeatmap;
+        private List<Entries.LeaderboardEntry> leaderboardEntries;
+
+        private int PageNumber
+        {
+            get => _pageNumber;
+            set
+            {
+                _pageNumber = value;
+                NotifyPropertyChanged(nameof(UpEnabled));
+                if (leaderboardTransform != null)
+                {
+                    leaderboard.SetScores(new List<LeaderboardTableView.ScoreData>(), 0);
+                    leaderboardTransform.Find("LoadingControl").gameObject.SetActive(true);
+                }
+                PageRequested?.Invoke(difficultyBeatmap, leaderboardSources[0], value);
+            }
+        }
 
         [UIComponent("leaderboard")]
         private Transform leaderboardTransform;
 
         [UIComponent("leaderboard")]
         internal LeaderboardTableView leaderboard;
-
-        [UIValue("cell-data")]
-        private List<IconSegmentedControl.DataItem> cellData
-        {
-            get
-            {
-                List<IconSegmentedControl.DataItem> list = new List<IconSegmentedControl.DataItem>();
-                foreach (var leaderboardSource in leaderboardSources)
-                {
-                    list.Add(new IconSegmentedControl.DataItem(leaderboardSource.Icon, leaderboardSource.HoverHint));
-                }
-                return list;
-            }
-        }
 
         [Inject]
         private void Inject(List<ILeaderboardSource> leaderboardSources)
@@ -78,7 +84,7 @@ namespace Hitbloq.UI
                 for(int i = 0; i < leaderboardEntries.Count; i++)
                 {
                     scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].score, $"<size=85%>{leaderboardEntries[i].username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].accuracy}%</color>)</size></size> - <size=75%> (<color=#6772E5>{leaderboardEntries[i].cr.Values.ToArray()[0]}<size=45%>cr</size></color>)</size>", 
-                        i + 1, false));
+                        (PageNumber * 10) + i + 1, false));
                 }
             }
 
@@ -95,19 +101,55 @@ namespace Hitbloq.UI
             
         }
 
+        [UIAction("up-clicked")]
+        private void UpClicked()
+        {
+            if (UpEnabled)
+            {
+                PageNumber--;
+            }
+        }
+
+        [UIAction("down-clicked")]
+        private void DownClicked()
+        {
+            if (DownEnabled)
+            {
+                PageNumber++;
+            }
+        }
+
         public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap)
         {
-            if (leaderboardTransform != null)
-            {
-                leaderboard.SetScores(new List<LeaderboardTableView.ScoreData>(), 0);
-                leaderboardTransform.Find("LoadingControl").gameObject.SetActive(true);
-            }
-            PageRequested?.Invoke(difficultyBeatmap, leaderboardSources[0], 0);
+            this.difficultyBeatmap = difficultyBeatmap;
+            PageNumber = 0;
         }
 
         public void LeaderboardEntriesUpdated(List<Entries.LeaderboardEntry> leaderboardEntries)
         {
+            this.leaderboardEntries = leaderboardEntries;
+            NotifyPropertyChanged(nameof(DownEnabled));
             SetScores(leaderboardEntries, -1);
         }
+
+        [UIValue("cell-data")]
+        private List<IconSegmentedControl.DataItem> cellData
+        {
+            get
+            {
+                List<IconSegmentedControl.DataItem> list = new List<IconSegmentedControl.DataItem>();
+                foreach (var leaderboardSource in leaderboardSources)
+                {
+                    list.Add(new IconSegmentedControl.DataItem(leaderboardSource.Icon, leaderboardSource.HoverHint));
+                }
+                return list;
+            }
+        }
+
+        [UIValue("up-enabled")]
+        private bool UpEnabled => PageNumber != 0;
+
+        [UIValue("down-enabled")]
+        private bool DownEnabled => leaderboardEntries != null && leaderboardEntries.Count != 0;
     }
 }

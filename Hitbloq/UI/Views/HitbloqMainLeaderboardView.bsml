@@ -7,6 +7,6 @@
 			<leaderboard id='leaderboard' cell-size='5.99' />
 		</vertical>
 	</horizontal>
-	<page-button direction='Up' anchor-pos-x='-40' anchor-pos-y='-5' active='false' />
-	<page-button direction='Down' anchor-pos-x='-40' anchor-pos-y='-35' active='false' />
+	<page-button direction='Up' anchor-pos-x='-40' anchor-pos-y='-5' active='~up-enabled' on-click='up-clicked' />
+	<page-button direction='Down' anchor-pos-x='-40' anchor-pos-y='-35' active='~down-enabled' on-click='down-clicked' />
 </bg>

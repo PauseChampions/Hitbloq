@@ -36,7 +36,7 @@ namespace Hitbloq.Sources
             string difficulty = difficultyBeatmap.difficulty.ToString();
             string characteristic = difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic.serializedName;
 
-            WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{hash}%7C_{difficulty}_Solo{characteristic}/scores_extended/0", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+            WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{hash}%7C_{difficulty}_Solo{characteristic}/scores_extended/{page}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
             if (!webResponse.IsSuccessStatusCode)
             {
                 return null;
