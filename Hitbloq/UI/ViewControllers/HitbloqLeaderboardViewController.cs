@@ -69,7 +69,7 @@ namespace Hitbloq.UI
         {
             List<LeaderboardTableView.ScoreData> scores = new List<LeaderboardTableView.ScoreData>();
 
-            if (leaderboardEntries.Count == 0 || leaderboardEntries == null)
+            if (leaderboardEntries == null || leaderboardEntries.Count == 0)
             {
                 scores.Add(new LeaderboardTableView.ScoreData(0, "You haven't set a score on this leaderboard - <size=75%>(<color=#FFD42A>0%</color>)</size>", 0, false));
             }

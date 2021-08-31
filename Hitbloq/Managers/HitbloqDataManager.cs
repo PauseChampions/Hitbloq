@@ -67,6 +67,18 @@ namespace Hitbloq.Managers
             tokenSource = new CancellationTokenSource();
             List<Entries.LeaderboardEntry> leaderboardEntries = await leaderboardSource.GetScoresTask(difficultyBeatmap, tokenSource.Token, page);
 
+            if (leaderboardEntries != null)
+            {
+                if (leaderboardEntries.Count == 0)
+                {
+                    leaderboardEntries = null;
+                }
+                else if (leaderboardEntries[0].cr.Count == 0)
+                {
+                    leaderboardEntries = null;
+                }
+            }
+
             foreach(var leaderboardEntriesUpdater in leaderboardEntriesUpdaters)
             {
                 leaderboardEntriesUpdater.LeaderboardEntriesUpdated(leaderboardEntries);
