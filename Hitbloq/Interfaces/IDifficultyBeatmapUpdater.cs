@@ -4,6 +4,6 @@ namespace Hitbloq.Interfaces
 {
     internal interface IDifficultyBeatmapUpdater
     {
-        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, LevelInfoEntry levelInfoEntry);
+        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo levelInfoEntry);
     }
 }

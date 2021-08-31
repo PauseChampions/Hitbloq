@@ -33,7 +33,7 @@ namespace Hitbloq.UI
             hitbloqFlowCoordinator.Show();
         }
 
-        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, LevelInfoEntry levelInfoEntry)
+        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo levelInfoEntry)
         {
             pools = new List<object>();
             if (levelInfoEntry != null)

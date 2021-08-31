@@ -16,6 +16,7 @@ namespace Hitbloq.UI
     [ViewDefinition("Hitbloq.UI.Views.HitbloqMainLeaderboardView.bsml")]
     internal class HitbloqLeaderboardViewController : BSMLAutomaticViewController, IDifficultyBeatmapUpdater, ILeaderboardEntriesUpdater
     {
+        private UserInfoSource userInfoSource;
         private List<ILeaderboardSource> leaderboardSources;
 
         public event Action<IDifficultyBeatmap, ILeaderboardSource, int> PageRequested;
@@ -58,8 +59,9 @@ namespace Hitbloq.UI
         internal LeaderboardTableView leaderboard;
 
         [Inject]
-        private void Inject(List<ILeaderboardSource> leaderboardSources)
+        private void Inject(UserInfoSource userInfoSource, List<ILeaderboardSource> leaderboardSources)
         {
+            this.userInfoSource = userInfoSource;
             this.leaderboardSources = leaderboardSources;
         }
 
@@ -83,9 +85,10 @@ namespace Hitbloq.UI
             }
         }
 
-        public void SetScores(List<Entries.LeaderboardEntry> leaderboardEntries, int myScorePos)
+        public async void SetScores(List<Entries.LeaderboardEntry> leaderboardEntries)
         {
             List<LeaderboardTableView.ScoreData> scores = new List<LeaderboardTableView.ScoreData>();
+            int myScorePos = -1;
 
             if (leaderboardEntries == null || leaderboardEntries.Count == 0)
             {
@@ -93,10 +96,17 @@ namespace Hitbloq.UI
             }
             else
             {
+                HitbloqUserInfo userInfo = await userInfoSource.GetUserInfoAsync();
+                int id = userInfo.id;
+
                 for(int i = 0; i < leaderboardEntries.Count; i++)
                 {
                     scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].score, $"<size=85%>{leaderboardEntries[i].username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].accuracy}%</color>)</size></size> - <size=75%> (<color=#6772E5>{leaderboardEntries[i].cr.Values.ToArray()[0]}<size=45%>cr</size></color>)</size>", 
-                        (PageNumber * 10) + i + 1, false));
+                        leaderboardEntries[i].rank, false));
+                    if (leaderboardEntries[i].userID == id)
+                    {
+                        myScorePos = i;
+                    }
                 }
             }
 
@@ -131,7 +141,7 @@ namespace Hitbloq.UI
             }
         }
 
-        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, LevelInfoEntry levelInfoEntry)
+        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo levelInfoEntry)
         {
             this.difficultyBeatmap = difficultyBeatmap;
             if (levelInfoEntry != null)
@@ -148,7 +158,7 @@ namespace Hitbloq.UI
         {
             this.leaderboardEntries = leaderboardEntries;
             NotifyPropertyChanged(nameof(DownEnabled));
-            SetScores(leaderboardEntries, -1);
+            SetScores(leaderboardEntries);
         }
 
         [UIValue("cell-data")]

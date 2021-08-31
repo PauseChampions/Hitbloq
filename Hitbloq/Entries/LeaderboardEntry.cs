@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Hitbloq.Entries
 {
-    internal struct LeaderboardEntry
+    internal class LeaderboardEntry
     {
         [JsonProperty("accuracy")]
         public float accuracy;
@@ -20,8 +20,11 @@ namespace Hitbloq.Entries
         [JsonProperty("username")]
         public string username;
 
+        [JsonProperty("user")]
+        public int userID;
+
         [JsonProperty("rank")]
-        public string rank;
+        public int rank;
 
         [JsonProperty("cr")]
         public Dictionary<string, float> cr;

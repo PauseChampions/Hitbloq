@@ -30,7 +30,7 @@ namespace Hitbloq.UI
             registered = false;
         }
 
-        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, LevelInfoEntry levelInfoEntry)
+        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo levelInfoEntry)
         {
             if (levelInfoEntry != null && !registered)
             {

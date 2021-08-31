@@ -62,7 +62,7 @@ namespace Hitbloq.Managers
         {
             levelInfoTokenSource?.Cancel();
             levelInfoTokenSource = new CancellationTokenSource();
-            LevelInfoEntry levelInfoEntry = await levelInfoSource.GetLevelInfoAsync(difficultyBeatmap, levelInfoTokenSource.Token);
+            HitbloqLevelInfo levelInfoEntry = await levelInfoSource.GetLevelInfoAsync(difficultyBeatmap, levelInfoTokenSource.Token);
 
             if (!levelInfoTokenSource.IsCancellationRequested)
             {

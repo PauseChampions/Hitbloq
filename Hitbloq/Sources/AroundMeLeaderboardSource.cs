@@ -1,4 +1,5 @@
-﻿using SiraUtil;
+﻿using Hitbloq.Entries;
+using SiraUtil;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,14 +10,13 @@ namespace Hitbloq.Sources
     internal class AroundMeLeaderboardSource : ILeaderboardSource
     {
         private readonly SiraClient siraClient;
+        private readonly UserInfoSource userInfoSource;
         private Sprite _icon;
-        private int id;
 
-        public AroundMeLeaderboardSource(SiraClient siraClient)
+        public AroundMeLeaderboardSource(SiraClient siraClient, UserInfoSource userInfoSource)
         {
             this.siraClient = siraClient;
-            this.id = 143; // todo
-            
+            this.userInfoSource = userInfoSource;
         }
 
         public string HoverHint => "Around Me";
@@ -41,8 +41,14 @@ namespace Hitbloq.Sources
             string difficulty = difficultyBeatmap.difficulty.ToString();
             string characteristic = difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic.serializedName;
 
+            HitbloqUserInfo? userInfo = await userInfoSource.GetUserInfoAsync(cancellationToken);
+            if (userInfo == null)
+            {
+                return null;
+            }
+            int id = userInfo.id;
+
             WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{hash}%7C_{difficulty}_Solo{characteristic}/nearby_scores/{id}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-            Plugin.Log.Debug($"{webResponse.ContentToBytes().Length} PixelBoom :D");
             if (!webResponse.IsSuccessStatusCode || webResponse.ContentToBytes().Length == 3) // 403 where?
             {
                 return null;

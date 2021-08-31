@@ -14,7 +14,7 @@ namespace Hitbloq.Sources
             this.siraClient = siraClient;
         }
 
-        public async Task<LevelInfoEntry> GetLevelInfoAsync(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken)
+        public async Task<HitbloqLevelInfo> GetLevelInfoAsync(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null)
         {
             string hash = difficultyBeatmap.level.levelID.Replace(CustomLevelLoader.kCustomLevelPrefixId, "");
             string difficulty = difficultyBeatmap.difficulty.ToString();
@@ -25,7 +25,7 @@ namespace Hitbloq.Sources
             {
                 return null;
             }
-            return webResponse.ContentToJson<LevelInfoEntry>();
+            return webResponse.ContentToJson<HitbloqLevelInfo>();
         }
     }
 }

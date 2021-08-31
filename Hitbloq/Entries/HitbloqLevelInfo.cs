@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace Hitbloq.Entries
 {
-    internal class LevelInfoEntry
+    internal class HitbloqLevelInfo
     {
         [JsonProperty("star_rating")]
         public Dictionary<string, float> pools;
