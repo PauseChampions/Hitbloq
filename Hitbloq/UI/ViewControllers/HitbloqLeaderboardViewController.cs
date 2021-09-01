@@ -179,6 +179,6 @@ namespace Hitbloq.UI
         private bool UpEnabled => PageNumber != 0 && leaderboardSources[SelectedCellIndex].Scrollable;
 
         [UIValue("down-enabled")]
-        private bool DownEnabled => leaderboardEntries != null && leaderboardEntries.Count != 0 && leaderboardSources[SelectedCellIndex].Scrollable;
+        private bool DownEnabled => leaderboardEntries != null && leaderboardEntries.Count == 10 && leaderboardSources[SelectedCellIndex].Scrollable;
     }
 }

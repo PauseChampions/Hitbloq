@@ -1,12 +1,16 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Components.Settings;
 using BeatSaberMarkupLanguage.ViewControllers;
 using Hitbloq.Entries;
 using Hitbloq.Interfaces;
 using Hitbloq.Sources;
+using HMUI;
+using IPA.Utilities;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using UnityEngine;
 using Zenject;
 
 namespace Hitbloq.UI
@@ -23,6 +27,15 @@ namespace Hitbloq.UI
 
         private CancellationTokenSource cancellationTokenSource;
 
+        [UIComponent("container")]
+        private readonly Backgroundable container;
+
+        [UIComponent("hitbloq-logo")]
+        private readonly ImageView logo;
+
+        [UIComponent("separator")]
+        private readonly ImageView separator;
+
         [UIComponent("dropdown-list")]
         private readonly DropDownListSetting dropDownListSetting;
 
@@ -31,6 +44,24 @@ namespace Hitbloq.UI
         {
             this.hitbloqFlowCoordinator = hitbloqFlowCoordinator;
             this.rankInfoSource = rankInfoSource;
+        }
+
+        [UIAction("#post-parse")]
+        private void PostParse()
+        {
+            container.background.material = BeatSaberMarkupLanguage.Utilities.ImageResources.NoGlowMat;
+            ImageView background = container.background as ImageView;
+            background.color0 = Color.white;
+            background.color1 = new Color(1f, 1f, 1f, 0f);
+            background.color = Color.gray;
+            background.SetField<ImageView, bool>("_gradient", true);
+            background.SetField<ImageView, float>("_skew", 0.18f);
+
+            logo.SetField<ImageView, float>("_skew", 0.18f);
+            logo.SetVerticesDirty();
+
+            separator.SetVerticesDirty();
+            separator.SetField<ImageView, float>("_skew", 0.18f);
         }
 
         [UIAction("clicked-logo")]
@@ -70,7 +101,7 @@ namespace Hitbloq.UI
         }
 
         [UIValue("pool-ranking-text")]
-        private string PoolRankingText => $"Pool Ranking: #{rank} ({cr.ToString("F2")}cr)";
+        private string PoolRankingText => $"<b>Pool Ranking:</b> #{rank} <size=75%>(<color=#6772E5>{cr.ToString("F2")}cr</color>)";
 
         [UIValue("pools")]
         private List<object> pools = new List<object> { "None" };
