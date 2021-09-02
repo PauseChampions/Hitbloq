@@ -10,6 +10,8 @@ namespace Hitbloq.UI
 {
     internal class HitbloqCustomLeaderboard : CustomLeaderboard, IDisposable, IDifficultyBeatmapUpdater
     {
+        private readonly CustomLeaderboardManager customLeaderboardManager;
+
         private readonly ViewController hitbloqPanelController;
         protected override ViewController panelViewController => hitbloqPanelController;
 
@@ -18,15 +20,16 @@ namespace Hitbloq.UI
 
         private bool registered = false;
 
-        internal HitbloqCustomLeaderboard(HitbloqPanelController hitbloqPanelController, HitbloqLeaderboardViewController mainLeaderboardViewController)
+        internal HitbloqCustomLeaderboard(CustomLeaderboardManager customLeaderboardManager, HitbloqPanelController hitbloqPanelController, HitbloqLeaderboardViewController mainLeaderboardViewController)
         {
+            this.customLeaderboardManager = customLeaderboardManager;
             this.hitbloqPanelController = hitbloqPanelController;
             this.mainLeaderboardViewController = mainLeaderboardViewController;
         }
 
         public void Dispose()
         {
-            CustomLeaderboardManager.instance?.Unregister(this);
+            customLeaderboardManager.Unregister(this);
             registered = false;
         }
 
@@ -34,12 +37,12 @@ namespace Hitbloq.UI
         {
             if (levelInfoEntry != null && !registered)
             {
-                CustomLeaderboardManager.instance?.Register(this);
+                customLeaderboardManager.Register(this);
                 registered = true;
             }
             else if (levelInfoEntry == null && registered)
             {
-                CustomLeaderboardManager.instance?.Unregister(this);
+                customLeaderboardManager.Unregister(this);
                 registered = false;
             }
         }
