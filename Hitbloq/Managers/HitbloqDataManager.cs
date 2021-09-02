@@ -64,6 +64,14 @@ namespace Hitbloq.Managers
             levelInfoTokenSource = new CancellationTokenSource();
             HitbloqLevelInfo levelInfoEntry = await levelInfoSource.GetLevelInfoAsync(difficultyBeatmap, levelInfoTokenSource.Token);
 
+            if (levelInfoEntry != null)
+            {
+                if (levelInfoEntry.pools.Count == 0)
+                {
+                    levelInfoEntry = null;
+                }
+            }
+
             if (!levelInfoTokenSource.IsCancellationRequested)
             {
                 foreach (var difficultyBeatmapUpdater in difficultyBeatmapUpdaters)
@@ -81,11 +89,7 @@ namespace Hitbloq.Managers
 
             if (leaderboardEntries != null)
             {
-                if (leaderboardEntries.Count == 0)
-                {
-                    leaderboardEntries = null;
-                }
-                else if (leaderboardEntries[0].cr.Count == 0)
+                if (leaderboardEntries.Count == 0 || leaderboardEntries[0].cr.Count == 0)
                 {
                     leaderboardEntries = null;
                 }
