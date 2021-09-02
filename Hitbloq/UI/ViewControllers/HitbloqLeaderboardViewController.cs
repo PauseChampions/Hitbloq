@@ -23,6 +23,7 @@ namespace Hitbloq.UI
 
         private int _pageNumber;
         private int _selectedCellIndex;
+
         private IDifficultyBeatmap difficultyBeatmap;
         private List<Entries.LeaderboardEntry> leaderboardEntries;
 
@@ -83,6 +84,7 @@ namespace Hitbloq.UI
                 }
                 Destroy(leaderboardTransform.Find("LoadingControl").Find("LoadingContainer").Find("Text").gameObject);
             }
+            PageNumber = 0;
         }
 
         public async void SetScores(List<Entries.LeaderboardEntry> leaderboardEntries)
@@ -143,14 +145,13 @@ namespace Hitbloq.UI
 
         public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo levelInfoEntry)
         {
-            this.difficultyBeatmap = difficultyBeatmap;
             if (levelInfoEntry != null)
             {
-            	PageNumber = 0;
-            }
-            else
-            {
-                LeaderboardEntriesUpdated(null);
+                this.difficultyBeatmap = difficultyBeatmap;
+                if (isActiveAndEnabled)
+                {
+                    PageNumber = 0;
+                }
             }
         }
 

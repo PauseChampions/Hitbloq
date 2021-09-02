@@ -61,8 +61,18 @@ namespace Hitbloq.Managers
         private async void UpdateDifficultyBeatmap(IDifficultyBeatmap difficultyBeatmap)
         {
             levelInfoTokenSource?.Cancel();
-            levelInfoTokenSource = new CancellationTokenSource();
-            HitbloqLevelInfo levelInfoEntry = await levelInfoSource.GetLevelInfoAsync(difficultyBeatmap, levelInfoTokenSource.Token);
+
+            HitbloqLevelInfo levelInfoEntry;
+
+            if (difficultyBeatmap.level is CustomPreviewBeatmapLevel)
+            {
+                levelInfoTokenSource = new CancellationTokenSource();
+                levelInfoEntry = await levelInfoSource.GetLevelInfoAsync(difficultyBeatmap, levelInfoTokenSource.Token);
+            }
+            else
+            {
+                levelInfoEntry = null;
+            }
 
             if (levelInfoEntry != null)
             {
