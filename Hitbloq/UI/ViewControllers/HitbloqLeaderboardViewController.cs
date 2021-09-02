@@ -1,4 +1,5 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Parser;
 using BeatSaberMarkupLanguage.ViewControllers;
 using Hitbloq.Entries;
 using Hitbloq.Interfaces;
@@ -58,6 +59,9 @@ namespace Hitbloq.UI
         [UIComponent("leaderboard")]
         internal LeaderboardTableView leaderboard;
 
+        [UIParams]
+        private readonly BSMLParserParams parserParams;
+
         [Inject]
         private void Inject(UserInfoSource userInfoSource, List<ILeaderboardSource> leaderboardSources)
         {
@@ -101,7 +105,7 @@ namespace Hitbloq.UI
 
                 for(int i = 0; i < leaderboardEntries.Count; i++)
                 {
-                    scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].score, $"<size=85%>{leaderboardEntries[i].username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#6772E5>{leaderboardEntries[i].cr.Values.ToArray()[0].ToString("F2")}<size=45%>cr</size></color>)</size>", 
+                    scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].score, $"<size=85%>{leaderboardEntries[i].username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#a361ff>{leaderboardEntries[i].cr.Values.ToArray()[0].ToString("F2")}<size=55%>cr</size></color>)</size>", 
                         leaderboardEntries[i].rank, false));
                     if (leaderboardEntries[i].userID == id)
                     {
@@ -115,6 +119,11 @@ namespace Hitbloq.UI
                 leaderboardTransform.Find("LoadingControl").gameObject.SetActive(false);
                 leaderboard.SetScores(scores, myScorePos);
             }
+        }
+        public void ShowModal()
+        {
+            parserParams.EmitEvent("close-modal");
+            parserParams.EmitEvent("open-modal");
         }
 
         [UIAction("cell-selected")]

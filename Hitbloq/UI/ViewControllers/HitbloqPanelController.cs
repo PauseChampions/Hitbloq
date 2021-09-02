@@ -7,6 +7,7 @@ using Hitbloq.Interfaces;
 using Hitbloq.Sources;
 using HMUI;
 using IPA.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -26,6 +27,7 @@ namespace Hitbloq.UI
         private float cr;
 
         private CancellationTokenSource cancellationTokenSource;
+        public event Action ClickedRankText;
 
         [UIComponent("container")]
         private readonly Backgroundable container;
@@ -69,6 +71,11 @@ namespace Hitbloq.UI
         {
             hitbloqFlowCoordinator.Show();
         }
+        [UIAction("clicked-rank-text")]
+        private void RankTextClicked()
+        {
+            ClickedRankText?.Invoke();
+        }
 
         public async void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo levelInfoEntry)
         {
@@ -101,7 +108,7 @@ namespace Hitbloq.UI
         }
 
         [UIValue("pool-ranking-text")]
-        private string PoolRankingText => $"<b>Pool Ranking:</b> #{rank} <size=75%>(<color=#6772E5>{cr.ToString("F2")}cr</color>)";
+        private string PoolRankingText => $"<b>Pool Ranking:</b> #{rank} <size=75%>(<color=#a361ff>{cr.ToString("F2")}cr</color>)";
 
         [UIValue("pools")]
         private List<object> pools = new List<object> { "None" };
