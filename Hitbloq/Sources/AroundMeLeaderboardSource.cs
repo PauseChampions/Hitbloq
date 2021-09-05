@@ -1,4 +1,5 @@
 ﻿using Hitbloq.Entries;
+using Hitbloq.Utilities;
 using SiraUtil;
 using System.Collections.Generic;
 using System.Threading;
@@ -37,10 +38,6 @@ namespace Hitbloq.Sources
 
         public async Task<List<Entries.LeaderboardEntry>> GetScoresTask(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null, int page = 0)
         {
-            string hash = difficultyBeatmap.level.levelID.Replace(CustomLevelLoader.kCustomLevelPrefixId, "");
-            string difficulty = difficultyBeatmap.difficulty.ToString();
-            string characteristic = difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic.serializedName;
-
             HitbloqUserInfo? userInfo = await userInfoSource.GetUserInfoAsync(cancellationToken);
             if (userInfo == null)
             {
@@ -50,11 +47,8 @@ namespace Hitbloq.Sources
 
             try
             {
-                WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{hash}%7C_{difficulty}_Solo{characteristic}/nearby_scores/{id}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                if (webResponse.IsSuccessStatusCode && webResponse.ContentToBytes().Length > 3)
-                {
-                    return webResponse.ContentToJson<List<Entries.LeaderboardEntry>>();
-                }
+                WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/nearby_scores/{id}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                return Utils.ParseWebResponse<List<Entries.LeaderboardEntry>>(webResponse);
             }
             catch (TaskCanceledException e) { }
             return null;

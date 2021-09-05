@@ -1,4 +1,5 @@
-﻿using SiraUtil;
+﻿using Hitbloq.Utilities;
+using SiraUtil;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -34,17 +35,10 @@ namespace Hitbloq.Sources
 
         public async Task<List<Entries.LeaderboardEntry>> GetScoresTask(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null, int page = 0)
         {
-            string hash = difficultyBeatmap.level.levelID.Replace(CustomLevelLoader.kCustomLevelPrefixId, "");
-            string difficulty = difficultyBeatmap.difficulty.ToString();
-            string characteristic = difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic.serializedName;
-
             try
             {
-                WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{hash}%7C_{difficulty}_Solo{characteristic}/scores_extended/{page}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                if (webResponse.IsSuccessStatusCode)
-                {
-                    return webResponse.ContentToJson<List<Entries.LeaderboardEntry>>();
-                }
+                WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/scores_extended/{page}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                return Utils.ParseWebResponse<List<Entries.LeaderboardEntry>>(webResponse);
             }
             catch (TaskCanceledException e) { }
             return null;

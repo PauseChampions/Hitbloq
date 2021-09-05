@@ -1,4 +1,5 @@
 ﻿using Hitbloq.Entries;
+using Hitbloq.Utilities;
 using SiraUtil;
 using System.Collections.Generic;
 using System.Threading;
@@ -24,19 +25,10 @@ namespace Hitbloq.Sources
                 return cachedValue;
             }
 
-            string hash = difficultyBeatmap.level.levelID.Replace(CustomLevelLoader.kCustomLevelPrefixId, "");
-            string difficulty = difficultyBeatmap.difficulty.ToString();
-            string characteristic = difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic.serializedName;
-
             try
             {
-                WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{hash}%7C_{difficulty}_Solo{characteristic}/info", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                if (!webResponse.IsSuccessStatusCode)
-                {
-                    cache[difficultyBeatmap] = null;
-                    return null;
-                }
-                HitbloqLevelInfo levelInfo = webResponse.ContentToJson<HitbloqLevelInfo>();
+                WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/info", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                HitbloqLevelInfo levelInfo = Utils.ParseWebResponse<HitbloqLevelInfo>(webResponse);
 
                 cache[difficultyBeatmap] = levelInfo;
                 return levelInfo;

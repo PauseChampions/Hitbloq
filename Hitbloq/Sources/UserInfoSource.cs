@@ -1,4 +1,5 @@
 ﻿using Hitbloq.Entries;
+using Hitbloq.Utilities;
 using SiraUtil;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,10 +29,7 @@ namespace Hitbloq.Sources
                     try
                     {
                         WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/tools/ss_to_hitbloq/{userInfo.platformUserId}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                        if (webResponse.IsSuccessStatusCode)
-                        {
-                            hitbloqUserInfo = webResponse.ContentToJson<HitbloqUserInfo>();
-                        }
+                        hitbloqUserInfo = Utils.ParseWebResponse<HitbloqUserInfo>(webResponse);
                     }
                     catch (TaskCanceledException e){}
                 }

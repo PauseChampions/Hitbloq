@@ -1,4 +1,5 @@
 ﻿using Hitbloq.Entries;
+using Hitbloq.Utilities;
 using SiraUtil;
 using System.Threading;
 using System.Threading.Tasks;
@@ -24,10 +25,7 @@ namespace Hitbloq.Sources
                 try
                 {
                     WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/player_rank/{poolID}/{userInfo.id}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                    if (webResponse.IsSuccessStatusCode)
-                    {
-                        return webResponse.ContentToJson<HitbloqRankInfo>();
-                    }
+                    return Utils.ParseWebResponse<HitbloqRankInfo>(webResponse);
                 }
                 catch (TaskCanceledException e) { }
             }
