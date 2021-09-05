@@ -54,14 +54,20 @@ namespace Hitbloq.UI
             background.color0 = Color.white;
             background.color1 = new Color(1f, 1f, 1f, 0f);
             background.color = Color.gray;
-            background.SetField<ImageView, bool>("_gradient", true);
-            background.SetField<ImageView, float>("_skew", 0.18f);
+            background.SetField("_gradient", true);
+            background.SetField("_skew", 0.18f);
 
-            logo.SetField<ImageView, float>("_skew", 0.18f);
+            logo.SetField("_skew", 0.18f);
             logo.SetVerticesDirty();
 
             separator.SetVerticesDirty();
-            separator.SetField<ImageView, float>("_skew", 0.18f);
+            separator.SetField("_skew", 0.18f);
+        }
+
+        protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
+        {
+            dropDownListSetting.dropdown.Hide(false);
+            base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
         }
 
         [UIAction("clicked-logo")]
