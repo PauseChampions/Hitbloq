@@ -14,7 +14,7 @@ namespace Hitbloq.UI
 {
     [HotReload(RelativePathToLayout = @"..\Views\HitbloqMainLeaderboardView.bsml")]
     [ViewDefinition("Hitbloq.UI.Views.HitbloqMainLeaderboardView.bsml")]
-    internal class HitbloqLeaderboardViewController : BSMLAutomaticViewController, IDifficultyBeatmapUpdater, ILeaderboardEntriesUpdater
+    internal class HitbloqLeaderboardViewController : BSMLAutomaticViewController, IDifficultyBeatmapUpdater, ILeaderboardEntriesUpdater, IPoolUpdater
     {
         private UserInfoSource userInfoSource;
         private List<ILeaderboardSource> leaderboardSources;
@@ -26,6 +26,7 @@ namespace Hitbloq.UI
 
         private IDifficultyBeatmap difficultyBeatmap;
         private List<Entries.LeaderboardEntry> leaderboardEntries;
+        private string pool;
 
         private int PageNumber
         {
@@ -103,7 +104,7 @@ namespace Hitbloq.UI
 
                 for(int i = 0; i < leaderboardEntries.Count; i++)
                 {
-                    scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].score, $"<size=85%>{leaderboardEntries[i].username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#6772E5>{leaderboardEntries[i].cr.Values.ToArray()[0].ToString("F2")}<size=45%>cr</size></color>)</size>", 
+                    scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].score, $"<size=85%>{leaderboardEntries[i].username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#6772E5>{leaderboardEntries[i].cr[pool].ToString("F2")}<size=45%>cr</size></color>)</size>", 
                         leaderboardEntries[i].rank, false));
                     if (leaderboardEntries[i].userID == id)
                     {
@@ -148,6 +149,7 @@ namespace Hitbloq.UI
             if (levelInfoEntry != null)
             {
                 this.difficultyBeatmap = difficultyBeatmap;
+                pool = levelInfoEntry.pools.Keys.First();
                 if (isActiveAndEnabled)
                 {
                     PageNumber = 0;
@@ -159,6 +161,12 @@ namespace Hitbloq.UI
         {
             this.leaderboardEntries = leaderboardEntries;
             NotifyPropertyChanged(nameof(DownEnabled));
+            SetScores(leaderboardEntries);
+        }
+
+        public void PoolUpdated(string pool)
+        {
+            this.pool = pool;
             SetScores(leaderboardEntries);
         }
 

@@ -7,6 +7,7 @@ using Hitbloq.Interfaces;
 using Hitbloq.Sources;
 using HMUI;
 using IPA.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -17,15 +18,17 @@ namespace Hitbloq.UI
 {
     [HotReload(RelativePathToLayout = @"..\Views\HitbloqPanel.bsml")]
     [ViewDefinition("Hitbloq.UI.Views.HitbloqPanel.bsml")]
-    internal class HitbloqPanelController : BSMLAutomaticViewController, IDifficultyBeatmapUpdater
+    internal class HitbloqPanelController : BSMLAutomaticViewController, IDifficultyBeatmapUpdater, IPoolUpdater
     {
         private HitbloqFlowCoordinator hitbloqFlowCoordinator;
         private RankInfoSource rankInfoSource;
 
         private int rank;
         private float cr;
+        private List<string> poolNames;
 
         private CancellationTokenSource cancellationTokenSource;
+        public event Action<string> PoolChangedEvent;
 
         [UIComponent("container")]
         private readonly Backgroundable container;
@@ -76,7 +79,13 @@ namespace Hitbloq.UI
             hitbloqFlowCoordinator.Show();
         }
 
-        public async void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo levelInfoEntry)
+        [UIAction("pool-changed")]
+        private void PoolChanged(string formattedPool)
+        {
+            PoolChangedEvent?.Invoke(poolNames[dropDownListSetting.dropdown.selectedIndex]);
+        }
+
+        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo levelInfoEntry)
         {
             pools = new List<object>();
             rank = 0;
@@ -88,15 +97,13 @@ namespace Hitbloq.UI
                 {
                     pools.Add($"{pool.Key} - {pool.Value}⭐");
                 }
-
-                cancellationTokenSource?.Cancel();
-                cancellationTokenSource = new CancellationTokenSource();
-                HitbloqRankInfo rankInfo = await rankInfoSource.GetRankInfoAsync(levelInfoEntry.pools.Keys.First(), cancellationTokenSource.Token);
-                rank = rankInfo.rank;
-                cr = rankInfo.cr;
+                poolNames = levelInfoEntry.pools.Keys.ToList();
+                PoolUpdated(poolNames.First());
             }
-
-            NotifyPropertyChanged(nameof(PoolRankingText));
+            else
+            {
+                poolNames = new List<string> { "None" };
+            }
 
             if (dropDownListSetting != null)
             {
@@ -104,6 +111,16 @@ namespace Hitbloq.UI
                 dropDownListSetting.UpdateChoices();
                 dropDownListSetting.dropdown.SelectCellWithIdx(0);
             }
+        }
+
+        public async void PoolUpdated(string pool)
+        {
+            cancellationTokenSource?.Cancel();
+            cancellationTokenSource = new CancellationTokenSource();
+            HitbloqRankInfo rankInfo = await rankInfoSource.GetRankInfoAsync(pool, cancellationTokenSource.Token);
+            rank = rankInfo.rank;
+            cr = rankInfo.cr;
+            NotifyPropertyChanged(nameof(PoolRankingText));
         }
 
         [UIValue("pool-ranking-text")]
