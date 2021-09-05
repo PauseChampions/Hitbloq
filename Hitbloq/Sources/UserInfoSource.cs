@@ -25,11 +25,15 @@ namespace Hitbloq.Sources
                 UserInfo userInfo = await platformUserModel.GetUserInfo();
                 if (userInfo != null)
                 {
-                    WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/tools/ss_to_hitbloq/{userInfo.platformUserId}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                    if (webResponse.IsSuccessStatusCode)
+                    try
                     {
-                        hitbloqUserInfo = webResponse.ContentToJson<HitbloqUserInfo>();
+                        WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/tools/ss_to_hitbloq/{userInfo.platformUserId}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                        if (webResponse.IsSuccessStatusCode)
+                        {
+                            hitbloqUserInfo = webResponse.ContentToJson<HitbloqUserInfo>();
+                        }
                     }
+                    catch (TaskCanceledException e){}
                 }
             }
             return hitbloqUserInfo;

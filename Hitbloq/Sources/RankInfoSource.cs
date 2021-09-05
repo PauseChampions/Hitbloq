@@ -21,11 +21,15 @@ namespace Hitbloq.Sources
             HitbloqUserInfo userInfo = await userInfoSource.GetUserInfoAsync(cancellationToken);
             if (userInfo != null)
             {
-                WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/player_rank/{poolID}/{userInfo.id}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                if (webResponse.IsSuccessStatusCode)
+                try
                 {
-                    return webResponse.ContentToJson<HitbloqRankInfo>();
+                    WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/player_rank/{poolID}/{userInfo.id}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                    if (webResponse.IsSuccessStatusCode)
+                    {
+                        return webResponse.ContentToJson<HitbloqRankInfo>();
+                    }
                 }
+                catch (TaskCanceledException e) { }
             }
             return null;
         }

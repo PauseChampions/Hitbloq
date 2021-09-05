@@ -48,12 +48,16 @@ namespace Hitbloq.Sources
             }
             int id = userInfo.id;
 
-            WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{hash}%7C_{difficulty}_Solo{characteristic}/nearby_scores/{id}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-            if (!webResponse.IsSuccessStatusCode || webResponse.ContentToBytes().Length == 3) // 403 where?
+            try
             {
-                return null;
+                WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{hash}%7C_{difficulty}_Solo{characteristic}/nearby_scores/{id}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                if (webResponse.IsSuccessStatusCode && webResponse.ContentToBytes().Length > 3)
+                {
+                    return webResponse.ContentToJson<List<Entries.LeaderboardEntry>>();
+                }
             }
-            return webResponse.ContentToJson<List<Entries.LeaderboardEntry>>();
+            catch (TaskCanceledException e) { }
+            return null;
         }
     }
 }

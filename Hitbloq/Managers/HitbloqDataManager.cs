@@ -88,12 +88,9 @@ namespace Hitbloq.Managers
                 }
             }
 
-            if (!levelInfoTokenSource.IsCancellationRequested)
+            foreach (var difficultyBeatmapUpdater in difficultyBeatmapUpdaters)
             {
-                foreach (var difficultyBeatmapUpdater in difficultyBeatmapUpdaters)
-                {
-                    difficultyBeatmapUpdater.DifficultyBeatmapUpdated(standardLevelDetailViewController.selectedDifficultyBeatmap, levelInfoEntry);
-                }
+                difficultyBeatmapUpdater.DifficultyBeatmapUpdated(standardLevelDetailViewController.selectedDifficultyBeatmap, levelInfoEntry);
             }
         }
 
