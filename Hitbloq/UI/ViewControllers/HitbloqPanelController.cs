@@ -108,7 +108,7 @@ namespace Hitbloq.UI
         }
 
         [UIValue("pool-ranking-text")]
-        private string PoolRankingText => $"<b>Pool Ranking:</b> #{rank} <size=75%>(<color=#a361ff>{cr.ToString("F2")}cr</color>)";
+        private string PoolRankingText => $"<b>Pool Ranking:</b> #{rank} <size=75%>(<color=#aa6eff>{cr.ToString("F2")}cr</color>)";
 
         [UIValue("pools")]
         private List<object> pools = new List<object> { "None" };

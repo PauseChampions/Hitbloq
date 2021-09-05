@@ -1,10 +1,12 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Parser;
 using BeatSaberMarkupLanguage.ViewControllers;
 using Hitbloq.Entries;
 using Hitbloq.Interfaces;
 using Hitbloq.Sources;
 using HMUI;
+using SiraUtil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -59,6 +61,15 @@ namespace Hitbloq.UI
         [UIComponent("leaderboard")]
         internal LeaderboardTableView leaderboard;
 
+        [UIComponent("modal-profile-pic")]
+        private ImageView modalProfilePic;
+
+        [UIComponent("modal-background-image")]
+        private ImageView modalBackgroundImage;
+
+        [UIComponent("modal-info-vertical")]
+        private Backgroundable modalInfoVertical;
+
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
@@ -105,7 +116,7 @@ namespace Hitbloq.UI
 
                 for(int i = 0; i < leaderboardEntries.Count; i++)
                 {
-                    scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].score, $"<size=85%>{leaderboardEntries[i].username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#a361ff>{leaderboardEntries[i].cr.Values.ToArray()[0].ToString("F2")}<size=55%>cr</size></color>)</size>", 
+                    scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].score, $"<size=85%>{leaderboardEntries[i].username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#aa6eff>{leaderboardEntries[i].cr.Values.ToArray()[0].ToString("F2")}<size=55%>cr</size></color>)</size>", 
                         leaderboardEntries[i].rank, false));
                     if (leaderboardEntries[i].userID == id)
                     {
@@ -124,6 +135,16 @@ namespace Hitbloq.UI
         {
             parserParams.EmitEvent("close-modal");
             parserParams.EmitEvent("open-modal");
+        }
+
+        [UIAction("#post-parse")]
+        protected void Parsed()
+        {
+            modalProfilePic.material = Resources.FindObjectsOfTypeAll<Material>().First(m => m.name == "UINoGlowRoundEdge");
+            modalBackgroundImage.material = Resources.FindObjectsOfTypeAll<Material>().First(m => m.name == "UINoGlowRoundEdge");
+
+            ImageView verticalBackground = modalInfoVertical.background as ImageView;
+            verticalBackground.color = new Color(0f, 0f, 0f, 0.75f);
         }
 
         [UIAction("cell-selected")]
