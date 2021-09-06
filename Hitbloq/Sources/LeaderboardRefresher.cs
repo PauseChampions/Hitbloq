@@ -1,8 +1,8 @@
 ﻿using Hitbloq.Entries;
+using Hitbloq.UI;
 using IPA.Utilities;
 using SiraUtil;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -13,15 +13,17 @@ namespace Hitbloq.Sources
         private readonly SiraClient siraClient;
         private readonly ResultsViewController resultsViewController;
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
+        private readonly HitbloqPanelController hitbloqPanelController;
         private readonly UserInfoSource userInfoSource;
         private readonly LevelInfoSource levelInfoSource;
 
         public LeaderboardRefresher(SiraClient siraClient, ResultsViewController resultsViewController, StandardLevelDetailViewController standardLevelDetailViewController,
-            UserInfoSource userInfoSource, LevelInfoSource levelInfoSource)
+            HitbloqPanelController hitbloqPanelController, UserInfoSource userInfoSource, LevelInfoSource levelInfoSource)
         {
             this.siraClient = siraClient;
             this.resultsViewController = resultsViewController;
             this.standardLevelDetailViewController = standardLevelDetailViewController;
+            this.hitbloqPanelController = hitbloqPanelController;
             this.userInfoSource = userInfoSource;
             this.levelInfoSource = levelInfoSource;
         }
@@ -30,12 +32,13 @@ namespace Hitbloq.Sources
         {
             if (await RefreshNeeded())
             {
-                Plugin.Log.Debug("Refreshing");
+                hitbloqPanelController.LoadingActive = true;
+                hitbloqPanelController.PromptText = "Refreshing Score...";
+
                 await Task.Delay(3000);
                 HitbloqUserInfo userInfo = await userInfoSource.GetUserInfoAsync();
                 WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/update_user/{userInfo.id}", CancellationToken.None).ConfigureAwait(false);
                 HitbloqRefreshEntry refreshEntry = Utilities.Utils.ParseWebResponse<HitbloqRefreshEntry>(webResponse);
-                Plugin.Log.Debug("Refreshed");
 
                 if (refreshEntry != null && refreshEntry.error == null)
                 {
@@ -49,17 +52,28 @@ namespace Hitbloq.Sources
 
                         if (actionQueueEntries == null || !actionQueueEntries.Exists(entry => entry.id == refreshEntry.id))
                         {
+                            hitbloqPanelController.LoadingActive = false;
+                            hitbloqPanelController.PromptText = "<color=green>Score refreshed!</color>";
                             return true;
                         }
                     }
+                    hitbloqPanelController.PromptText = "<color=red>The action queue is very busy, your score cannot be refreshed for now.</color>";
+                }
+                else if (refreshEntry.error != null)
+                {
+                    hitbloqPanelController.PromptText = $"<color=red>{refreshEntry.error}</color>";
+                }
+                else
+                {
+                    hitbloqPanelController.PromptText = "<color=red>Hitbloq servers are not responding, please try again later.</color>";
                 }
             }
+            hitbloqPanelController.LoadingActive = false;
             return false;
         }
 
         private async Task<bool> RefreshNeeded()
         {
-            Plugin.Log.Debug("Refresh Needed?");
             IDifficultyBeatmap lastPlayedBeatmap = resultsViewController.GetField<IDifficultyBeatmap, ResultsViewController>("_difficultyBeatmap");
             HitbloqLevelInfo levelInfo;
 

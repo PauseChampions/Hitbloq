@@ -27,6 +27,9 @@ namespace Hitbloq.UI
         private float cr;
         private List<string> poolNames;
 
+        private string _promptText;
+        private bool _loadingActive;
+
         private CancellationTokenSource cancellationTokenSource;
         public event Action<string> PoolChangedEvent;
 
@@ -110,6 +113,9 @@ namespace Hitbloq.UI
                 dropDownListSetting.values = pools.Count != 0 ? pools : new List<object> { "None" };
                 dropDownListSetting.UpdateChoices();
                 dropDownListSetting.dropdown.SelectCellWithIdx(0);
+
+                PromptText = "";
+                LoadingActive = false;
             }
         }
 
@@ -121,6 +127,28 @@ namespace Hitbloq.UI
             rank = rankInfo.rank;
             cr = rankInfo.cr;
             NotifyPropertyChanged(nameof(PoolRankingText));
+        }
+
+        [UIValue("prompt-text")]
+        public string PromptText
+        {
+            get => _promptText;
+            set
+            {
+                _promptText = value;
+                NotifyPropertyChanged(nameof(PromptText));
+            }
+        }
+
+        [UIValue("loading-active")]
+        public bool LoadingActive
+        {
+            get => _loadingActive;
+            set
+            {
+                _loadingActive = value;
+                NotifyPropertyChanged(nameof(LoadingActive));
+            }
         }
 
         [UIValue("pool-ranking-text")]

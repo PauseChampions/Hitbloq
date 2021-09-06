@@ -59,7 +59,6 @@ namespace Hitbloq.Managers
 
         public async void OnScoreUploaded()
         {
-            Plugin.Log.Debug("Score uploaded");
             if (await leaderboardRefresher.Refresh())
             {
                 UpdateDifficultyBeatmap(standardLevelDetailViewController.selectedDifficultyBeatmap);
