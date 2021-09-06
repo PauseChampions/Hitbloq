@@ -22,6 +22,7 @@ namespace Hitbloq.UI
     {
         private HitbloqFlowCoordinator hitbloqFlowCoordinator;
         private RankInfoSource rankInfoSource;
+        private PoolInfoSource poolInfoSource;
 
         private int rank;
         private float cr;
@@ -30,7 +31,8 @@ namespace Hitbloq.UI
         private string _promptText;
         private bool _loadingActive;
 
-        private CancellationTokenSource cancellationTokenSource;
+        private CancellationTokenSource poolInfoTokenSource;
+        private CancellationTokenSource rankInfoTokenSource;
         public event Action<string> PoolChangedEvent;
 
         [UIComponent("container")]
@@ -45,11 +47,15 @@ namespace Hitbloq.UI
         [UIComponent("dropdown-list")]
         private readonly DropDownListSetting dropDownListSetting;
 
+        [UIComponent("dropdown-list")]
+        private readonly RectTransform dropDownListTransform;
+
         [Inject]
-        private void Inject(HitbloqFlowCoordinator hitbloqFlowCoordinator, RankInfoSource rankInfoSource)
+        private void Inject(HitbloqFlowCoordinator hitbloqFlowCoordinator, RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource)
         {
             this.hitbloqFlowCoordinator = hitbloqFlowCoordinator;
             this.rankInfoSource = rankInfoSource;
+            this.poolInfoSource = poolInfoSource;
         }
 
         [UIAction("#post-parse")]
@@ -68,6 +74,10 @@ namespace Hitbloq.UI
 
             separator.SetVerticesDirty();
             separator.SetField("_skew", 0.18f);
+
+            CurvedTextMeshPro dropdownText = dropDownListTransform.GetComponentInChildren<CurvedTextMeshPro>();
+            dropdownText.fontSize = 3.5f;
+            dropdownText.transform.localPosition = new Vector3(-1.5f, 0, 0);
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
@@ -82,8 +92,11 @@ namespace Hitbloq.UI
             PoolChangedEvent?.Invoke(poolNames[dropDownListSetting.dropdown.selectedIndex]);
         }
 
-        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo levelInfoEntry)
+        public async void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo levelInfoEntry)
         {
+            poolInfoTokenSource?.Cancel();
+            poolInfoTokenSource = new CancellationTokenSource();
+
             pools = new List<object>();
             rank = 0;
             cr = 0;
@@ -92,7 +105,8 @@ namespace Hitbloq.UI
             {
                 foreach(var pool in levelInfoEntry.pools)
                 {
-                    pools.Add($"{pool.Key} - {pool.Value}⭐");
+                    HitbloqPoolInfo poolInfo = await poolInfoSource.GetPoolInfoAsync(pool.Key, poolInfoTokenSource.Token);
+                    pools.Add($"{poolInfo.shownName} - {pool.Value}⭐");
                 }
                 poolNames = levelInfoEntry.pools.Keys.ToList();
                 PoolUpdated(poolNames.First());
@@ -115,9 +129,9 @@ namespace Hitbloq.UI
 
         public async void PoolUpdated(string pool)
         {
-            cancellationTokenSource?.Cancel();
-            cancellationTokenSource = new CancellationTokenSource();
-            HitbloqRankInfo rankInfo = await rankInfoSource.GetRankInfoAsync(pool, cancellationTokenSource.Token);
+            rankInfoTokenSource?.Cancel();
+            rankInfoTokenSource = new CancellationTokenSource();
+            HitbloqRankInfo rankInfo = await rankInfoSource.GetRankInfoAsync(pool, rankInfoTokenSource.Token);
             rank = rankInfo.rank;
             cr = rankInfo.cr;
             NotifyPropertyChanged(nameof(PoolRankingText));
