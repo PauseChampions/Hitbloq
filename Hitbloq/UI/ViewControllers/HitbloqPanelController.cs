@@ -76,12 +76,6 @@ namespace Hitbloq.UI
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
         }
 
-        [UIAction("clicked-logo")]
-        private void LogoClicked()
-        {
-            hitbloqFlowCoordinator.Show();
-        }
-
         [UIAction("pool-changed")]
         private void PoolChanged(string formattedPool)
         {
