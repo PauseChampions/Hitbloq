@@ -27,13 +27,13 @@ namespace Hitbloq.UI
         private int rank;
         private float cr;
         private List<string> poolNames;
-
         private string _promptText;
         private bool _loadingActive;
 
         private CancellationTokenSource poolInfoTokenSource;
         private CancellationTokenSource rankInfoTokenSource;
         public event Action<string> PoolChangedEvent;
+        public event Action ClickedRankText;
 
         [UIComponent("container")]
         private readonly Backgroundable container;
@@ -90,6 +90,11 @@ namespace Hitbloq.UI
         private void PoolChanged(string formattedPool)
         {
             PoolChangedEvent?.Invoke(poolNames[dropDownListSetting.dropdown.selectedIndex]);
+        }
+        [UIAction("clicked-rank-text")]
+        private void RankTextClicked()
+        {
+            ClickedRankText?.Invoke();
         }
 
         public async void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo levelInfoEntry)
@@ -160,7 +165,7 @@ namespace Hitbloq.UI
         }
 
         [UIValue("pool-ranking-text")]
-        private string PoolRankingText => $"<b>Pool Ranking:</b> #{rank} <size=75%>(<color=#6772E5>{cr.ToString("F2")}cr</color>)";
+        private string PoolRankingText => $"<b>Pool Ranking:</b> #{rank} <size=75%>(<color=#aa6eff>{cr.ToString("F2")}cr</color>)";
 
         [UIValue("pools")]
         private List<object> pools = new List<object> { "None" };
