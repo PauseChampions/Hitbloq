@@ -4,12 +4,10 @@ using HMUI;
 using LeaderboardCore.Managers;
 using LeaderboardCore.Models;
 using System;
-using System.Collections.Generic;
-using Zenject;
 
 namespace Hitbloq.UI
 {
-    internal class HitbloqCustomLeaderboard : CustomLeaderboard, IInitializable, IDisposable, IDifficultyBeatmapUpdater
+    internal class HitbloqCustomLeaderboard : CustomLeaderboard, IDisposable, IDifficultyBeatmapUpdater
     {
         private readonly CustomLeaderboardManager customLeaderboardManager;
 
@@ -24,15 +22,6 @@ namespace Hitbloq.UI
             this.customLeaderboardManager = customLeaderboardManager;
             this.hitbloqPanelController = hitbloqPanelController;
             this.mainLeaderboardViewController = mainLeaderboardViewController;
-        }
-        public void Initialize()
-        {
-            hitbloqPanelController.ClickedRankText += HitbloqPanelController_ClickedRankText;
-        }
-
-        private void HitbloqPanelController_ClickedRankText()
-        {
-            mainLeaderboardViewController.ShowModal();
         }
 
         public void Dispose()

@@ -17,7 +17,7 @@ namespace Hitbloq.Installers
             Container.BindInterfacesAndSelfTo<HitbloqFlowCoordinator>().FromNewComponentOnRoot().AsSingle();
 
             Container.BindInterfacesTo<HitbloqCustomLeaderboard>().AsSingle();
-            Container.BindInterfacesTo<HitbloqDataManager>().AsSingle();
+            Container.BindInterfacesTo<HitbloqManager>().AsSingle();
 
             Container.Bind<UserInfoSource>().AsSingle();
             Container.Bind<RankInfoSource>().AsSingle();

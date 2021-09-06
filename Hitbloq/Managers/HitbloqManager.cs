@@ -10,7 +10,7 @@ using LeaderboardCore.Interfaces;
 
 namespace Hitbloq.Managers
 {
-    internal class HitbloqDataManager : IInitializable, IDisposable, INotifyScoreUpload
+    internal class HitbloqManager : IInitializable, IDisposable, INotifyScoreUpload
     {
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
         private readonly HitbloqLeaderboardViewController hitbloqLeaderboardViewController;
@@ -26,7 +26,7 @@ namespace Hitbloq.Managers
         private CancellationTokenSource levelInfoTokenSource;
         private CancellationTokenSource leaderboardTokenSource;
 
-        public HitbloqDataManager(StandardLevelDetailViewController standardLevelDetailViewController, HitbloqLeaderboardViewController hitbloqLeaderboardViewController, HitbloqPanelController hitbloqPanelController,
+        public HitbloqManager(StandardLevelDetailViewController standardLevelDetailViewController, HitbloqLeaderboardViewController hitbloqLeaderboardViewController, HitbloqPanelController hitbloqPanelController,
             LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher, List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters, List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters, List<IPoolUpdater> poolUpdaters)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
@@ -47,6 +47,7 @@ namespace Hitbloq.Managers
             standardLevelDetailViewController.didChangeContentEvent += OnContentChanged;
             hitbloqLeaderboardViewController.PageRequested += OnPageRequested;
             hitbloqPanelController.PoolChangedEvent += OnPoolChanged;
+            hitbloqPanelController.ClickedRankText += OnRankTextClicked;
         }
 
         public void Dispose()
@@ -55,6 +56,7 @@ namespace Hitbloq.Managers
             standardLevelDetailViewController.didChangeContentEvent -= OnContentChanged;
             hitbloqLeaderboardViewController.PageRequested -= OnPageRequested;
             hitbloqPanelController.PoolChangedEvent -= OnPoolChanged;
+            hitbloqPanelController.ClickedRankText -= OnRankTextClicked;
         }
 
         public async void OnScoreUploaded()
@@ -131,6 +133,11 @@ namespace Hitbloq.Managers
             {
                 poolUpdater.PoolUpdated(pool);
             }
+        }
+
+        private void OnRankTextClicked()
+        {
+            hitbloqLeaderboardViewController.ShowModal();
         }
     }
 }
