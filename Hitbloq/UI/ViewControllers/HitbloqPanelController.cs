@@ -78,6 +78,13 @@ namespace Hitbloq.UI
             CurvedTextMeshPro dropdownText = dropDownListTransform.GetComponentInChildren<CurvedTextMeshPro>();
             dropdownText.fontSize = 3.5f;
             dropdownText.transform.localPosition = new Vector3(-1.5f, 0, 0);
+
+            (dropDownListSetting.dropdown as DropdownWithTableView).SetField("_numberOfVisibleCells", 2);
+            dropDownListSetting.values = new List<object>() { "1", "2" };
+            dropDownListSetting.UpdateChoices();
+            dropDownListSetting.dropdown.SelectCellWithIdx(0);
+            dropDownListSetting.values = pools.Count != 0 ? pools : new List<object> { "None" };
+            dropDownListSetting.UpdateChoices();
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
