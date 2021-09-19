@@ -14,17 +14,17 @@ namespace Hitbloq.Sources
         private readonly ResultsViewController resultsViewController;
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
         private readonly HitbloqPanelController hitbloqPanelController;
-        private readonly UserInfoSource userInfoSource;
+        private readonly UserIDSource userIDSource;
         private readonly LevelInfoSource levelInfoSource;
 
         public LeaderboardRefresher(SiraClient siraClient, ResultsViewController resultsViewController, StandardLevelDetailViewController standardLevelDetailViewController,
-            HitbloqPanelController hitbloqPanelController, UserInfoSource userInfoSource, LevelInfoSource levelInfoSource)
+            HitbloqPanelController hitbloqPanelController, UserIDSource userIDSource, LevelInfoSource levelInfoSource)
         {
             this.siraClient = siraClient;
             this.resultsViewController = resultsViewController;
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.hitbloqPanelController = hitbloqPanelController;
-            this.userInfoSource = userInfoSource;
+            this.userIDSource = userIDSource;
             this.levelInfoSource = levelInfoSource;
         }
 
@@ -36,8 +36,8 @@ namespace Hitbloq.Sources
                 hitbloqPanelController.PromptText = "Refreshing Score...";
 
                 await Task.Delay(3000);
-                HitbloqUserInfo userInfo = await userInfoSource.GetUserInfoAsync();
-                WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/update_user/{userInfo.id}", CancellationToken.None).ConfigureAwait(false);
+                HitbloqUserID userID = await userIDSource.GetUserIDAsync();
+                WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/update_user/{userID.id}", CancellationToken.None).ConfigureAwait(false);
                 HitbloqRefreshEntry refreshEntry = Utilities.Utils.ParseWebResponse<HitbloqRefreshEntry>(webResponse);
 
                 if (refreshEntry != null && refreshEntry.error == null)

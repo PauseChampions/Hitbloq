@@ -6,22 +6,22 @@ using System.Threading.Tasks;
 
 namespace Hitbloq.Sources
 {
-    internal class UserInfoSource
+    internal class UserIDSource
     {
         private readonly SiraClient siraClient;
         private readonly IPlatformUserModel platformUserModel;
 
-        private HitbloqUserInfo hitbloqUserInfo;
+        private HitbloqUserID hitbloqUserID;
 
-        public UserInfoSource(SiraClient siraClient, IPlatformUserModel platformUserModel)
+        public UserIDSource(SiraClient siraClient, IPlatformUserModel platformUserModel)
         {
             this.siraClient = siraClient;
             this.platformUserModel = platformUserModel;
         }
 
-        public async Task<HitbloqUserInfo> GetUserInfoAsync(CancellationToken? cancellationToken = null)
+        public async Task<HitbloqUserID> GetUserIDAsync(CancellationToken? cancellationToken = null)
         {
-            if (hitbloqUserInfo == null)
+            if (hitbloqUserID == null)
             {
                 UserInfo userInfo = await platformUserModel.GetUserInfo();
                 if (userInfo != null)
@@ -29,12 +29,12 @@ namespace Hitbloq.Sources
                     try
                     {
                         WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/tools/ss_to_hitbloq/{userInfo.platformUserId}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                        hitbloqUserInfo = Utils.ParseWebResponse<HitbloqUserInfo>(webResponse);
+                        hitbloqUserID = Utils.ParseWebResponse<HitbloqUserID>(webResponse);
                     }
                     catch (TaskCanceledException e){}
                 }
             }
-            return hitbloqUserInfo;
+            return hitbloqUserID;
         }
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Hitbloq.Entries
 {
-    internal class HitbloqUserInfo
+    internal class HitbloqUserID
     {
         [JsonProperty("id")]
         public int id;

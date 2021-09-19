@@ -19,7 +19,7 @@ namespace Hitbloq.UI
     [ViewDefinition("Hitbloq.UI.Views.HitbloqMainLeaderboardView.bsml")]
     internal class HitbloqLeaderboardViewController : BSMLAutomaticViewController, IDifficultyBeatmapUpdater, ILeaderboardEntriesUpdater, IPoolUpdater
     {
-        private UserInfoSource userInfoSource;
+        private UserIDSource userIDSource;
         private List<ILeaderboardSource> leaderboardSources;
 
         public event Action<IDifficultyBeatmap, ILeaderboardSource, int> PageRequested;
@@ -76,9 +76,9 @@ namespace Hitbloq.UI
         private readonly BSMLParserParams parserParams;
 
         [Inject]
-        private void Inject(UserInfoSource userInfoSource, List<ILeaderboardSource> leaderboardSources)
+        private void Inject(UserIDSource userIDSource, List<ILeaderboardSource> leaderboardSources)
         {
-            this.userInfoSource = userInfoSource;
+            this.userIDSource = userIDSource;
             this.leaderboardSources = leaderboardSources;
         }
 
@@ -114,8 +114,8 @@ namespace Hitbloq.UI
             }
             else
             {
-                HitbloqUserInfo userInfo = await userInfoSource.GetUserInfoAsync();
-                int id = userInfo.id;
+                HitbloqUserID userID = await userIDSource.GetUserIDAsync();
+                int id = userID.id;
 
                 for(int i = 0; i < leaderboardEntries.Count; i++)
                 {

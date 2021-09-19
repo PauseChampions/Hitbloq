@@ -11,13 +11,13 @@ namespace Hitbloq.Sources
     internal class AroundMeLeaderboardSource : ILeaderboardSource
     {
         private readonly SiraClient siraClient;
-        private readonly UserInfoSource userInfoSource;
+        private readonly UserIDSource userIDSource;
         private Sprite _icon;
 
-        public AroundMeLeaderboardSource(SiraClient siraClient, UserInfoSource userInfoSource)
+        public AroundMeLeaderboardSource(SiraClient siraClient, UserIDSource userIDSource)
         {
             this.siraClient = siraClient;
-            this.userInfoSource = userInfoSource;
+            this.userIDSource = userIDSource;
         }
 
         public string HoverHint => "Around Me";
@@ -38,12 +38,12 @@ namespace Hitbloq.Sources
 
         public async Task<List<Entries.LeaderboardEntry>> GetScoresTask(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null, int page = 0)
         {
-            HitbloqUserInfo? userInfo = await userInfoSource.GetUserInfoAsync(cancellationToken);
-            if (userInfo == null)
+            HitbloqUserID? userID = await userIDSource.GetUserIDAsync(cancellationToken);
+            if (userID == null)
             {
                 return null;
             }
-            int id = userInfo.id;
+            int id = userID.id;
 
             try
             {

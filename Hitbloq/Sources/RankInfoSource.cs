@@ -9,22 +9,22 @@ namespace Hitbloq.Sources
     internal class RankInfoSource
     {
         private readonly SiraClient siraClient;
-        private readonly UserInfoSource userInfoSource;
+        private readonly UserIDSource userIDSource;
 
-        public RankInfoSource(SiraClient siraClient, UserInfoSource userInfoSource)
+        public RankInfoSource(SiraClient siraClient, UserIDSource userIDSource)
         {
             this.siraClient = siraClient;
-            this.userInfoSource = userInfoSource;
+            this.userIDSource = userIDSource;
         }
 
         public async Task<HitbloqRankInfo> GetRankInfoAsync(string poolID, CancellationToken? cancellationToken = null)
         {
-            HitbloqUserInfo userInfo = await userInfoSource.GetUserInfoAsync(cancellationToken);
-            if (userInfo != null)
+            HitbloqUserID userID = await userIDSource.GetUserIDAsync(cancellationToken);
+            if (userID != null)
             {
                 try
                 {
-                    WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/player_rank/{poolID}/{userInfo.id}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                    WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/player_rank/{poolID}/{userID.id}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
                     return Utils.ParseWebResponse<HitbloqRankInfo>(webResponse);
                 }
                 catch (TaskCanceledException e) { }
