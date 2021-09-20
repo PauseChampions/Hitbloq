@@ -2,16 +2,28 @@
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Parser;
+using Hitbloq.Entries;
+using Hitbloq.Interfaces;
+using Hitbloq.Sources;
 using HMUI;
 using IPA.Utilities;
+using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using UnityEngine;
 
 namespace Hitbloq.UI
 {
-    internal class HitbloqProfileModalController
+    internal class HitbloqProfileModalController : IPoolUpdater, INotifyPropertyChanged
     {
+        private readonly PoolInfoSource poolInfoSource;
+
+        private HitbloqRankInfo _rankInfo;
+        private HitbloqPoolInfo _poolInfo;
+
+        private CancellationTokenSource poolInfoTokenSource;
+
         private bool parsed;
 
         [UIComponent("modal")]
@@ -30,6 +42,36 @@ namespace Hitbloq.UI
 
         [UIParams]
         private readonly BSMLParserParams parserParams;
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        private HitbloqRankInfo RankInfo
+        {
+            get => _rankInfo;
+            set
+            {
+                _rankInfo = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Username)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Rank)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CR)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ScoreCount)));
+            }
+        }
+
+        private HitbloqPoolInfo PoolInfo
+        {
+            get => _poolInfo;
+            set
+            {
+                _poolInfo = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PoolName)));
+            }
+        }
+
+        public HitbloqProfileModalController(PoolInfoSource poolInfoSource)
+        {
+            this.poolInfoSource = poolInfoSource;
+        }
 
         public void Initialize()
         {
@@ -59,11 +101,35 @@ namespace Hitbloq.UI
             modalView.SetField("_animateParentCanvas", true);
         }
 
-        internal void ShowModal(Transform parentTransform)
+        internal async void ShowModal(Transform parentTransform, HitbloqRankInfo rankInfo, string pool)
         {
+            PoolUpdated(pool);
+            RankInfo = rankInfo;
             Parse(parentTransform);
             parserParams.EmitEvent("close-modal");
             parserParams.EmitEvent("open-modal");
         }
+
+        public async void PoolUpdated(string pool)
+        {
+            poolInfoTokenSource?.Cancel();
+            poolInfoTokenSource = new CancellationTokenSource();
+            PoolInfo = await poolInfoSource.GetPoolInfoAsync(pool, poolInfoTokenSource.Token);
+        }
+
+        [UIValue("username")]
+        private string Username => RankInfo.username;
+
+        [UIValue("pool-name")]
+        private string PoolName => PoolInfo.shownName;
+
+        [UIValue("rank")]
+        private string Rank => $"{RankInfo.rank}";
+
+        [UIValue("cr")]
+        private string CR => $"{RankInfo.cr}";
+
+        [UIValue("score-count")]
+        private string ScoreCount => $"{RankInfo.scoreCount}";
     }
 }

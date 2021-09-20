@@ -10,17 +10,17 @@
 			</vertical>
 			<vertical  horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='40' pref-height='40' pad-left='3'>
 				<vertical vertical-fit='PreferredSize' pref-height='9' pad-right='3' pad-bottom='2'>
-					<text id='modal-username' text='Username' italics='true' font-size='5' align='Center' />
-					<text id='modal-mappool' text='Map Pool' italics='true' font-size='3' align='Center' color='#a3a3a3'/>
+					<text text='~username' italics='true' font-size='5' align='Center' />
+					<text text='~pool-name' italics='true' font-size='3' align='Center' color='#a3a3a3'/>
 				</vertical>
 				<vertical pad-right='4'>
 					<vertical id='modal-info-vertical' bg='round-rect-panel' horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='30' pref-height='30' pad-left='3' pad-top='1' pad-bottom='1'>
 						<text text='Pool Rank'/>
-						<text id='modal-rank' text='#69'/>
+						<text text='~rank'/>
 						<text text='CR'/>
-						<text id='modal-cr-count' text='6,696cr' color='#b987ff'/>
+						<text text='~cr' color='#b987ff'/>
 						<text text='Score Count'/>
-						<text id='modal-playcount' text='6,900 plays'/>
+						<text text='~score-count'/>
 					</vertical>
 				</vertical>
 			</vertical>

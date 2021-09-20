@@ -153,9 +153,9 @@ namespace Hitbloq.Managers
             }
         }
 
-        private void OnRankTextClicked()
+        private void OnRankTextClicked(HitbloqRankInfo rankInfo, string pool)
         {
-            hitbloqProfileModalController.ShowModal(hitbloqLeaderboardViewController.transform);
+            hitbloqProfileModalController.ShowModal(hitbloqLeaderboardViewController.transform, rankInfo, pool);
         }
     }
 }

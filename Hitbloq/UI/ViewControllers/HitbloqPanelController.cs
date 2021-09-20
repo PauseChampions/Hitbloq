@@ -24,8 +24,7 @@ namespace Hitbloq.UI
         private RankInfoSource rankInfoSource;
         private PoolInfoSource poolInfoSource;
 
-        private int rank;
-        private float cr;
+        private HitbloqRankInfo rankInfo;
         private List<string> poolNames;
         private string _promptText;
         private bool _loadingActive;
@@ -33,7 +32,7 @@ namespace Hitbloq.UI
         private CancellationTokenSource poolInfoTokenSource;
         private CancellationTokenSource rankInfoTokenSource;
         public event Action<string> PoolChangedEvent;
-        public event Action ClickedRankText;
+        public event Action<HitbloqRankInfo, string> ClickedRankText;
 
         [UIComponent("container")]
         private readonly Backgroundable container;
@@ -102,7 +101,7 @@ namespace Hitbloq.UI
         [UIAction("clicked-rank-text")]
         private void RankTextClicked()
         {
-            ClickedRankText?.Invoke();
+            ClickedRankText?.Invoke(rankInfo, poolNames[dropDownListSetting.dropdown.selectedIndex]);
         }
 
         public void UserRegistered()
@@ -117,8 +116,7 @@ namespace Hitbloq.UI
             poolInfoTokenSource = new CancellationTokenSource();
 
             pools = new List<object>();
-            rank = 0;
-            cr = 0;
+            rankInfo = null;
 
             if (levelInfoEntry != null)
             {
@@ -152,9 +150,7 @@ namespace Hitbloq.UI
         {
             rankInfoTokenSource?.Cancel();
             rankInfoTokenSource = new CancellationTokenSource();
-            HitbloqRankInfo rankInfo = await rankInfoSource.GetRankInfoAsync(pool, rankInfoTokenSource.Token);
-            rank = rankInfo.rank;
-            cr = rankInfo.cr;
+            rankInfo = await rankInfoSource.GetRankInfoAsync(pool, rankInfoTokenSource.Token);
             NotifyPropertyChanged(nameof(PoolRankingText));
         }
 
@@ -181,7 +177,7 @@ namespace Hitbloq.UI
         }
 
         [UIValue("pool-ranking-text")]
-        private string PoolRankingText => $"<b>Pool Ranking:</b> #{rank} <size=75%>(<color=#aa6eff>{cr.ToString("F2")}cr</color>)";
+        private string PoolRankingText => $"<b>Pool Ranking:</b> #{rankInfo?.rank} <size=75%>(<color=#aa6eff>{rankInfo?.cr.ToString("F2")}cr</color>)";
 
         [UIValue("pools")]
         private List<object> pools = new List<object> { "None" };
