@@ -15,6 +15,7 @@ namespace Hitbloq.Managers
         private readonly StandardLevelDetailViewController standardLevelDetailViewController;
         private readonly HitbloqLeaderboardViewController hitbloqLeaderboardViewController;
         private readonly HitbloqPanelController hitbloqPanelController;
+        private readonly HitbloqProfileModalController hitbloqProfileModalController;
 
         private readonly UserIDSource userIDSource;
         private readonly LevelInfoSource levelInfoSource;
@@ -29,13 +30,14 @@ namespace Hitbloq.Managers
         private CancellationTokenSource leaderboardTokenSource;
 
         public HitbloqManager(StandardLevelDetailViewController standardLevelDetailViewController, HitbloqLeaderboardViewController hitbloqLeaderboardViewController, 
-            HitbloqPanelController hitbloqPanelController, UserIDSource userIDSource, LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher,
-            List<INotifyUserRegistered> notifyUserRegistereds, List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters, List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters,
-            List<IPoolUpdater> poolUpdaters)
+            HitbloqPanelController hitbloqPanelController, HitbloqProfileModalController hitbloqProfileModalController, UserIDSource userIDSource, LevelInfoSource levelInfoSource,
+            LeaderboardRefresher leaderboardRefresher, List<INotifyUserRegistered> notifyUserRegistereds, List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters,
+            List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters, List<IPoolUpdater> poolUpdaters)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.hitbloqLeaderboardViewController = hitbloqLeaderboardViewController;
             this.hitbloqPanelController = hitbloqPanelController;
+            this.hitbloqProfileModalController = hitbloqProfileModalController;
 
             this.userIDSource = userIDSource;
             this.levelInfoSource = levelInfoSource;
@@ -153,7 +155,7 @@ namespace Hitbloq.Managers
 
         private void OnRankTextClicked()
         {
-            hitbloqLeaderboardViewController.ShowModal();
+            hitbloqProfileModalController.ShowModal(hitbloqLeaderboardViewController.transform);
         }
     }
 }

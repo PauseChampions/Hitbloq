@@ -104,6 +104,7 @@
 	  <None Remove="UI\Views\HitbloqMainLeaderboardView.bsml" />
 	  <None Remove="UI\Views\HitbloqMainView.bsml" />
 	  <None Remove="UI\Views\HitbloqPanel.bsml" />
+	  <None Remove="UI\Views\HitbloqProfileModal.bsml" />
 	</ItemGroup>
 
 	<ItemGroup>

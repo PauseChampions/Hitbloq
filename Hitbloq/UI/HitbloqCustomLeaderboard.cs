@@ -14,14 +14,14 @@ namespace Hitbloq.UI
         private readonly ViewController hitbloqPanelController;
         protected override ViewController panelViewController => hitbloqPanelController;
 
-        private readonly HitbloqLeaderboardViewController mainLeaderboardViewController;
-        protected override ViewController leaderboardViewController => mainLeaderboardViewController;
+        private readonly HitbloqLeaderboardViewController hitbloqLeaderboardViewController;
+        protected override ViewController leaderboardViewController => hitbloqLeaderboardViewController;
 
         internal HitbloqCustomLeaderboard(CustomLeaderboardManager customLeaderboardManager, HitbloqPanelController hitbloqPanelController, HitbloqLeaderboardViewController mainLeaderboardViewController)
         {
             this.customLeaderboardManager = customLeaderboardManager;
             this.hitbloqPanelController = hitbloqPanelController;
-            this.mainLeaderboardViewController = mainLeaderboardViewController;
+            this.hitbloqLeaderboardViewController = mainLeaderboardViewController;
         }
 
         public void Dispose()
@@ -40,7 +40,5 @@ namespace Hitbloq.UI
                 customLeaderboardManager.Unregister(this);
             }
         }
-
-
     }
 }

@@ -99,7 +99,7 @@ namespace Hitbloq.UI
             PoolChangedEvent?.Invoke(poolNames[dropDownListSetting.dropdown.selectedIndex]);
         }
 
-        //[UIAction("clicked-rank-text")]
+        [UIAction("clicked-rank-text")]
         private void RankTextClicked()
         {
             ClickedRankText?.Invoke();
