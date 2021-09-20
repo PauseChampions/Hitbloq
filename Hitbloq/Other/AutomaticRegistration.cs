@@ -1,13 +1,13 @@
 ﻿using Hitbloq.Entries;
+using Hitbloq.Sources;
 using Hitbloq.UI;
 using Hitbloq.Utilities;
 using SiraUtil;
-using System.Collections.Specialized;
 using System.Text;
 using System.Threading;
 using Zenject;
 
-namespace Hitbloq.Sources
+namespace Hitbloq.Other
 {
     internal class AutomaticRegistration : IInitializable
     {

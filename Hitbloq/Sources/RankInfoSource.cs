@@ -17,18 +17,24 @@ namespace Hitbloq.Sources
             this.userIDSource = userIDSource;
         }
 
-        public async Task<HitbloqRankInfo> GetRankInfoAsync(string poolID, CancellationToken? cancellationToken = null)
+        public async Task<HitbloqRankInfo> GetRankInfoForSelfAsync(string poolID, CancellationToken? cancellationToken = null)
         {
             HitbloqUserID userID = await userIDSource.GetUserIDAsync(cancellationToken);
             if (userID != null)
             {
-                try
-                {
-                    WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/player_rank/{poolID}/{userID.id}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                    return Utils.ParseWebResponse<HitbloqRankInfo>(webResponse);
-                }
-                catch (TaskCanceledException) { }
+                return await GetRankInfoAsync(poolID, userID.id, cancellationToken);
             }
+            return null;
+        }
+
+        public async Task<HitbloqRankInfo> GetRankInfoAsync(string poolID, int userID, CancellationToken? cancellationToken = null)
+        {
+            try
+            {
+                WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/player_rank/{poolID}/{userID}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                return Utils.ParseWebResponse<HitbloqRankInfo>(webResponse);
+            }
+            catch (TaskCanceledException) { }
             return null;
         }
     }

@@ -1,4 +1,5 @@
 ﻿using Hitbloq.Entries;
+using Hitbloq.Sources;
 using Hitbloq.UI;
 using IPA.Utilities;
 using SiraUtil;
@@ -6,7 +7,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace Hitbloq.Sources
+namespace Hitbloq.Other
 {
     internal class LeaderboardRefresher
     {

@@ -14,9 +14,11 @@ namespace Hitbloq.Entries
         public int scoreCount;
 
         [JsonProperty("tier")]
-        public string tier;
+        private string tier;
 
         [JsonProperty("username")]
         public string username;
+
+        public string TierURL => $"https://hitbloq.com/static/ranks/{tier}.png";
     }
 }

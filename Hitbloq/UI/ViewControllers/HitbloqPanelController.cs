@@ -150,7 +150,7 @@ namespace Hitbloq.UI
         {
             rankInfoTokenSource?.Cancel();
             rankInfoTokenSource = new CancellationTokenSource();
-            rankInfo = await rankInfoSource.GetRankInfoAsync(pool, rankInfoTokenSource.Token);
+            rankInfo = await rankInfoSource.GetRankInfoForSelfAsync(pool, rankInfoTokenSource.Token);
             NotifyPropertyChanged(nameof(PoolRankingText));
         }
 

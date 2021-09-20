@@ -4,6 +4,7 @@ using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Parser;
 using Hitbloq.Entries;
 using Hitbloq.Interfaces;
+using Hitbloq.Other;
 using Hitbloq.Sources;
 using HMUI;
 using IPA.Utilities;
@@ -11,16 +12,20 @@ using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Hitbloq.UI
 {
     internal class HitbloqProfileModalController : IPoolUpdater, INotifyPropertyChanged
     {
+        private readonly ProfileSource profileSource;
         private readonly PoolInfoSource poolInfoSource;
+        private readonly SpriteLoader spriteLoader;
 
         private HitbloqRankInfo _rankInfo;
         private HitbloqPoolInfo _poolInfo;
+        private HitbloqProfile _hitbloqProfile;
 
         private CancellationTokenSource poolInfoTokenSource;
 
@@ -36,6 +41,9 @@ namespace Hitbloq.UI
 
         [UIComponent("modal-profile-pic")]
         private ImageView modalProfilePic;
+
+        [UIComponent("modal-badge")]
+        private ImageView modalBadge;
 
         [UIComponent("modal-info-vertical")]
         private Backgroundable modalInfoVertical;
@@ -55,6 +63,7 @@ namespace Hitbloq.UI
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Rank)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CR)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ScoreCount)));
+                spriteLoader.DownloadSpriteAsync(_rankInfo.TierURL, (Sprite sprite) => modalBadge.sprite = sprite);
             }
         }
 
@@ -68,9 +77,21 @@ namespace Hitbloq.UI
             }
         }
 
-        public HitbloqProfileModalController(PoolInfoSource poolInfoSource)
+        private HitbloqProfile HitbloqProfile
+        {
+            get => _hitbloqProfile;
+            set
+            {
+                _hitbloqProfile = value;
+                spriteLoader.DownloadSpriteAsync(_hitbloqProfile.profilePictureURL, (Sprite sprite) => modalProfilePic.sprite = sprite);
+            }
+        }
+
+        public HitbloqProfileModalController(PoolInfoSource poolInfoSource, ProfileSource profileSource, SpriteLoader spriteLoader)
         {
             this.poolInfoSource = poolInfoSource;
+            this.profileSource = profileSource;
+            this.spriteLoader = spriteLoader;
         }
 
         public void Initialize()
@@ -101,11 +122,12 @@ namespace Hitbloq.UI
             modalView.SetField("_animateParentCanvas", true);
         }
 
-        internal async void ShowModal(Transform parentTransform, HitbloqRankInfo rankInfo, string pool)
+        internal async void ShowModalForSelf(Transform parentTransform, HitbloqRankInfo rankInfo, string pool)
         {
             PoolUpdated(pool);
             RankInfo = rankInfo;
             Parse(parentTransform);
+            HitbloqProfile = await profileSource.GetProfileForSelfAsync();
             parserParams.EmitEvent("close-modal");
             parserParams.EmitEvent("open-modal");
         }

@@ -3,6 +3,7 @@ using SiraUtil;
 using Hitbloq.UI;
 using Hitbloq.Managers;
 using Hitbloq.Sources;
+using Hitbloq.Other;
 
 namespace Hitbloq.Installers
 {
@@ -21,13 +22,16 @@ namespace Hitbloq.Installers
             Container.BindInterfacesTo<HitbloqManager>().AsSingle();
 
             Container.Bind<UserIDSource>().AsSingle();
+            Container.Bind<ProfileSource>().AsSingle();
             Container.Bind<RankInfoSource>().AsSingle();
             Container.Bind<LevelInfoSource>().AsSingle();
             Container.Bind<PoolInfoSource>().AsSingle();
-            Container.Bind<LeaderboardRefresher>().AsSingle();
-            Container.BindInterfacesTo<AutomaticRegistration>().AsSingle();
             Container.BindInterfacesTo<GlobalLeaderboardSource>().AsSingle();
             Container.BindInterfacesTo<AroundMeLeaderboardSource>().AsSingle();
+
+            Container.Bind<SpriteLoader>().AsSingle();
+            Container.Bind<LeaderboardRefresher>().AsSingle();
+            Container.BindInterfacesTo<AutomaticRegistration>().AsSingle();
         }
     }
 }

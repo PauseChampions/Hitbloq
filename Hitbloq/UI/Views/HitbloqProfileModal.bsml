@@ -2,8 +2,8 @@
 	<modal id='modal' show-event='open-modal' hide-event='close-modal' clickerino-offerino-closerino='true' size-delta-x='80' size-delta-y='50' anchor-pos-x='-2' anchor-pos-y='5' move-to-center='false' horizontal-fit='PreferredSize' vertical-fit='PreferredSize'>
 		<horizontal>
 			<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='35' pad-top='3' spacing='1'>
-				<img id='modal-profile-pic' src='Hitbloq.Images.lighter.png' preserve-aspect='true' pref-height='27'/>
-				<img id='modal-badge' src='Hitbloq.Images.badges.png' preserve-aspect='true' pref-height='9'/>
+				<img id='modal-profile-pic' preserve-aspect='true' pref-height='27'/>
+				<img id='modal-badge' preserve-aspect='true' pref-height='9'/>
 			</vertical>
 			<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='.75' pref-height='40' >
 				<img id='profile-line-border' src='Hitbloq.Images.Pixel.png' size-delta-x='.75' size-delta-y='40'/>

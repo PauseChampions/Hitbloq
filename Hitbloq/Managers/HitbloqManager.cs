@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Threading;
 using Zenject;
 using LeaderboardCore.Interfaces;
+using Hitbloq.Other;
 
 namespace Hitbloq.Managers
 {
@@ -155,7 +156,7 @@ namespace Hitbloq.Managers
 
         private void OnRankTextClicked(HitbloqRankInfo rankInfo, string pool)
         {
-            hitbloqProfileModalController.ShowModal(hitbloqLeaderboardViewController.transform, rankInfo, pool);
+            hitbloqProfileModalController.ShowModalForSelf(hitbloqLeaderboardViewController.transform, rankInfo, pool);
         }
     }
 }
