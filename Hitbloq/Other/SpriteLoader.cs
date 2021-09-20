@@ -31,6 +31,7 @@ namespace Hitbloq.Other
             if (cachedSprites.TryGetValue(spriteURL, out Sprite cachedSprite))
             {
                 onCompletion?.Invoke(cachedSprite);
+                return;
             }
 
             try
