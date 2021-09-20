@@ -3,7 +3,6 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Parser;
 using Hitbloq.Entries;
-using Hitbloq.Interfaces;
 using Hitbloq.Other;
 using Hitbloq.Sources;
 using HMUI;
@@ -17,17 +16,16 @@ using UnityEngine;
 
 namespace Hitbloq.UI
 {
-    internal class HitbloqProfileModalController : IPoolUpdater, INotifyPropertyChanged
+    internal class HitbloqProfileModalController : INotifyPropertyChanged
     {
         private readonly ProfileSource profileSource;
         private readonly PoolInfoSource poolInfoSource;
         private readonly SpriteLoader spriteLoader;
 
+        private bool _isloading;
         private HitbloqRankInfo _rankInfo;
         private HitbloqPoolInfo _poolInfo;
         private HitbloqProfile _hitbloqProfile;
-
-        private CancellationTokenSource poolInfoTokenSource;
 
         private bool parsed;
 
@@ -116,6 +114,7 @@ namespace Hitbloq.UI
             if (!parsed)
             {
                 BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqProfileModal.bsml"), parentTransform.gameObject, this);
+                modalView.gameObject.name = "HitbloqProfileModal";
                 modalPosition = modalTransform.localPosition;
             }
             modalTransform.localPosition = modalPosition;
@@ -124,34 +123,48 @@ namespace Hitbloq.UI
 
         internal async void ShowModalForSelf(Transform parentTransform, HitbloqRankInfo rankInfo, string pool)
         {
-            PoolUpdated(pool);
-            RankInfo = rankInfo;
             Parse(parentTransform);
-            HitbloqProfile = await profileSource.GetProfileForSelfAsync();
+
             parserParams.EmitEvent("close-modal");
             parserParams.EmitEvent("open-modal");
+
+            IsLoading = true;
+
+            RankInfo = rankInfo;
+            PoolInfo = await poolInfoSource.GetPoolInfoAsync(pool);
+            HitbloqProfile = await profileSource.GetProfileForSelfAsync();
+
+            IsLoading = false;
         }
 
-        public async void PoolUpdated(string pool)
+        [UIValue("is-loading")]
+        private bool IsLoading
         {
-            poolInfoTokenSource?.Cancel();
-            poolInfoTokenSource = new CancellationTokenSource();
-            PoolInfo = await poolInfoSource.GetPoolInfoAsync(pool, poolInfoTokenSource.Token);
+            get => _isloading;
+            set
+            {
+                _isloading = value;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsLoading)));
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsNotLoading)));
+            }
         }
+
+        [UIValue("is-not-loading")]
+        private bool IsNotLoading => !_isloading;
 
         [UIValue("username")]
-        private string Username => RankInfo.username;
+        private string Username => $"{RankInfo?.username}";
 
         [UIValue("pool-name")]
-        private string PoolName => PoolInfo.shownName;
+        private string PoolName => $"{PoolInfo?.shownName}";
 
         [UIValue("rank")]
-        private string Rank => $"{RankInfo.rank}";
+        private string Rank => $"{RankInfo?.rank}";
 
         [UIValue("cr")]
-        private string CR => $"{RankInfo.cr}";
+        private string CR => $"{RankInfo?.cr}";
 
         [UIValue("score-count")]
-        private string ScoreCount => $"{RankInfo.scoreCount}";
+        private string ScoreCount => $"{RankInfo?.scoreCount}";
     }
 }
