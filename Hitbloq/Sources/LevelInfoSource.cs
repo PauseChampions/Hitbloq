@@ -33,7 +33,7 @@ namespace Hitbloq.Sources
                 cache[difficultyBeatmap] = levelInfo;
                 return levelInfo;
             }
-            catch (TaskCanceledException e)
+            catch (TaskCanceledException)
             {
                 return null;
             }

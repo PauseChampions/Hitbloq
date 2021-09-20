@@ -24,6 +24,7 @@ namespace Hitbloq.Installers
             Container.Bind<LevelInfoSource>().AsSingle();
             Container.Bind<PoolInfoSource>().AsSingle();
             Container.Bind<LeaderboardRefresher>().AsSingle();
+            Container.BindInterfacesTo<AutomaticRegistration>().AsSingle();
             Container.BindInterfacesTo<GlobalLeaderboardSource>().AsSingle();
             Container.BindInterfacesTo<AroundMeLeaderboardSource>().AsSingle();
         }

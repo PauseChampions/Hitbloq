@@ -38,7 +38,7 @@ namespace Hitbloq.Sources
 
         public async Task<List<Entries.LeaderboardEntry>> GetScoresTask(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null, int page = 0)
         {
-            HitbloqUserID? userID = await userIDSource.GetUserIDAsync(cancellationToken);
+            HitbloqUserID userID = await userIDSource.GetUserIDAsync(cancellationToken);
             if (userID == null)
             {
                 return null;
@@ -50,7 +50,7 @@ namespace Hitbloq.Sources
                 WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/nearby_scores/{id}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
                 return Utils.ParseWebResponse<List<Entries.LeaderboardEntry>>(webResponse);
             }
-            catch (TaskCanceledException e) { }
+            catch (TaskCanceledException) { }
             return null;
         }
     }

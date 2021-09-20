@@ -27,7 +27,7 @@ namespace Hitbloq.Sources
                     WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/player_rank/{poolID}/{userID.id}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
                     return Utils.ParseWebResponse<HitbloqRankInfo>(webResponse);
                 }
-                catch (TaskCanceledException e) { }
+                catch (TaskCanceledException) { }
             }
             return null;
         }

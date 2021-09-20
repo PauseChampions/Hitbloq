@@ -4,7 +4,10 @@ namespace Hitbloq.Entries
 {
     internal class HitbloqUserID
     {
-        [JsonProperty("id")]
-        public int id;
+        [JsonProperty("user", NullValueHandling = NullValueHandling.Ignore)]
+        public int id = -1;
+
+        [JsonProperty("registered")]
+        public bool registered;
     }
 }

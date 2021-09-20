@@ -40,7 +40,7 @@ namespace Hitbloq.Sources
                 WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/scores_extended/{page}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
                 return Utils.ParseWebResponse<List<Entries.LeaderboardEntry>>(webResponse);
             }
-            catch (TaskCanceledException e) { }
+            catch (TaskCanceledException) { }
             return null;
         }
     }

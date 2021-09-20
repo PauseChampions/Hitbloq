@@ -34,7 +34,7 @@ namespace Hitbloq.Sources
                 cache[poolID] = poolInfo;
                 return poolInfo;
             }
-            catch (TaskCanceledException e) 
+            catch (TaskCanceledException)
             {
                 return null;
             }

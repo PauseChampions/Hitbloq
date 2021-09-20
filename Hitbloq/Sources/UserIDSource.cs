@@ -28,10 +28,10 @@ namespace Hitbloq.Sources
                 {
                     try
                     {
-                        WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/tools/ss_to_hitbloq/{userInfo.platformUserId}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                        WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/tools/ss_registered/{userInfo.platformUserId}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
                         hitbloqUserID = Utils.ParseWebResponse<HitbloqUserID>(webResponse);
                     }
-                    catch (TaskCanceledException e){}
+                    catch (TaskCanceledException) { }
                 }
             }
             return hitbloqUserID;
