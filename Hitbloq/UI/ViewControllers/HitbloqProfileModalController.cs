@@ -10,8 +10,6 @@ using IPA.Utilities;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Hitbloq.UI
@@ -29,13 +27,21 @@ namespace Hitbloq.UI
 
         private bool parsed;
 
+        private Material fogBG;
+        private Material noGlowRoundEdge;
+        private Sprite roundRectSmall;
+
+        private Color originalModalColour;
+        private Color customModalColour;
+
+        private Vector3 modalPosition;
+        private ImageView modalBackground;
+
         [UIComponent("modal")]
         private ModalView modalView;
 
         [UIComponent("modal")]
         private readonly RectTransform modalTransform;
-
-        private Vector3 modalPosition;
 
         [UIComponent("modal-profile-pic")]
         private ImageView modalProfilePic;
@@ -82,6 +88,22 @@ namespace Hitbloq.UI
             {
                 _hitbloqProfile = value;
                 spriteLoader.DownloadSpriteAsync(_hitbloqProfile.profilePictureURL, (Sprite sprite) => modalProfilePic.sprite = sprite);
+
+                if (_hitbloqProfile.profileBackgroundURL != null)
+                {
+                    spriteLoader.DownloadSpriteAsync(_hitbloqProfile.profileBackgroundURL, (Sprite sprite) =>
+                    {
+                        modalBackground.sprite = sprite;
+                        modalBackground.color = customModalColour;
+                        modalBackground.material = noGlowRoundEdge;
+                    });
+                }
+                else
+                {
+                    modalBackground.sprite = roundRectSmall;
+                    modalBackground.color = originalModalColour;
+                    modalBackground.material = fogBG;
+                }
             }
         }
 
@@ -101,8 +123,15 @@ namespace Hitbloq.UI
         private void PostParse()
         {
             parsed = true;
+            modalView.gameObject.name = "HitbloqProfileModal";
 
-            Material noGlowRoundEdge = Resources.FindObjectsOfTypeAll<Material>().First(m => m.name == "UINoGlowRoundEdge");
+            modalBackground = modalView.transform.Find("BG").GetComponent<ImageView>();
+            fogBG = modalBackground.material;
+            roundRectSmall = modalBackground.sprite;
+            originalModalColour = modalBackground.color;
+            customModalColour = new Color(0.5f, 0.5f, 0.5f, 1f);
+
+            noGlowRoundEdge = Resources.FindObjectsOfTypeAll<Material>().First(m => m.name == "UINoGlowRoundEdge");
             modalProfilePic.material = noGlowRoundEdge;
 
             ImageView verticalBackground = modalInfoVertical.background as ImageView;
@@ -114,7 +143,6 @@ namespace Hitbloq.UI
             if (!parsed)
             {
                 BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqProfileModal.bsml"), parentTransform.gameObject, this);
-                modalView.gameObject.name = "HitbloqProfileModal";
                 modalPosition = modalTransform.localPosition;
             }
             modalTransform.localPosition = modalPosition;
