@@ -1,6 +1,7 @@
 ﻿using Hitbloq.Entries;
 using Hitbloq.Utilities;
 using SiraUtil;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -12,6 +13,7 @@ namespace Hitbloq.Sources
         private readonly IPlatformUserModel platformUserModel;
 
         private HitbloqUserID hitbloqUserID;
+        public event Action UserRegisteredEvent;
 
         public UserIDSource(SiraClient siraClient, IPlatformUserModel platformUserModel)
         {
@@ -21,7 +23,7 @@ namespace Hitbloq.Sources
 
         public async Task<HitbloqUserID> GetUserIDAsync(CancellationToken? cancellationToken = null)
         {
-            if (hitbloqUserID == null)
+            if (hitbloqUserID == null || !hitbloqUserID.registered)
             {
                 UserInfo userInfo = await platformUserModel.GetUserInfo();
                 if (userInfo != null)
@@ -30,6 +32,11 @@ namespace Hitbloq.Sources
                     {
                         WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/tools/ss_registered/{userInfo.platformUserId}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
                         hitbloqUserID = Utils.ParseWebResponse<HitbloqUserID>(webResponse);
+
+                        if (hitbloqUserID.registered)
+                        {
+                            UserRegisteredEvent?.Invoke();
+                        }
                     }
                     catch (TaskCanceledException) { }
                 }

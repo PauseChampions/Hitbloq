@@ -1,7 +1,9 @@
 ﻿using Hitbloq.Entries;
+using Hitbloq.UI;
 using Hitbloq.Utilities;
 using SiraUtil;
 using System.Collections.Specialized;
+using System.Text;
 using System.Threading;
 using Zenject;
 
@@ -10,12 +12,14 @@ namespace Hitbloq.Sources
     internal class AutomaticRegistration : IInitializable
     {
         private readonly SiraClient siraClient;
+        private readonly HitbloqPanelController hitbloqPanelController;
         private readonly IPlatformUserModel platformUserModel;
         private readonly UserIDSource userIDSource;
 
-        public AutomaticRegistration(SiraClient siraClient, IPlatformUserModel platformUserModel, UserIDSource userIDSource)
+        public AutomaticRegistration(SiraClient siraClient, HitbloqPanelController hitbloqPanelController, IPlatformUserModel platformUserModel, UserIDSource userIDSource)
         {
             this.siraClient = siraClient;
+            this.hitbloqPanelController = hitbloqPanelController;
             this.platformUserModel = platformUserModel;
             this.userIDSource = userIDSource;
         }
@@ -49,6 +53,17 @@ namespace Hitbloq.Sources
             byte[] requestParams = encoding.GetBytes(postData);
             webResponse = await siraClient.PostAsync("https://hitbloq.com/api/add_user", requestParams, CancellationToken.None);
             HitbloqRegistrationEntry registrationEntry = Utils.ParseWebResponse<HitbloqRegistrationEntry>(webResponse);
+
+            if (registrationEntry != null && registrationEntry.status != "ratelimit")
+            {
+                hitbloqPanelController.PromptText = "Registering Hitbloq Account";
+                hitbloqPanelController.LoadingActive = true;
+            }
+            else
+            {
+                hitbloqPanelController.PromptText = "<color=red>Please register for Hitbloq on the Discord Server.</color>";
+                hitbloqPanelController.LoadingActive = false;
+            }
         }
     }
 }

@@ -61,7 +61,7 @@ namespace Hitbloq.Sources
                 }
                 else if (refreshEntry.error != null)
                 {
-                    hitbloqPanelController.PromptText = $"<color=red>{refreshEntry.error}</color>";
+                    hitbloqPanelController.PromptText = $"<color=red>Error: {refreshEntry.error}</color>";
                 }
                 else
                 {
@@ -74,6 +74,12 @@ namespace Hitbloq.Sources
 
         private async Task<bool> RefreshNeeded()
         {
+            HitbloqUserID userID = await userIDSource.GetUserIDAsync();
+            if (!userID.registered)
+            {
+                return false;
+            }
+
             IDifficultyBeatmap lastPlayedBeatmap = resultsViewController.GetField<IDifficultyBeatmap, ResultsViewController>("_difficultyBeatmap");
             HitbloqLevelInfo levelInfo;
 

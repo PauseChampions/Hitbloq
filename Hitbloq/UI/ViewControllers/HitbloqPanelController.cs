@@ -18,7 +18,7 @@ namespace Hitbloq.UI
 {
     [HotReload(RelativePathToLayout = @"..\Views\HitbloqPanel.bsml")]
     [ViewDefinition("Hitbloq.UI.Views.HitbloqPanel.bsml")]
-    internal class HitbloqPanelController : BSMLAutomaticViewController, IDifficultyBeatmapUpdater, IPoolUpdater
+    internal class HitbloqPanelController : BSMLAutomaticViewController, INotifyUserRegistered, IDifficultyBeatmapUpdater, IPoolUpdater
     {
         private HitbloqFlowCoordinator hitbloqFlowCoordinator;
         private RankInfoSource rankInfoSource;
@@ -105,6 +105,12 @@ namespace Hitbloq.UI
             ClickedRankText?.Invoke();
         }
 
+        public void UserRegistered()
+        {
+            PromptText = "";
+            LoadingActive = false;
+        }
+
         public async void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo levelInfoEntry)
         {
             poolInfoTokenSource?.Cancel();
@@ -135,8 +141,10 @@ namespace Hitbloq.UI
                 dropDownListSetting.UpdateChoices();
                 dropDownListSetting.dropdown.SelectCellWithIdx(0);
 
-                PromptText = "";
-                LoadingActive = false;
+                if (!LoadingActive && !PromptText.Contains("<color=red>"))
+                {
+                    PromptText = "";
+                }
             }
         }
 

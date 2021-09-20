@@ -16,9 +16,11 @@ namespace Hitbloq.Managers
         private readonly HitbloqLeaderboardViewController hitbloqLeaderboardViewController;
         private readonly HitbloqPanelController hitbloqPanelController;
 
+        private readonly UserIDSource userIDSource;
         private readonly LevelInfoSource levelInfoSource;
         private readonly LeaderboardRefresher leaderboardRefresher;
 
+        private readonly List<INotifyUserRegistered> notifyUserRegistereds;
         private readonly List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters;
         private readonly List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters;
         private readonly List<IPoolUpdater> poolUpdaters;
@@ -26,16 +28,20 @@ namespace Hitbloq.Managers
         private CancellationTokenSource levelInfoTokenSource;
         private CancellationTokenSource leaderboardTokenSource;
 
-        public HitbloqManager(StandardLevelDetailViewController standardLevelDetailViewController, HitbloqLeaderboardViewController hitbloqLeaderboardViewController, HitbloqPanelController hitbloqPanelController,
-            LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher, List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters, List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters, List<IPoolUpdater> poolUpdaters)
+        public HitbloqManager(StandardLevelDetailViewController standardLevelDetailViewController, HitbloqLeaderboardViewController hitbloqLeaderboardViewController, 
+            HitbloqPanelController hitbloqPanelController, UserIDSource userIDSource, LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher,
+            List<INotifyUserRegistered> notifyUserRegistereds, List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters, List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters,
+            List<IPoolUpdater> poolUpdaters)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.hitbloqLeaderboardViewController = hitbloqLeaderboardViewController;
             this.hitbloqPanelController = hitbloqPanelController;
 
+            this.userIDSource = userIDSource;
             this.levelInfoSource = levelInfoSource;
             this.leaderboardRefresher = leaderboardRefresher;
 
+            this.notifyUserRegistereds = notifyUserRegistereds;
             this.difficultyBeatmapUpdaters = difficultyBeatmapUpdaters;
             this.leaderboardEntriesUpdaters = leaderboardEntriesUpdaters;
             this.poolUpdaters = poolUpdaters;
@@ -43,6 +49,7 @@ namespace Hitbloq.Managers
 
         public void Initialize()
         {
+            userIDSource.UserRegisteredEvent += OnUserRegistered;
             standardLevelDetailViewController.didChangeDifficultyBeatmapEvent += OnDifficultyBeatmapChanged;
             standardLevelDetailViewController.didChangeContentEvent += OnContentChanged;
             hitbloqLeaderboardViewController.PageRequested += OnPageRequested;
@@ -52,6 +59,7 @@ namespace Hitbloq.Managers
 
         public void Dispose()
         {
+            userIDSource.UserRegisteredEvent -= OnUserRegistered;
             standardLevelDetailViewController.didChangeDifficultyBeatmapEvent -= OnDifficultyBeatmapChanged;
             standardLevelDetailViewController.didChangeContentEvent -= OnContentChanged;
             hitbloqLeaderboardViewController.PageRequested -= OnPageRequested;
@@ -64,6 +72,14 @@ namespace Hitbloq.Managers
             if (await leaderboardRefresher.Refresh())
             {
                 UpdateDifficultyBeatmap(standardLevelDetailViewController.selectedDifficultyBeatmap);
+            }
+        }
+
+        private void OnUserRegistered()
+        {
+            foreach (var notifyUserRegistered in notifyUserRegistereds)
+            {
+                notifyUserRegistered.UserRegistered();
             }
         }
 
