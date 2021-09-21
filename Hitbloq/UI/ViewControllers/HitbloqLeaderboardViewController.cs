@@ -1,6 +1,4 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
-using BeatSaberMarkupLanguage.Components;
-using BeatSaberMarkupLanguage.Parser;
 using BeatSaberMarkupLanguage.ViewControllers;
 using Hitbloq.Entries;
 using Hitbloq.Interfaces;
@@ -10,14 +8,16 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using UnityEngine.UI;
 using Zenject;
 
 namespace Hitbloq.UI
 {
-    [HotReload(RelativePathToLayout = @"..\Views\HitbloqMainLeaderboardView.bsml")]
-    [ViewDefinition("Hitbloq.UI.Views.HitbloqMainLeaderboardView.bsml")]
+    [HotReload(RelativePathToLayout = @"..\Views\HitbloqLeaderboardView.bsml")]
+    [ViewDefinition("Hitbloq.UI.Views.HitbloqLeaderboardView.bsml")]
     internal class HitbloqLeaderboardViewController : BSMLAutomaticViewController, IDifficultyBeatmapUpdater, ILeaderboardEntriesUpdater, IPoolUpdater
     {
+        private HitbloqProfileModalController profileModalController;
         private UserIDSource userIDSource;
         private List<ILeaderboardSource> leaderboardSources;
 
@@ -29,6 +29,8 @@ namespace Hitbloq.UI
         private IDifficultyBeatmap difficultyBeatmap;
         private List<Entries.LeaderboardEntry> leaderboardEntries;
         private string pool;
+
+        private List<Button> infoButtons;
 
         private int PageNumber
         {
@@ -62,9 +64,44 @@ namespace Hitbloq.UI
         [UIComponent("leaderboard")]
         internal LeaderboardTableView leaderboard;
 
+        #region Info Buttons
+
+        [UIComponent("button1")]
+        protected Button button1;
+
+        [UIComponent("button2")]
+        protected Button button2;
+
+        [UIComponent("button3")]
+        protected Button button3;
+
+        [UIComponent("button4")]
+        protected Button button4;
+
+        [UIComponent("button5")]
+        protected Button button5;
+
+        [UIComponent("button6")]
+        protected Button button6;
+
+        [UIComponent("button7")]
+        protected Button button7;
+
+        [UIComponent("button8")]
+        protected Button button8;
+
+        [UIComponent("button9")]
+        protected Button button9;
+
+        [UIComponent("button10")]
+        protected Button button10;
+
+        #endregion
+
         [Inject]
-        private void Inject(UserIDSource userIDSource, List<ILeaderboardSource> leaderboardSources)
+        private void Inject(HitbloqProfileModalController profileModalController, UserIDSource userIDSource, List<ILeaderboardSource> leaderboardSources)
         {
+            this.profileModalController = profileModalController;
             this.userIDSource = userIDSource;
             this.leaderboardSources = leaderboardSources;
         }
@@ -72,21 +109,6 @@ namespace Hitbloq.UI
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
-            if (firstActivation)
-            {
-                List<LeaderboardTableView.ScoreData> placeholder = new List<LeaderboardTableView.ScoreData>();
-                for (int i = 0; i < 10; i++)
-                {
-                    placeholder.Add(new LeaderboardTableView.ScoreData(0, "", 0, false));
-                }
-
-                LeaderboardTableCell[] leaderboardTableCells = leaderboardTransform.GetComponentsInChildren<LeaderboardTableCell>(true);
-                foreach (var leaderboardTableCell in leaderboardTableCells)
-                {
-                    leaderboardTableCell.transform.Find("PlayerName").GetComponent<CurvedTextMeshPro>().richText = true;
-                }
-                Destroy(leaderboardTransform.Find("LoadingControl").Find("LoadingContainer").Find("Text").gameObject);
-            }
             PageNumber = 0;
         }
 
@@ -94,6 +116,11 @@ namespace Hitbloq.UI
         {
             List<LeaderboardTableView.ScoreData> scores = new List<LeaderboardTableView.ScoreData>();
             int myScorePos = -1;
+
+            foreach (var button in infoButtons)
+            {
+                button.gameObject.SetActive(false);
+            }
 
             if (leaderboardEntries == null || leaderboardEntries.Count == 0)
             {
@@ -104,14 +131,17 @@ namespace Hitbloq.UI
                 HitbloqUserID userID = await userIDSource.GetUserIDAsync();
                 int id = userID.id;
 
-                for(int i = 0; i < leaderboardEntries.Count; i++)
+                for(int i = 0; i < (leaderboardEntries.Count > 10 ? 10: leaderboardEntries.Count); i++)
                 {
                     scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].score, $"<size=85%>{leaderboardEntries[i].username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#aa6eff>{leaderboardEntries[i].cr[pool].ToString("F2")}<size=55%>cr</size></color>)</size>", 
                         leaderboardEntries[i].rank, false));
+
                     if (leaderboardEntries[i].userID == id)
                     {
                         myScorePos = i;
                     }
+
+                    infoButtons[i].gameObject.SetActive(true);
                 }
             }
 
@@ -120,6 +150,53 @@ namespace Hitbloq.UI
                 leaderboardTransform.Find("LoadingControl").gameObject.SetActive(false);
                 leaderboard.SetScores(scores, myScorePos);
             }
+        }
+
+        private void ChangeButtonScale(Button button, float scale)
+        {
+            Transform transform = button.transform;
+            Vector3 localScale = transform.localScale;
+            transform.localScale = localScale * scale;
+            infoButtons.Add(button);
+        }
+
+        public void InfoButtonClicked(int index)
+        {
+            if (index < leaderboardEntries.Count)
+            {
+                profileModalController.ShowModalForUser(transform, leaderboardEntries[index].userID, pool);
+            }
+        }
+
+        [UIAction("#post-parse")]
+        private void PostParse()
+        {
+            List<LeaderboardTableView.ScoreData> placeholder = new List<LeaderboardTableView.ScoreData>();
+            for (int i = 0; i < 10; i++)
+            {
+                placeholder.Add(new LeaderboardTableView.ScoreData(0, "", 0, false));
+            }
+
+            LeaderboardTableCell[] leaderboardTableCells = leaderboardTransform.GetComponentsInChildren<LeaderboardTableCell>(true);
+            foreach (var leaderboardTableCell in leaderboardTableCells)
+            {
+                leaderboardTableCell.transform.Find("PlayerName").GetComponent<CurvedTextMeshPro>().richText = true;
+            }
+            Destroy(leaderboardTransform.Find("LoadingControl").Find("LoadingContainer").Find("Text").gameObject);
+
+            infoButtons = new List<Button>();
+
+            // Change info button scales
+            ChangeButtonScale(button1, 0.425f);
+            ChangeButtonScale(button2, 0.425f);
+            ChangeButtonScale(button3, 0.425f);
+            ChangeButtonScale(button4, 0.425f);
+            ChangeButtonScale(button5, 0.425f);
+            ChangeButtonScale(button6, 0.425f);
+            ChangeButtonScale(button7, 0.425f);
+            ChangeButtonScale(button8, 0.425f);
+            ChangeButtonScale(button9, 0.425f);
+            ChangeButtonScale(button10, 0.425f);
         }
 
         [UIAction("cell-selected")]
@@ -145,6 +222,40 @@ namespace Hitbloq.UI
                 PageNumber++;
             }
         }
+
+        #region Info Buttons Clicked
+
+        [UIAction("b-1-click")]
+        private void B1Clicked() => InfoButtonClicked(0);
+
+        [UIAction("b-2-click")]
+        private void B2Clicked() => InfoButtonClicked(1);
+
+        [UIAction("b-3-click")]
+        private void B3Clicked() => InfoButtonClicked(2);
+
+        [UIAction("b-4-click")]
+        private void B4Clicked() => InfoButtonClicked(3);
+
+        [UIAction("b-5-click")]
+        private void B5Clicked() => InfoButtonClicked(4);
+
+        [UIAction("b-6-click")]
+        private void B6Clicked() => InfoButtonClicked(5);
+
+        [UIAction("b-7-click")]
+        private void B7Clicked() => InfoButtonClicked(6);
+
+        [UIAction("b-8-click")]
+        private void B8Clicked() => InfoButtonClicked(7);
+
+        [UIAction("b-9-click")]
+        private void B9Clicked() => InfoButtonClicked(8);
+
+        [UIAction("b-10-click")]
+        private void B10Clicked() => InfoButtonClicked(9);
+
+        #endregion
 
         public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo levelInfoEntry)
         {

@@ -53,6 +53,7 @@ namespace Hitbloq.Other
                 try
                 {
                     Sprite sprite = BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(imageBytes);
+                    sprite.texture.wrapMode = TextureWrapMode.Clamp;
                     cachedSprites[spriteURL] = sprite;
                     onCompletion?.Invoke(sprite);
                 }

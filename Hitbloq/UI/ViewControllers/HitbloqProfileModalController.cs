@@ -17,6 +17,7 @@ namespace Hitbloq.UI
     internal class HitbloqProfileModalController : INotifyPropertyChanged
     {
         private readonly ProfileSource profileSource;
+        private readonly RankInfoSource rankInfoSource;
         private readonly PoolInfoSource poolInfoSource;
         private readonly SpriteLoader spriteLoader;
 
@@ -98,19 +99,14 @@ namespace Hitbloq.UI
                         modalBackground.material = noGlowRoundEdge;
                     });
                 }
-                else
-                {
-                    modalBackground.sprite = roundRectSmall;
-                    modalBackground.color = originalModalColour;
-                    modalBackground.material = fogBG;
-                }
             }
         }
 
-        public HitbloqProfileModalController(PoolInfoSource poolInfoSource, ProfileSource profileSource, SpriteLoader spriteLoader)
+        public HitbloqProfileModalController(ProfileSource profileSource, RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource, SpriteLoader spriteLoader)
         {
-            this.poolInfoSource = poolInfoSource;
             this.profileSource = profileSource;
+            this.rankInfoSource = rankInfoSource;
+            this.poolInfoSource = poolInfoSource;
             this.spriteLoader = spriteLoader;
         }
 
@@ -146,6 +142,14 @@ namespace Hitbloq.UI
                 modalPosition = modalTransform.localPosition;
             }
             modalTransform.localPosition = modalPosition;
+
+            modalProfilePic.sprite = BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite;
+            modalBadge.sprite = BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite;
+
+            modalBackground.sprite = roundRectSmall;
+            modalBackground.color = originalModalColour;
+            modalBackground.material = fogBG;
+
             modalView.SetField("_animateParentCanvas", true);
         }
 
@@ -161,6 +165,22 @@ namespace Hitbloq.UI
             RankInfo = rankInfo;
             PoolInfo = await poolInfoSource.GetPoolInfoAsync(pool);
             HitbloqProfile = await profileSource.GetProfileForSelfAsync();
+
+            IsLoading = false;
+        }
+
+        internal async void ShowModalForUser(Transform parentTransform, int userID, string pool)
+        {
+            Parse(parentTransform);
+
+            parserParams.EmitEvent("close-modal");
+            parserParams.EmitEvent("open-modal");
+
+            IsLoading = true;
+
+            RankInfo = await rankInfoSource.GetRankInfoAsync(pool, userID);
+            PoolInfo = await poolInfoSource.GetPoolInfoAsync(pool);
+            HitbloqProfile = await profileSource.GetProfileAsync(userID);
 
             IsLoading = false;
         }
@@ -187,7 +207,7 @@ namespace Hitbloq.UI
         private string PoolName => $"{PoolInfo?.shownName}";
 
         [UIValue("rank")]
-        private string Rank => $"{RankInfo?.rank}";
+        private string Rank => $"#{RankInfo?.rank}";
 
         [UIValue("cr")]
         private string CR => $"{RankInfo?.cr}";

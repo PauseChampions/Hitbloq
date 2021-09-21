@@ -99,13 +99,6 @@
 		<EmbeddedResource Include="Images\*.png" />
 		<EmbeddedResource Include="UI\Views\*.bsml" />
 	</ItemGroup>
-	
-	<ItemGroup>
-	  <None Remove="UI\Views\HitbloqMainLeaderboardView.bsml" />
-	  <None Remove="UI\Views\HitbloqMainView.bsml" />
-	  <None Remove="UI\Views\HitbloqPanel.bsml" />
-	  <None Remove="UI\Views\HitbloqProfileModal.bsml" />
-	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="BeatSaberModdingTools.Tasks" Version="1.4.3">

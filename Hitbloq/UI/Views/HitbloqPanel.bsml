@@ -12,7 +12,7 @@
 	  </vertical>
 	  <vertical pref-width='70' pref-height='10' spacing='-1'>
 		  <clickable-text text='~pool-ranking-text' font-size='3.5' italics='true' rich-text='true' on-click='clicked-rank-text' />
-		  <dropdown-list-setting id='dropdown-list' text='Map Pool:' font-size='3.5' bold='true' italics='true' options='pools' on-change='pool-changed' size-delta-x='41' anchor-pos-x='-16' />
+		  <dropdown-list-setting id='dropdown-list' text='Map Pool' font-size='3.5' bold='true' italics='true' options='pools' on-change='pool-changed' size-delta-x='41' anchor-pos-x='-16' />
 	  </vertical>
   </horizontal>
 </bg>
