@@ -31,7 +31,9 @@ namespace Hitbloq.Installers
 
             Container.Bind<SpriteLoader>().AsSingle();
             Container.Bind<LeaderboardRefresher>().AsSingle();
-            Container.BindInterfacesTo<AutomaticRegistration>().AsSingle();
+
+            // Temporarily disabling due to bugs
+            //Container.BindInterfacesTo<AutomaticRegistration>().AsSingle();
         }
     }
 }
