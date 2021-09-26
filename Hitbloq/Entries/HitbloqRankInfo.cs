@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 
 namespace Hitbloq.Entries
 {
@@ -20,5 +22,11 @@ namespace Hitbloq.Entries
         public string username;
 
         public string TierURL => $"https://hitbloq.com/static/ranks/{tier}.png";
+
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+            username = Regex.Replace(username, "<[^>]*(>|$)", "");
+        }
     }
 }

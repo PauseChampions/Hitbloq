@@ -1,5 +1,7 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 
 namespace Hitbloq.Entries
 {
@@ -28,5 +30,11 @@ namespace Hitbloq.Entries
 
         [JsonProperty("cr")]
         public Dictionary<string, float> cr;
+
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+            username = Regex.Replace(username, "<[^>]*(>|$)", "");
+        }
     }
 }

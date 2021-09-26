@@ -1,4 +1,6 @@
 ﻿using Newtonsoft.Json;
+using System.Runtime.Serialization;
+using System.Text.RegularExpressions;
 
 namespace Hitbloq.Entries
 {
@@ -6,5 +8,11 @@ namespace Hitbloq.Entries
     {
         [JsonProperty("shown_name")]
         public string shownName;
+
+        [OnDeserialized]
+        private void OnDeserialized(StreamingContext context)
+        {
+            shownName = Regex.Replace(shownName, "<[^>]*(>|$)", "");
+        }
     }
 }
