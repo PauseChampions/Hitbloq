@@ -21,6 +21,7 @@ namespace Hitbloq.UI
     internal class HitbloqPanelController : BSMLAutomaticViewController, INotifyUserRegistered, IDifficultyBeatmapUpdater, IPoolUpdater
     {
         private HitbloqFlowCoordinator hitbloqFlowCoordinator;
+        private IVRPlatformHelper platformHelper;
         private RankInfoSource rankInfoSource;
         private PoolInfoSource poolInfoSource;
 
@@ -50,9 +51,10 @@ namespace Hitbloq.UI
         private readonly RectTransform dropDownListTransform;
 
         [Inject]
-        private void Inject(HitbloqFlowCoordinator hitbloqFlowCoordinator, RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource)
+        private void Inject(HitbloqFlowCoordinator hitbloqFlowCoordinator, IVRPlatformHelper platformHelper, RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource)
         {
             this.hitbloqFlowCoordinator = hitbloqFlowCoordinator;
+            this.platformHelper = platformHelper;
             this.rankInfoSource = rankInfoSource;
             this.poolInfoSource = poolInfoSource;
         }
@@ -84,6 +86,8 @@ namespace Hitbloq.UI
             dropDownListSetting.dropdown.SelectCellWithIdx(0);
             dropDownListSetting.values = pools.Count != 0 ? pools : new List<object> { "None" };
             dropDownListSetting.UpdateChoices();
+
+            dropDownListSetting.GetComponentInChildren<ScrollView>(true).SetField("_platformHelper", platformHelper);
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
