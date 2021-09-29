@@ -18,7 +18,7 @@ namespace Hitbloq.UI
 {
     [HotReload(RelativePathToLayout = @"..\Views\HitbloqPanel.bsml")]
     [ViewDefinition("Hitbloq.UI.Views.HitbloqPanel.bsml")]
-    internal class HitbloqPanelController : BSMLAutomaticViewController, INotifyUserRegistered, IDifficultyBeatmapUpdater, IPoolUpdater
+    internal class HitbloqPanelController : BSMLAutomaticViewController, INotifyUserRegistered, IDifficultyBeatmapUpdater, IPoolUpdater, ILeaderboardEntriesUpdater
     {
         private HitbloqFlowCoordinator hitbloqFlowCoordinator;
         private IVRPlatformHelper platformHelper;
@@ -27,13 +27,40 @@ namespace Hitbloq.UI
 
         private HitbloqRankInfo rankInfo;
         private List<string> poolNames;
+        private bool _cuteMode;
         private string _promptText;
         private bool _loadingActive;
 
+        private Sprite logoSprite;
+        private Sprite flushedSprite;
+
         private CancellationTokenSource poolInfoTokenSource;
         private CancellationTokenSource rankInfoTokenSource;
+
         public event Action<string> PoolChangedEvent;
         public event Action<HitbloqRankInfo, string> ClickedRankText;
+
+        private bool CuteMode
+        {
+            get => _cuteMode;
+            set
+            {
+                if (_cuteMode != value)
+                {
+                    if (flushedSprite == null)
+                    {
+                        flushedSprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.LogoFlushed.png");
+                    }
+
+                    if (logo != null)
+                    {
+                        logo.sprite = value ? flushedSprite : logoSprite;
+                        logo.GetComponent<HoverHint>().enabled = value;
+                    }
+                }
+                _cuteMode = value;
+            }
+        }
 
         [UIComponent("container")]
         private readonly Backgroundable container;
@@ -70,6 +97,10 @@ namespace Hitbloq.UI
             background.SetField("_gradient", true);
             background.SetField("_skew", 0.18f);
 
+            logoSprite = logo.sprite;
+            logo.sprite = CuteMode ? flushedSprite : logoSprite;
+            logo.GetComponent<HoverHint>().enabled = CuteMode;
+            
             logo.SetField("_skew", 0.18f);
             logo.SetVerticesDirty();
 
@@ -156,6 +187,11 @@ namespace Hitbloq.UI
             rankInfoTokenSource = new CancellationTokenSource();
             rankInfo = await rankInfoSource.GetRankInfoForSelfAsync(pool, rankInfoTokenSource.Token);
             NotifyPropertyChanged(nameof(PoolRankingText));
+        }
+
+        public void LeaderboardEntriesUpdated(List<Entries.LeaderboardEntry> leaderboardEntries)
+        {
+            CuteMode = leaderboardEntries.Exists(u => u.userID == 726);
         }
 
         [UIValue("prompt-text")]
