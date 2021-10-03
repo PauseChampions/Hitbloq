@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Zenject;
+using System.Linq;
 
 namespace Hitbloq.Sources
 {
@@ -27,7 +28,12 @@ namespace Hitbloq.Sources
                 try
                 {
                     // the list will be in a key called "ids" and will be a list string
-                    WebResponse webResponse = await siraClient.PostAsync($"https://hitbloq.com/api/tools/mass_ss_to_hitbloq", null, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                    // lol what
+                    var content = new Dictionary<string, string[]>
+                    {
+                        { "ids", friendIDs.ToArray<string>()}
+                    };
+                    WebResponse webResponse = await siraClient.PostAsync($"https://hitbloq.com/api/tools/mass_ss_to_hitbloq", content, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
                     Plugin.Log.Debug(webResponse.ContentToString());
                 }
                 catch (TaskCanceledException) { }
