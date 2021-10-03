@@ -17,6 +17,8 @@ namespace Hitbloq.Other
         private readonly SelectLevelCategoryViewController selectLevelCategoryViewController;
         private readonly IconSegmentedControl levelCategorySegmentedControl;
 
+        private CancellationTokenSource tokenSource;
+
         public PlaylistManagerIHardlyKnowHer(SiraClient siraClient, LevelFilteringNavigationController levelFilteringNavigationController, SelectLevelCategoryViewController selectLevelCategoryViewController)
         {
             this.siraClient = siraClient;
@@ -27,14 +29,24 @@ namespace Hitbloq.Other
 
         internal async void OpenPlaylist(string poolID, Action onDownloadComplete = null)
         {
+            tokenSource?.Dispose();
+            tokenSource = new CancellationTokenSource();
             IBeatmapLevelPack playlistToSelect = await GetPlaylist(poolID);
+
+            if (playlistToSelect == null)
+            {
+                return;
+            }
+
             onDownloadComplete?.Invoke();
             levelCategorySegmentedControl.SelectCellWithNumber(1);
             selectLevelCategoryViewController.LevelFilterCategoryIconSegmentedControlDidSelectCell(levelCategorySegmentedControl, 1);
             levelFilteringNavigationController.SelectAnnotatedBeatmapLevelCollection(playlistToSelect);
         }
 
-        private async Task<IBeatmapLevelPack> GetPlaylist(string poolID, CancellationToken? cancellationToken = null)
+        internal void CancelDownload() => tokenSource?.Cancel();
+
+        private async Task<IBeatmapLevelPack> GetPlaylist(string poolID)
         {
             string syncURL = $"https://hitbloq.com/static/hashlists/{poolID}.bplist";
 
@@ -50,13 +62,20 @@ namespace Hitbloq.Other
                 }
             }
 
-            WebResponse webResponse = await siraClient.GetAsync(syncURL, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-            Stream playlistStream = new MemoryStream(webResponse.ContentToBytes());
-            BeatSaberPlaylistsLib.Types.IPlaylist newPlaylist = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler?.Deserialize(playlistStream);
+            try
+            {
+                WebResponse webResponse = await siraClient.GetAsync(syncURL, tokenSource.Token).ConfigureAwait(false);
+                Stream playlistStream = new MemoryStream(webResponse.ContentToBytes());
+                BeatSaberPlaylistsLib.Types.IPlaylist newPlaylist = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler?.Deserialize(playlistStream);
 
-            BeatSaberPlaylistsLib.PlaylistManager playlistManager = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.CreateChildManager("Hitbloq");
-            playlistManager.StorePlaylist(newPlaylist);
-            return newPlaylist;
+                BeatSaberPlaylistsLib.PlaylistManager playlistManager = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.CreateChildManager("Hitbloq");
+                playlistManager.StorePlaylist(newPlaylist);
+                return newPlaylist;
+            }
+            catch (TaskCanceledException)
+            {
+                return null;
+            }
         }
     }
 }

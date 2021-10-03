@@ -40,6 +40,9 @@ namespace Hitbloq.UI
         private Sprite logoSprite;
         private Sprite flushedSprite;
 
+        private Color defaultHighlightColour;
+        private Color cancelHighlightColor;
+
         private CancellationTokenSource poolInfoTokenSource;
         private CancellationTokenSource rankInfoTokenSource;
 
@@ -82,6 +85,9 @@ namespace Hitbloq.UI
 
         [UIComponent("dropdown-list")]
         private readonly RectTransform dropDownListTransform;
+
+        [UIComponent("pm-image")]
+        private readonly ClickableImage playlistManagerImage;
 
         [Inject]
         private void Inject(MainFlowCoordinator mainFlowCoordinator, HitbloqFlowCoordinator hitbloqFlowCoordinator, [InjectOptional] PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer, 
@@ -128,6 +134,9 @@ namespace Hitbloq.UI
             dropDownListSetting.UpdateChoices();
 
             dropDownListSetting.GetComponentInChildren<ScrollView>(true).SetField("_platformHelper", platformHelper);
+
+            defaultHighlightColour = playlistManagerImage.HighlightColor;
+            cancelHighlightColor = Color.red;
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -159,8 +168,16 @@ namespace Hitbloq.UI
         {
             if (PlaylistManagerActive)
             {
-                DownloadingActive = true;
-                playlistManagerIHardlyKnowHer.OpenPlaylist(selectedPool, () => DownloadingActive = false);
+                if (DownloadingActive)
+                {
+                    playlistManagerIHardlyKnowHer.CancelDownload();
+                    DownloadingActive = false;
+                }
+                else
+                {
+                    DownloadingActive = true;
+                    playlistManagerIHardlyKnowHer.OpenPlaylist(selectedPool, () => DownloadingActive = false);
+                }
             }
         }
 
@@ -249,7 +266,9 @@ namespace Hitbloq.UI
             set
             {
                 _downloadingActive = value;
+                playlistManagerImage.HighlightColor = value ? cancelHighlightColor : defaultHighlightColour;
                 NotifyPropertyChanged(nameof(DownloadingActive));
+                NotifyPropertyChanged(nameof(PlaylistManagerHoverHint));
             }
         }
 
@@ -261,5 +280,8 @@ namespace Hitbloq.UI
 
         [UIValue("pm-active")]
         private bool PlaylistManagerActive => playlistManagerIHardlyKnowHer != null && mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf() is SinglePlayerLevelSelectionFlowCoordinator;
+
+        [UIValue("pm-hover")]
+        private string PlaylistManagerHoverHint => DownloadingActive ? "Cancel playlist download" : "Open the playlist for this pool.";
     }
 }
