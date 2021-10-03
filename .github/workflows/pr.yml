@@ -35,6 +35,15 @@ jobs:
                 name: LeaderboardCore
                 repo: rithik-b/LeaderboardCore
                 path: ${{github.workspace}}/Refs
+            - name: Download PlaylistManager
+              uses: dawidd6/action-download-artifact@v2.14.1
+              with:
+                github_token: ${{secrets.TOKEN}}
+                workflow: master.yml
+                workflow_conclusion: success
+                name: PlaylistManager
+                repo: rithik-b/PlaylistManager
+                path: ${{github.workspace}}/Refs
             - name: Build
               id: Build
               run: dotnet build --configuration Release
