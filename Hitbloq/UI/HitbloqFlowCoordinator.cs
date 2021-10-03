@@ -9,20 +9,22 @@ namespace Hitbloq.UI
         private FlowCoordinator mainFlowCoordinator;
         private FlowCoordinator parentFlowCoordinator;
         private ViewController hitbloqMainViewController;
+        private ViewController hitbloqInfoViewController;
 
         [Inject]
-        public void Construct(MainFlowCoordinator mainFlowCoordinator, HitbloqMainViewController hitbloqMainViewController)
+        public void Construct(MainFlowCoordinator mainFlowCoordinator, HitbloqMainViewController hitbloqMainViewController, HitbloqInfoViewController hitbloqInfoViewController)
         {
             this.mainFlowCoordinator = mainFlowCoordinator;
             parentFlowCoordinator = mainFlowCoordinator;
             this.hitbloqMainViewController = hitbloqMainViewController;
+            this.hitbloqInfoViewController = hitbloqInfoViewController;
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             SetTitle("Hitbloq");
             showBackButton = true;
-            ProvideInitialViewControllers(hitbloqMainViewController);
+            ProvideInitialViewControllers(hitbloqMainViewController, hitbloqInfoViewController);
         }
 
         protected override void BackButtonWasPressed(ViewController topViewController)
