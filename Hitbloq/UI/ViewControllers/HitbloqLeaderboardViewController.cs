@@ -265,6 +265,10 @@ namespace Hitbloq.UI
                 pool = levelInfoEntry.pools.Keys.First();
                 if (isActiveAndEnabled)
                 {
+                    foreach (ILeaderboardSource leaderboardSource in leaderboardSources)
+                    {
+                        leaderboardSource.ClearCache();
+                    }
                     PageNumber = 0;
                 }
             }

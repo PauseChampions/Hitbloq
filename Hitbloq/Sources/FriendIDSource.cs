@@ -4,7 +4,6 @@ using SiraUtil;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Zenject;
 using System.Linq;
 
 namespace Hitbloq.Sources

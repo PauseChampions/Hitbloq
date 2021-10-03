@@ -36,6 +36,10 @@ namespace Hitbloq.Sources
 
         public bool Scrollable => false;
 
+        public void ClearCache()
+        {
+        }
+
         public async Task<List<Entries.LeaderboardEntry>> GetScoresTask(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null, int page = 0)
         {
             HitbloqUserID userID = await userIDSource.GetUserIDAsync(cancellationToken);

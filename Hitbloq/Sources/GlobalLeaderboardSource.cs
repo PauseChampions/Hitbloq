@@ -33,6 +33,10 @@ namespace Hitbloq.Sources
 
         public bool Scrollable => true;
 
+        public void ClearCache()
+        {
+        }
+
         public async Task<List<Entries.LeaderboardEntry>> GetScoresTask(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null, int page = 0)
         {
             try
