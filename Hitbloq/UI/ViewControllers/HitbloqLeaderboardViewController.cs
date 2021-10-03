@@ -28,7 +28,7 @@ namespace Hitbloq.UI
 
         private IDifficultyBeatmap difficultyBeatmap;
         private List<Entries.LeaderboardEntry> leaderboardEntries;
-        private string pool;
+        private string selectedPool;
 
         private List<Button> infoButtons;
 
@@ -133,7 +133,7 @@ namespace Hitbloq.UI
 
                 for(int i = 0; i < (leaderboardEntries.Count > 10 ? 10: leaderboardEntries.Count); i++)
                 {
-                    scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].score, $"<size=85%>{leaderboardEntries[i].username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#aa6eff>{leaderboardEntries[i].cr[pool].ToString("F2")}<size=55%>cr</size></color>)</size>", 
+                    scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].score, $"<size=85%>{leaderboardEntries[i].username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#aa6eff>{leaderboardEntries[i].cr[selectedPool].ToString("F2")}<size=55%>cr</size></color>)</size>", 
                         leaderboardEntries[i].rank, false));
 
                     if (leaderboardEntries[i].userID == id)
@@ -164,7 +164,7 @@ namespace Hitbloq.UI
         {
             if (index < leaderboardEntries.Count)
             {
-                profileModalController.ShowModalForUser(transform, leaderboardEntries[index].userID, pool);
+                profileModalController.ShowModalForUser(transform, leaderboardEntries[index].userID, selectedPool);
             }
         }
 
@@ -262,7 +262,7 @@ namespace Hitbloq.UI
             if (levelInfoEntry != null)
             {
                 this.difficultyBeatmap = difficultyBeatmap;
-                pool = levelInfoEntry.pools.Keys.First();
+                selectedPool = levelInfoEntry.pools.Keys.First();
                 if (isActiveAndEnabled)
                 {
                     PageNumber = 0;
@@ -279,7 +279,7 @@ namespace Hitbloq.UI
 
         public void PoolUpdated(string pool)
         {
-            this.pool = pool;
+            this.selectedPool = pool;
             SetScores(leaderboardEntries);
         }
 

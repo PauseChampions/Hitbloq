@@ -4,6 +4,7 @@ using BeatSaberMarkupLanguage.Components.Settings;
 using BeatSaberMarkupLanguage.ViewControllers;
 using Hitbloq.Entries;
 using Hitbloq.Interfaces;
+using Hitbloq.Other;
 using Hitbloq.Sources;
 using HMUI;
 using IPA.Utilities;
@@ -20,19 +21,27 @@ namespace Hitbloq.UI
     [ViewDefinition("Hitbloq.UI.Views.HitbloqPanel.bsml")]
     internal class HitbloqPanelController : BSMLAutomaticViewController, INotifyUserRegistered, IDifficultyBeatmapUpdater, IPoolUpdater, ILeaderboardEntriesUpdater
     {
+        private MainFlowCoordinator mainFlowCoordinator;
         private HitbloqFlowCoordinator hitbloqFlowCoordinator;
+        private PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer;
         private IVRPlatformHelper platformHelper;
         private RankInfoSource rankInfoSource;
         private PoolInfoSource poolInfoSource;
 
         private HitbloqRankInfo rankInfo;
         private List<string> poolNames;
+        private string selectedPool;
+
         private bool _cuteMode;
         private string _promptText;
         private bool _loadingActive;
+        private bool _downloadingActive;
 
         private Sprite logoSprite;
         private Sprite flushedSprite;
+
+        private Color defaultHighlightColour;
+        private Color cancelHighlightColor;
 
         private CancellationTokenSource poolInfoTokenSource;
         private CancellationTokenSource rankInfoTokenSource;
@@ -77,10 +86,16 @@ namespace Hitbloq.UI
         [UIComponent("dropdown-list")]
         private readonly RectTransform dropDownListTransform;
 
+        [UIComponent("pm-image")]
+        private readonly ClickableImage playlistManagerImage;
+
         [Inject]
-        private void Inject(HitbloqFlowCoordinator hitbloqFlowCoordinator, IVRPlatformHelper platformHelper, RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource)
+        private void Inject(MainFlowCoordinator mainFlowCoordinator, HitbloqFlowCoordinator hitbloqFlowCoordinator, [InjectOptional] PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer, 
+            IVRPlatformHelper platformHelper, RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource)
         {
+            this.mainFlowCoordinator = mainFlowCoordinator;
             this.hitbloqFlowCoordinator = hitbloqFlowCoordinator;
+            this.playlistManagerIHardlyKnowHer = playlistManagerIHardlyKnowHer;
             this.platformHelper = platformHelper;
             this.rankInfoSource = rankInfoSource;
             this.poolInfoSource = poolInfoSource;
@@ -119,6 +134,15 @@ namespace Hitbloq.UI
             dropDownListSetting.UpdateChoices();
 
             dropDownListSetting.GetComponentInChildren<ScrollView>(true).SetField("_platformHelper", platformHelper);
+
+            defaultHighlightColour = playlistManagerImage.HighlightColor;
+            cancelHighlightColor = Color.red;
+        }
+
+        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        {
+            base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
+            NotifyPropertyChanged(nameof(PlaylistManagerActive));
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
@@ -137,6 +161,24 @@ namespace Hitbloq.UI
         private void RankTextClicked()
         {
             ClickedRankText?.Invoke(rankInfo, poolNames[dropDownListSetting.dropdown.selectedIndex]);
+        }
+
+        [UIAction("pm-click")]
+        private void PlaylistManagerClicked()
+        {
+            if (PlaylistManagerActive)
+            {
+                if (DownloadingActive)
+                {
+                    playlistManagerIHardlyKnowHer.CancelDownload();
+                    DownloadingActive = false;
+                }
+                else
+                {
+                    DownloadingActive = true;
+                    playlistManagerIHardlyKnowHer.OpenPlaylist(selectedPool, () => DownloadingActive = false);
+                }
+            }
         }
 
         public void UserRegistered()
@@ -185,6 +227,7 @@ namespace Hitbloq.UI
         {
             rankInfoTokenSource?.Cancel();
             rankInfoTokenSource = new CancellationTokenSource();
+            selectedPool = pool;
             rankInfo = await rankInfoSource.GetRankInfoForSelfAsync(pool, rankInfoTokenSource.Token);
             NotifyPropertyChanged(nameof(PoolRankingText));
         }
@@ -216,10 +259,29 @@ namespace Hitbloq.UI
             }
         }
 
+        [UIValue("downloading-active")]
+        private bool DownloadingActive
+        {
+            get => _downloadingActive;
+            set
+            {
+                _downloadingActive = value;
+                playlistManagerImage.HighlightColor = value ? cancelHighlightColor : defaultHighlightColour;
+                NotifyPropertyChanged(nameof(DownloadingActive));
+                NotifyPropertyChanged(nameof(PlaylistManagerHoverHint));
+            }
+        }
+
         [UIValue("pool-ranking-text")]
         private string PoolRankingText => $"<b>Pool Ranking:</b> #{rankInfo?.rank} <size=75%>(<color=#aa6eff>{rankInfo?.cr.ToString("F2")}cr</color>)";
 
         [UIValue("pools")]
         private List<object> pools = new List<object> { "None" };
+
+        [UIValue("pm-active")]
+        private bool PlaylistManagerActive => playlistManagerIHardlyKnowHer != null && mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf() is SinglePlayerLevelSelectionFlowCoordinator;
+
+        [UIValue("pm-hover")]
+        private string PlaylistManagerHoverHint => DownloadingActive ? "Cancel playlist download" : "Open the playlist for this pool.";
     }
 }

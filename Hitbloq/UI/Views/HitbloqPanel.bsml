@@ -15,4 +15,6 @@
 		  <dropdown-list-setting id='dropdown-list' text='Map Pool' font-size='3.5' bold='true' italics='true' options='pools' on-change='pool-changed' size-delta-x='41' anchor-pos-x='-16' />
 	  </vertical>
   </horizontal>
+  <clickable-image id='pm-image' src='Hitbloq.Images.PlaylistManager.png' hover-hint='~pm-hover' on-click='pm-click' active='~pm-active' preserve-aspect='true' size-delta-x='3' anchor-pos-x='32' anchor-pos-y='-1.5' />
+  <loading-indicator active='~downloading-active' preserve-aspect='true' pref-width='4' pref-height='4' anchor-pos-x='32' anchor-pos-y='-1.5' />
 </bg>

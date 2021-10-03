@@ -4,6 +4,8 @@ using Hitbloq.UI;
 using Hitbloq.Managers;
 using Hitbloq.Sources;
 using Hitbloq.Other;
+using IPA.Loader;
+using System;
 
 namespace Hitbloq.Installers
 {
@@ -31,6 +33,12 @@ namespace Hitbloq.Installers
 
             Container.Bind<SpriteLoader>().AsSingle();
             Container.Bind<LeaderboardRefresher>().AsSingle();
+
+            PluginMetadata playlistManager = PluginManager.GetPluginFromId("PlaylistManager");
+            if (playlistManager != null && playlistManager.Assembly.GetName().Version >= new Version("1.5.0"))
+            {
+                Container.Bind<PlaylistManagerIHardlyKnowHer>().AsSingle();
+            }
 
             // Temporarily disabling due to bugs
             //Container.BindInterfacesTo<AutomaticRegistration>().AsSingle();
