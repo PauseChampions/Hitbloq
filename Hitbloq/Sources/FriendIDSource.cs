@@ -9,10 +9,12 @@ using System.Linq;
 
 namespace Hitbloq.Sources
 {
-    internal class FriendIDSource : IInitializable
+    internal class FriendIDSource
     {
         private readonly SiraClient siraClient;
         private readonly IPlatformUserModel platformUserModel;
+
+        private List<HitbloqFriendID> hitbloqFriendIds;
 
         public FriendIDSource(SiraClient siraClient, IPlatformUserModel platformUserModel)
         {
@@ -20,10 +22,10 @@ namespace Hitbloq.Sources
             this.platformUserModel = platformUserModel;
         }
 
-        public async Task<HitbloqLevelInfo> GetLevelInfoAsync(CancellationToken? cancellationToken = null)
+        public async Task<List<HitbloqFriendID>> GetLevelInfoAsync(CancellationToken? cancellationToken = null)
         {
             IReadOnlyList<string> friendIDs = await platformUserModel.GetUserFriendsUserIds(true);
-            if (friendIDs != null)
+            if (friendIDs != null  && hitbloqFriendIds == null)
             {
                 try
                 {
@@ -34,16 +36,12 @@ namespace Hitbloq.Sources
                         { "ids", friendIDs.ToArray<string>()}
                     };
                     WebResponse webResponse = await siraClient.PostAsync($"https://hitbloq.com/api/tools/mass_ss_to_hitbloq", content, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                    Plugin.Log.Debug(webResponse.ContentToString());
+
+                    hitbloqFriendIds = Utils.ParseWebResponse<List<HitbloqFriendID>>(webResponse);
                 }
                 catch (TaskCanceledException) { }
             }
-            return null;
-        }
-
-        public async void Initialize()
-        {
-            await GetLevelInfoAsync();
+            return hitbloqFriendIds;
         }
     }
 }

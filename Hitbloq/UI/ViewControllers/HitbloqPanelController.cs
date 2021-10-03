@@ -191,7 +191,7 @@ namespace Hitbloq.UI
 
         public void LeaderboardEntriesUpdated(List<Entries.LeaderboardEntry> leaderboardEntries)
         {
-            CuteMode = leaderboardEntries.Exists(u => u.userID == 726);
+            CuteMode = leaderboardEntries != null && leaderboardEntries.Exists(u => u.userID == 726);
         }
 
         [UIValue("prompt-text")]
