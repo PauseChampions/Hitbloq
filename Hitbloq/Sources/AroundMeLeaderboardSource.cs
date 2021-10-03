@@ -14,6 +14,8 @@ namespace Hitbloq.Sources
         private readonly UserIDSource userIDSource;
         private Sprite _icon;
 
+        private List<Entries.LeaderboardEntry> cachedEntries;
+
         public AroundMeLeaderboardSource(SiraClient siraClient, UserIDSource userIDSource)
         {
             this.siraClient = siraClient;
@@ -36,26 +38,27 @@ namespace Hitbloq.Sources
 
         public bool Scrollable => false;
 
-        public void ClearCache()
-        {
-        }
-
         public async Task<List<Entries.LeaderboardEntry>> GetScoresTask(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null, int page = 0)
         {
-            HitbloqUserID userID = await userIDSource.GetUserIDAsync(cancellationToken);
-            if (userID == null)
+            if (cachedEntries == null)
             {
-                return null;
-            }
-            int id = userID.id;
+                HitbloqUserID userID = await userIDSource.GetUserIDAsync(cancellationToken);
+                if (userID == null)
+                {
+                    return null;
+                }
+                int id = userID.id;
 
-            try
-            {
-                WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/nearby_scores/{id}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                return Utils.ParseWebResponse<List<Entries.LeaderboardEntry>>(webResponse);
+                try
+                {
+                    WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/nearby_scores/{id}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                    cachedEntries = Utils.ParseWebResponse<List<Entries.LeaderboardEntry>>(webResponse);
+                }
+                catch (TaskCanceledException) { }
             }
-            catch (TaskCanceledException) { }
-            return null;
+            return cachedEntries;
         }
+
+        public void ClearCache() => cachedEntries = null;
     }
 }

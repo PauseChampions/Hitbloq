@@ -72,28 +72,27 @@ namespace Hitbloq.Sources
                     List<Entries.LeaderboardEntry> leaderboardEntries = Utils.ParseWebResponse<List<Entries.LeaderboardEntry>>(webResponse);
                     cachedEntries = new List<List<Entries.LeaderboardEntry>>();
 
-                    // Splitting entries into lists of 10
-                    int p = 0;
-                    cachedEntries.Add(new List<Entries.LeaderboardEntry>());
-                    for (int i = 0; i < leaderboardEntries.Count; i++)
+                    if (leaderboardEntries != null)
                     {
-                        if (cachedEntries[p].Count == 10)
+                        // Splitting entries into lists of 10
+                        int p = 0;
+                        cachedEntries.Add(new List<Entries.LeaderboardEntry>());
+                        for (int i = 0; i < leaderboardEntries.Count; i++)
                         {
-                            cachedEntries.Add(new List<Entries.LeaderboardEntry>());
-                            p++;
+                            if (cachedEntries[p].Count == 10)
+                            {
+                                cachedEntries.Add(new List<Entries.LeaderboardEntry>());
+                                p++;
+                            }
+                            cachedEntries[p].Add(leaderboardEntries[i]);
                         }
-                        cachedEntries[p].Add(leaderboardEntries[i]);
                     }
                 }
                 catch (TaskCanceledException) { }
             }
-            
-            return cachedEntries[page];
+            return page < cachedEntries.Count ? cachedEntries[page] : null;
         }
 
-        public void ClearCache()
-        {
-            cachedEntries = null;
-        }
+        public void ClearCache() => cachedEntries = null;
     }
 }

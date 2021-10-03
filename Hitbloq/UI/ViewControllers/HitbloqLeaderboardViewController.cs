@@ -109,6 +109,10 @@ namespace Hitbloq.UI
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
+            foreach (ILeaderboardSource leaderboardSource in leaderboardSources)
+            {
+                leaderboardSource.ClearCache();
+            }
             PageNumber = 0;
         }
 
