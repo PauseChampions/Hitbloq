@@ -11,5 +11,6 @@ namespace Hitbloq.Sources
         public Sprite Icon { get; }
         public Task<List<Entries.LeaderboardEntry>> GetScoresTask(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null, int page = 0);
         public bool Scrollable { get; }
+        public void ClearCache();
     }
 }

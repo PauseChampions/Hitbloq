@@ -24,12 +24,14 @@ namespace Hitbloq.Installers
             Container.BindInterfacesTo<HitbloqManager>().AsSingle();
 
             Container.Bind<UserIDSource>().AsSingle();
+            Container.Bind<FriendIDSource>().AsSingle();
             Container.Bind<ProfileSource>().AsSingle();
             Container.Bind<RankInfoSource>().AsSingle();
             Container.Bind<LevelInfoSource>().AsSingle();
             Container.Bind<PoolInfoSource>().AsSingle();
             Container.BindInterfacesTo<GlobalLeaderboardSource>().AsSingle();
             Container.BindInterfacesTo<AroundMeLeaderboardSource>().AsSingle();
+            Container.BindInterfacesTo<FriendsLeaderboardSource>().AsSingle();
 
             Container.Bind<SpriteLoader>().AsSingle();
             Container.Bind<LeaderboardRefresher>().AsSingle();

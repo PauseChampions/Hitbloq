@@ -12,6 +12,8 @@ namespace Hitbloq.Sources
         private readonly SiraClient siraClient;
         private Sprite _icon;
 
+        private List<List<Entries.LeaderboardEntry>> cachedEntries;
+
         public GlobalLeaderboardSource(SiraClient siraClient)
         {
             this.siraClient = siraClient;
@@ -35,13 +37,18 @@ namespace Hitbloq.Sources
 
         public async Task<List<Entries.LeaderboardEntry>> GetScoresTask(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null, int page = 0)
         {
-            try
+            if (cachedEntries.Count < page + 1)
             {
-                WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/scores_extended/{page}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                return Utils.ParseWebResponse<List<Entries.LeaderboardEntry>>(webResponse);
+                try
+                {
+                    WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/scores_extended/{page}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                    cachedEntries.Add(Utils.ParseWebResponse<List<Entries.LeaderboardEntry>>(webResponse));
+                }
+                catch (TaskCanceledException) { }
             }
-            catch (TaskCanceledException) { }
-            return null;
+            return page < cachedEntries.Count ? cachedEntries[page] : null;
         }
+
+        public void ClearCache() => cachedEntries = new List<List<Entries.LeaderboardEntry>>();
     }
 }
