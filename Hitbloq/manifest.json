@@ -3,7 +3,7 @@
   "id": "Hitbloq",
   "name": "Hitbloq",
   "author": "Hitbloq",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Hitbloq offers a unique competitive experience for Beat Saber through its use of map pools and the relative ranking algorithm.",
   "gameVersion": "1.18.0",
     "dependsOn": {
