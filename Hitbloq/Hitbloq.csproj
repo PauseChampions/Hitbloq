@@ -31,7 +31,7 @@
 		  <Private>False</Private>
 		</Reference>
 		<Reference Include="BeatSaberPlaylistsLib">
-		  <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Libs\BeatSaberPlaylistsLib.dll</HintPath>
+		  <HintPath>$(BeatSaberDir)\Libs\BeatSaberPlaylistsLib.dll</HintPath>
 		  <Private>False</Private>
 		</Reference>
 		<Reference Include="LeaderboardCore">
@@ -39,7 +39,7 @@
 		  <Private>False</Private>
 		</Reference>
 		<Reference Include="PlaylistManager">
-		  <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\Beat Saber\Plugins\PlaylistManager.dll</HintPath>
+		  <HintPath>$(BeatSaberDir)\Plugins\PlaylistManager.dll</HintPath>
 		  <Private>False</Private>
 		</Reference>
 		<Reference Include="Unity.TextMeshPro">
