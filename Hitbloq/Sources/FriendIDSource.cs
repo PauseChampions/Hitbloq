@@ -24,6 +24,13 @@ namespace Hitbloq.Sources
 
         public async Task<List<int>> GetFriendIDsAsync(CancellationToken? cancellationToken = null)
         {
+            await GetPlatformFriendIDsAsync(cancellationToken);
+            return hitbloqPlatformFriendIds.Union(PluginConfig.Instance.Friends).ToList();
+        }
+
+
+        public async Task<HashSet<int>> GetPlatformFriendIDsAsync(CancellationToken? cancellationToken = null)
+        {
             if (hitbloqPlatformFriendIds == null)
             {
                 IReadOnlyList<string> friendIDs = await platformUserModel.GetUserFriendsUserIds(true);
@@ -44,8 +51,7 @@ namespace Hitbloq.Sources
                     catch (TaskCanceledException) { }
                 }
             }
-            PluginConfig.Instance.Changed();
-            return hitbloqPlatformFriendIds.Union(PluginConfig.Instance.Friends).ToList();
+            return hitbloqPlatformFriendIds;
         }
     }
 }
