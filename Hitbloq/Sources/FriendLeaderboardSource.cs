@@ -46,7 +46,7 @@ namespace Hitbloq.Sources
             if (cachedEntries == null)
             {
                 HitbloqUserID userID = await userIDSource.GetUserIDAsync(cancellationToken);
-                List<HitbloqFriendID> friendIDs = await friendIDSource.GetLevelInfoAsync(cancellationToken);
+                List<int> friendIDs = await friendIDSource.GetFriendIDsAsync(cancellationToken);
 
                 if (friendIDs == null)
                 {
@@ -57,7 +57,7 @@ namespace Hitbloq.Sources
                 ids[0] = userID.id;
                 for (int i = 0; i < friendIDs.Count; i++)
                 {
-                    ids[i + 1] = friendIDs[i].id;
+                    ids[i + 1] = friendIDs[i];
                 }
 
                 try

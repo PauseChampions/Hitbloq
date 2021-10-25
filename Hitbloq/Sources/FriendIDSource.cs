@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
+using Hitbloq.Configuration;
 
 namespace Hitbloq.Sources
 {
@@ -13,7 +14,7 @@ namespace Hitbloq.Sources
         private readonly SiraClient siraClient;
         private readonly IPlatformUserModel platformUserModel;
 
-        private List<HitbloqFriendID> hitbloqFriendIds;
+        private HashSet<int> hitbloqPlatformFriendIds;
 
         public FriendIDSource(SiraClient siraClient, IPlatformUserModel platformUserModel)
         {
@@ -21,26 +22,36 @@ namespace Hitbloq.Sources
             this.platformUserModel = platformUserModel;
         }
 
-        public async Task<List<HitbloqFriendID>> GetLevelInfoAsync(CancellationToken? cancellationToken = null)
+        public async Task<List<int>> GetFriendIDsAsync(CancellationToken? cancellationToken = null)
         {
-            IReadOnlyList<string> friendIDs = await platformUserModel.GetUserFriendsUserIds(true);
-            if (friendIDs != null  && hitbloqFriendIds == null)
+            await GetPlatformFriendIDsAsync(cancellationToken);
+            return hitbloqPlatformFriendIds.Union(PluginConfig.Instance.Friends).ToList();
+        }
+
+
+        public async Task<HashSet<int>> GetPlatformFriendIDsAsync(CancellationToken? cancellationToken = null)
+        {
+            if (hitbloqPlatformFriendIds == null)
             {
-                try
+                IReadOnlyList<string> friendIDs = await platformUserModel.GetUserFriendsUserIds(true);
+                if (friendIDs != null)
                 {
-                    // the list will be in a key called "ids" and will be a list string
-                    // lol what
-                    var content = new Dictionary<string, string[]>
+                    try
+                    {
+                        // the list will be in a key called "ids" and will be a list string
+                        // lol what
+                        var content = new Dictionary<string, string[]>
                     {
                         { "ids", friendIDs.ToArray<string>()}
                     };
-                    WebResponse webResponse = await siraClient.PostAsync($"https://hitbloq.com/api/tools/mass_ss_to_hitbloq", content, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                        WebResponse webResponse = await siraClient.PostAsync($"https://hitbloq.com/api/tools/mass_ss_to_hitbloq", content, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
 
-                    hitbloqFriendIds = Utils.ParseWebResponse<List<HitbloqFriendID>>(webResponse);
+                        hitbloqPlatformFriendIds = Utils.ParseWebResponse<List<HitbloqFriendID>>(webResponse).Select(x => x.id).ToHashSet();
+                    }
+                    catch (TaskCanceledException) { }
                 }
-                catch (TaskCanceledException) { }
             }
-            return hitbloqFriendIds;
+            return hitbloqPlatformFriendIds;
         }
     }
 }
