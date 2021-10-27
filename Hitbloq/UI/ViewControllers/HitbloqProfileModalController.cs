@@ -22,6 +22,7 @@ namespace Hitbloq.UI
         private readonly UserIDSource userIDSource;
         private readonly ProfileSource profileSource;
         private readonly FriendIDSource friendIDSource;
+        private readonly FriendsLeaderboardSource friendsLeaderboardSource;
         private readonly RankInfoSource rankInfoSource;
         private readonly PoolInfoSource poolInfoSource;
         private readonly SpriteLoader spriteLoader;
@@ -140,12 +141,13 @@ namespace Hitbloq.UI
         }
 
         public HitbloqProfileModalController(IPlatformUserModel platformUserModel, UserIDSource userIDSource, ProfileSource profileSource, FriendIDSource friendIDSource,
-            RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource, SpriteLoader spriteLoader)
+            FriendsLeaderboardSource friendsLeaderboardSource, RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource, SpriteLoader spriteLoader)
         {
             this.platformUserModel = platformUserModel;
             this.userIDSource = userIDSource;
             this.profileSource = profileSource;
             this.friendIDSource = friendIDSource;
+            this.friendsLeaderboardSource = friendsLeaderboardSource;
             this.rankInfoSource = rankInfoSource;
             this.poolInfoSource = poolInfoSource;
             this.spriteLoader = spriteLoader;
@@ -262,6 +264,7 @@ namespace Hitbloq.UI
                 PluginConfig.Instance.Changed();
             }
             IsFriend = !IsFriend;
+            friendsLeaderboardSource.ClearCache();
         }
 
         [UIValue("is-loading")]
