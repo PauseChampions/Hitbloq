@@ -10,10 +10,7 @@
 		</vertical>
 		<vertical  horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='40' pref-height='40' pad-left='3'>
 			<vertical vertical-fit='PreferredSize' pref-height='9' pad-right='3' pad-bottom='2'>
-				<horizontal spacing='-5'>
-					<text text='~username' italics='true' font-size='5' align='Center' />
-					<icon-button id='add-friend' hover-hint='~add-friend-hover' interactable='~add-friend-interactable' on-click='add-friend-click' />
-				</horizontal>
+				<text text='~username' italics='true' font-size='5' align='Center' />
 				<text text='~pool-name' italics='true' font-size='3' align='Center' color='#a3a3a3'/>
 			</vertical>
 			<vertical pad-right='4'>
@@ -28,4 +25,5 @@
 			</vertical>
 		</vertical>
 	</horizontal>
+	<icon-button id='add-friend' hover-hint='~add-friend-hover' interactable='~add-friend-interactable' on-click='add-friend-click' anchor-pos-x='76' anchor-pos-y='-3' />
 </modal>
