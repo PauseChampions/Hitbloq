@@ -57,7 +57,7 @@ namespace Hitbloq.Managers
             standardLevelDetailViewController.didChangeContentEvent += OnContentChanged;
             hitbloqLeaderboardViewController.PageRequested += OnPageRequested;
             hitbloqPanelController.PoolChangedEvent += OnPoolChanged;
-            hitbloqPanelController.ClickedRankText += OnRankTextClicked;
+            hitbloqPanelController.RankTextClickedEvent += OnRankTextClicked;
         }
 
         public void Dispose()
@@ -67,7 +67,7 @@ namespace Hitbloq.Managers
             standardLevelDetailViewController.didChangeContentEvent -= OnContentChanged;
             hitbloqLeaderboardViewController.PageRequested -= OnPageRequested;
             hitbloqPanelController.PoolChangedEvent -= OnPoolChanged;
-            hitbloqPanelController.ClickedRankText -= OnRankTextClicked;
+            hitbloqPanelController.RankTextClickedEvent -= OnRankTextClicked;
         }
 
         public async void OnScoreUploaded()

@@ -8,18 +8,20 @@ using Hitbloq.Other;
 using Hitbloq.Sources;
 using HMUI;
 using IPA.Utilities;
+using SiraUtil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using Zenject;
 
 namespace Hitbloq.UI
 {
     [HotReload(RelativePathToLayout = @"..\Views\HitbloqPanel.bsml")]
     [ViewDefinition("Hitbloq.UI.Views.HitbloqPanel.bsml")]
-    internal class HitbloqPanelController : BSMLAutomaticViewController, INotifyUserRegistered, IDifficultyBeatmapUpdater, IPoolUpdater, ILeaderboardEntriesUpdater
+    internal class HitbloqPanelController : BSMLAutomaticViewController, IDisposable, INotifyUserRegistered, IDifficultyBeatmapUpdater, IPoolUpdater, ILeaderboardEntriesUpdater
     {
         private MainFlowCoordinator mainFlowCoordinator;
         private HitbloqFlowCoordinator hitbloqFlowCoordinator;
@@ -27,6 +29,7 @@ namespace Hitbloq.UI
         private IVRPlatformHelper platformHelper;
         private RankInfoSource rankInfoSource;
         private PoolInfoSource poolInfoSource;
+        private EventSource eventSource;
 
         private HitbloqRankInfo rankInfo;
         private List<string> poolNames;
@@ -39,6 +42,7 @@ namespace Hitbloq.UI
 
         private Sprite logoSprite;
         private Sprite flushedSprite;
+        private string spriteHoverText = "";
 
         private Color defaultHighlightColour;
         private Color cancelHighlightColor;
@@ -47,7 +51,8 @@ namespace Hitbloq.UI
         private CancellationTokenSource rankInfoTokenSource;
 
         public event Action<string> PoolChangedEvent;
-        public event Action<HitbloqRankInfo, string> ClickedRankText;
+        public event Action<HitbloqRankInfo, string> RankTextClickedEvent;
+        public event Action LogoClickedEvent;
 
         private bool CuteMode
         {
@@ -56,15 +61,12 @@ namespace Hitbloq.UI
             {
                 if (_cuteMode != value)
                 {
-                    if (flushedSprite == null)
-                    {
-                        flushedSprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.LogoFlushed.png");
-                    }
-
                     if (logo != null)
                     {
                         logo.sprite = value ? flushedSprite : logoSprite;
-                        logo.GetComponent<HoverHint>().enabled = value;
+                        HoverHint hoverHint = logo.GetComponent<HoverHint>();
+                        hoverHint.text = value ? "Pink Cute!" : spriteHoverText;
+                        hoverHint.enabled = value || !string.IsNullOrEmpty(spriteHoverText);
                     }
                 }
                 _cuteMode = value;
@@ -75,7 +77,7 @@ namespace Hitbloq.UI
         private readonly Backgroundable container;
 
         [UIComponent("hitbloq-logo")]
-        private readonly ImageView logo;
+        private ImageView logo;
 
         [UIComponent("separator")]
         private readonly ImageView separator;
@@ -91,7 +93,7 @@ namespace Hitbloq.UI
 
         [Inject]
         private void Inject(MainFlowCoordinator mainFlowCoordinator, HitbloqFlowCoordinator hitbloqFlowCoordinator, [InjectOptional] PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer, 
-            IVRPlatformHelper platformHelper, RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource)
+            IVRPlatformHelper platformHelper, RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource, EventSource eventSource)
         {
             this.mainFlowCoordinator = mainFlowCoordinator;
             this.hitbloqFlowCoordinator = hitbloqFlowCoordinator;
@@ -99,10 +101,11 @@ namespace Hitbloq.UI
             this.platformHelper = platformHelper;
             this.rankInfoSource = rankInfoSource;
             this.poolInfoSource = poolInfoSource;
+            this.eventSource = eventSource;
         }
 
         [UIAction("#post-parse")]
-        private void PostParse()
+        private async void PostParse()
         {
             container.background.material = BeatSaberMarkupLanguage.Utilities.ImageResources.NoGlowMat;
             ImageView background = container.background as ImageView;
@@ -113,9 +116,10 @@ namespace Hitbloq.UI
             background.SetField("_skew", 0.18f);
 
             logoSprite = logo.sprite;
+            flushedSprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.LogoFlushed.png");
             logo.sprite = CuteMode ? flushedSprite : logoSprite;
             logo.GetComponent<HoverHint>().enabled = CuteMode;
-            
+
             logo.SetField("_skew", 0.18f);
             logo.SetVerticesDirty();
 
@@ -137,6 +141,32 @@ namespace Hitbloq.UI
 
             defaultHighlightColour = playlistManagerImage.HighlightColor;
             cancelHighlightColor = Color.red;
+
+            HitbloqEvent hitbloqEvent = await eventSource.GetEventAsync();
+            if (hitbloqEvent == null || hitbloqEvent.id == -1)
+            {
+                return;
+            }
+
+            ClickableImage clickableLogo = logo.Upgrade<ImageView, ClickableImage>();
+            logo = clickableLogo;
+            logoSprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.LogoEvent.png");
+            logo.sprite = CuteMode ? flushedSprite : logoSprite;
+
+            spriteHoverText = "Show event info";
+            HoverHint hoverHint = logo.GetComponent<HoverHint>();
+            hoverHint.text = CuteMode ? "Pink Cute!" : spriteHoverText;
+            hoverHint.enabled = CuteMode || !string.IsNullOrEmpty(spriteHoverText);
+
+            clickableLogo.OnClickEvent += LogoClicked;
+        }
+
+        public void Dispose()
+        {
+            if (logo is ClickableImage clickableLogo)
+            {
+                clickableLogo.OnClickEvent -= LogoClicked;
+            }
         }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
@@ -160,7 +190,7 @@ namespace Hitbloq.UI
         [UIAction("clicked-rank-text")]
         private void RankTextClicked()
         {
-            ClickedRankText?.Invoke(rankInfo, poolNames[dropDownListSetting.dropdown.selectedIndex]);
+            RankTextClickedEvent?.Invoke(rankInfo, poolNames[dropDownListSetting.dropdown.selectedIndex]);
         }
 
         [UIAction("pm-click")]
@@ -180,6 +210,8 @@ namespace Hitbloq.UI
                 }
             }
         }
+
+        private void LogoClicked(PointerEventData pointerEventData) => LogoClickedEvent?.Invoke();
 
         public void UserRegistered()
         {
