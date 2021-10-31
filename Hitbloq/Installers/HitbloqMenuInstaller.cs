@@ -29,6 +29,7 @@ namespace Hitbloq.Installers
             Container.Bind<RankInfoSource>().AsSingle();
             Container.Bind<LevelInfoSource>().AsSingle();
             Container.Bind<PoolInfoSource>().AsSingle();
+            Container.Bind<EventSource>().AsSingle();
             Container.BindInterfacesTo<GlobalLeaderboardSource>().AsSingle();
             Container.BindInterfacesTo<AroundMeLeaderboardSource>().AsSingle();
             Container.BindInterfacesAndSelfTo<FriendsLeaderboardSource>().AsSingle();

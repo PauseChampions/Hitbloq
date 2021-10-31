@@ -130,7 +130,7 @@ namespace Hitbloq.Managers
         {
             leaderboardTokenSource?.Cancel();
             leaderboardTokenSource = new CancellationTokenSource();
-            List<Entries.LeaderboardEntry> leaderboardEntries = await leaderboardSource.GetScoresTask(difficultyBeatmap, leaderboardTokenSource.Token, page);
+            List<HitbloqLeaderboardEntry> leaderboardEntries = await leaderboardSource.GetScoresTask(difficultyBeatmap, leaderboardTokenSource.Token, page);
 
             if (leaderboardEntries != null)
             {
