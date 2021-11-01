@@ -2,6 +2,7 @@
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Components.Settings;
 using BeatSaberMarkupLanguage.ViewControllers;
+using Hitbloq.Configuration;
 using Hitbloq.Entries;
 using Hitbloq.Interfaces;
 using Hitbloq.Other;
@@ -143,22 +144,20 @@ namespace Hitbloq.UI
             cancelHighlightColor = Color.red;
 
             HitbloqEvent hitbloqEvent = await eventSource.GetEventAsync();
-            if (hitbloqEvent == null || hitbloqEvent.id == -1)
+            if (hitbloqEvent != null && hitbloqEvent.id != -1)
             {
-                return;
+                ClickableImage clickableLogo = logo.Upgrade<ImageView, ClickableImage>();
+                logo = clickableLogo;
+                logoSprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.LogoEvent.png");
+                logo.sprite = CuteMode ? flushedSprite : logoSprite;
+
+                spriteHoverText = "Show event info";
+                HoverHint hoverHint = logo.GetComponent<HoverHint>();
+                hoverHint.text = CuteMode ? "Pink Cute!" : spriteHoverText;
+                hoverHint.enabled = CuteMode || !string.IsNullOrEmpty(spriteHoverText);
+
+                clickableLogo.OnClickEvent += LogoClicked;
             }
-
-            ClickableImage clickableLogo = logo.Upgrade<ImageView, ClickableImage>();
-            logo = clickableLogo;
-            logoSprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.LogoEvent.png");
-            logo.sprite = CuteMode ? flushedSprite : logoSprite;
-
-            spriteHoverText = "Show event info";
-            HoverHint hoverHint = logo.GetComponent<HoverHint>();
-            hoverHint.text = CuteMode ? "Pink Cute!" : spriteHoverText;
-            hoverHint.enabled = CuteMode || !string.IsNullOrEmpty(spriteHoverText);
-
-            clickableLogo.OnClickEvent += LogoClicked;
         }
 
         public void Dispose()
@@ -169,10 +168,24 @@ namespace Hitbloq.UI
             }
         }
 
-        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        protected override async void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
             NotifyPropertyChanged(nameof(PlaylistManagerActive));
+
+            if (firstActivation)
+            {
+                HitbloqEvent hitbloqEvent = await eventSource.GetEventAsync();
+                if (hitbloqEvent != null && hitbloqEvent.id != -1)
+                {
+                    if (!PluginConfig.Instance.ViewedEvents.Contains(hitbloqEvent.id))
+                    {
+                        LogoClickedEvent?.Invoke();
+                        PluginConfig.Instance.ViewedEvents.Add(hitbloqEvent.id);
+                        PluginConfig.Instance.Changed();
+                    }
+                }
+            }
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
