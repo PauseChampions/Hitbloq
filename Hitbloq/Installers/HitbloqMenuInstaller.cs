@@ -17,6 +17,7 @@ namespace Hitbloq.Installers
             Container.BindInterfacesAndSelfTo<HitbloqPanelController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<HitbloqMainViewController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<HitbloqProfileModalController>().AsSingle();
+            Container.BindInterfacesAndSelfTo<HitbloqEventModalViewController>().AsSingle();
 
             Container.BindInterfacesAndSelfTo<HitbloqFlowCoordinator>().FromNewComponentOnRoot().AsSingle();
 

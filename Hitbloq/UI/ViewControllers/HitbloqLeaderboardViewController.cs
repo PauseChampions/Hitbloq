@@ -1,4 +1,5 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Parser;
 using BeatSaberMarkupLanguage.ViewControllers;
 using Hitbloq.Entries;
 using Hitbloq.Interfaces;
@@ -59,10 +60,13 @@ namespace Hitbloq.UI
         }
 
         [UIComponent("leaderboard")]
-        private Transform leaderboardTransform;
+        private readonly Transform leaderboardTransform;
 
         [UIComponent("leaderboard")]
-        internal LeaderboardTableView leaderboard;
+        private readonly LeaderboardTableView leaderboard;
+
+        [UIParams]
+        private readonly BSMLParserParams parserParams;
 
         #region Info Buttons
 

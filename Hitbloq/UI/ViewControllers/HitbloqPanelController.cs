@@ -198,16 +198,16 @@ namespace Hitbloq.UI
         {
             if (PlaylistManagerActive)
             {
+                DownloadingActive = playlistManagerIHardlyKnowHer.IsDownloading;
                 if (DownloadingActive)
                 {
                     playlistManagerIHardlyKnowHer.CancelDownload();
-                    DownloadingActive = false;
                 }
                 else
                 {
-                    DownloadingActive = true;
                     playlistManagerIHardlyKnowHer.OpenPlaylist(selectedPool, () => DownloadingActive = false);
                 }
+                DownloadingActive = playlistManagerIHardlyKnowHer.IsDownloading;
             }
         }
 
