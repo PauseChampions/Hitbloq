@@ -7,13 +7,13 @@ namespace Hitbloq.Entries
         [JsonProperty("id")]
         public int id;
 
-        [JsonProperty("title", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("urt_title", NullValueHandling = NullValueHandling.Ignore)]
         public string title;
 
         [JsonProperty("image", NullValueHandling = NullValueHandling.Ignore)]
         public string image;
 
-        [JsonProperty("description", NullValueHandling = NullValueHandling.Ignore)]
+        [JsonProperty("urt_description", NullValueHandling = NullValueHandling.Ignore)]
         public string description;
 
         [JsonProperty("pool", NullValueHandling = NullValueHandling.Ignore)]
