@@ -55,22 +55,22 @@ namespace Hitbloq.UI
         private ImageView modalBackground;
 
         [UIComponent("modal")]
-        private ModalView modalView;
+        private readonly ModalView modalView;
 
         [UIComponent("modal")]
         private readonly RectTransform modalTransform;
 
         [UIComponent("modal-profile-pic")]
-        private ImageView modalProfilePic;
+        private readonly ImageView modalProfilePic;
 
         [UIComponent("modal-badge")]
-        private ImageView modalBadge;
+        private readonly ImageView modalBadge;
 
         [UIComponent("add-friend")]
-        private ButtonIconImage addFriendButton;
+        private readonly ButtonIconImage addFriendButton;
 
         [UIComponent("modal-info-vertical")]
-        private Backgroundable modalInfoVertical;
+        private readonly Backgroundable modalInfoVertical;
 
         [UIParams]
         private readonly BSMLParserParams parserParams;

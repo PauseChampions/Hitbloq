@@ -17,6 +17,7 @@ namespace Hitbloq.Managers
         private readonly HitbloqLeaderboardViewController hitbloqLeaderboardViewController;
         private readonly HitbloqPanelController hitbloqPanelController;
         private readonly HitbloqProfileModalController hitbloqProfileModalController;
+        private readonly HitbloqEventModalViewController hitbloqEventModalViewController;
 
         private readonly UserIDSource userIDSource;
         private readonly LevelInfoSource levelInfoSource;
@@ -31,14 +32,15 @@ namespace Hitbloq.Managers
         private CancellationTokenSource leaderboardTokenSource;
 
         public HitbloqManager(StandardLevelDetailViewController standardLevelDetailViewController, HitbloqLeaderboardViewController hitbloqLeaderboardViewController, 
-            HitbloqPanelController hitbloqPanelController, HitbloqProfileModalController hitbloqProfileModalController, UserIDSource userIDSource, LevelInfoSource levelInfoSource,
-            LeaderboardRefresher leaderboardRefresher, List<INotifyUserRegistered> notifyUserRegistereds, List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters,
-            List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters, List<IPoolUpdater> poolUpdaters)
+            HitbloqPanelController hitbloqPanelController, HitbloqProfileModalController hitbloqProfileModalController, HitbloqEventModalViewController hitbloqEventModalViewController,
+            UserIDSource userIDSource, LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher, List<INotifyUserRegistered> notifyUserRegistereds,
+            List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters, List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters, List<IPoolUpdater> poolUpdaters)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.hitbloqLeaderboardViewController = hitbloqLeaderboardViewController;
             this.hitbloqPanelController = hitbloqPanelController;
             this.hitbloqProfileModalController = hitbloqProfileModalController;
+            this.hitbloqEventModalViewController = hitbloqEventModalViewController;
 
             this.userIDSource = userIDSource;
             this.levelInfoSource = levelInfoSource;
@@ -57,7 +59,8 @@ namespace Hitbloq.Managers
             standardLevelDetailViewController.didChangeContentEvent += OnContentChanged;
             hitbloqLeaderboardViewController.PageRequested += OnPageRequested;
             hitbloqPanelController.PoolChangedEvent += OnPoolChanged;
-            hitbloqPanelController.ClickedRankText += OnRankTextClicked;
+            hitbloqPanelController.RankTextClickedEvent += OnRankTextClicked;
+            hitbloqPanelController.LogoClickedEvent += OnLogoClicked;
         }
 
         public void Dispose()
@@ -67,7 +70,8 @@ namespace Hitbloq.Managers
             standardLevelDetailViewController.didChangeContentEvent -= OnContentChanged;
             hitbloqLeaderboardViewController.PageRequested -= OnPageRequested;
             hitbloqPanelController.PoolChangedEvent -= OnPoolChanged;
-            hitbloqPanelController.ClickedRankText -= OnRankTextClicked;
+            hitbloqPanelController.RankTextClickedEvent -= OnRankTextClicked;
+            hitbloqPanelController.LogoClickedEvent -= OnLogoClicked;
         }
 
         public async void OnScoreUploaded()
@@ -130,7 +134,7 @@ namespace Hitbloq.Managers
         {
             leaderboardTokenSource?.Cancel();
             leaderboardTokenSource = new CancellationTokenSource();
-            List<Entries.LeaderboardEntry> leaderboardEntries = await leaderboardSource.GetScoresTask(difficultyBeatmap, leaderboardTokenSource.Token, page);
+            List<HitbloqLeaderboardEntry> leaderboardEntries = await leaderboardSource.GetScoresTask(difficultyBeatmap, leaderboardTokenSource.Token, page);
 
             if (leaderboardEntries != null)
             {
@@ -157,6 +161,11 @@ namespace Hitbloq.Managers
         private void OnRankTextClicked(HitbloqRankInfo rankInfo, string pool)
         {
             hitbloqProfileModalController.ShowModalForSelf(hitbloqLeaderboardViewController.transform, rankInfo, pool);
+        }
+
+        private void OnLogoClicked()
+        {
+            hitbloqEventModalViewController.ShowModal(hitbloqLeaderboardViewController.transform);
         }
     }
 }

@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 
 namespace Hitbloq.Entries
 {
-    internal class LeaderboardEntry
+    internal class HitbloqLeaderboardEntry
     {
         [JsonProperty("accuracy")]
         public float accuracy;

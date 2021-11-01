@@ -1,4 +1,5 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Parser;
 using BeatSaberMarkupLanguage.ViewControllers;
 using Hitbloq.Entries;
 using Hitbloq.Interfaces;
@@ -27,7 +28,7 @@ namespace Hitbloq.UI
         private int _selectedCellIndex;
 
         private IDifficultyBeatmap difficultyBeatmap;
-        private List<Entries.LeaderboardEntry> leaderboardEntries;
+        private List<HitbloqLeaderboardEntry> leaderboardEntries;
         private string selectedPool;
 
         private List<Button> infoButtons;
@@ -59,10 +60,13 @@ namespace Hitbloq.UI
         }
 
         [UIComponent("leaderboard")]
-        private Transform leaderboardTransform;
+        private readonly Transform leaderboardTransform;
 
         [UIComponent("leaderboard")]
-        internal LeaderboardTableView leaderboard;
+        private readonly LeaderboardTableView leaderboard;
+
+        [UIParams]
+        private readonly BSMLParserParams parserParams;
 
         #region Info Buttons
 
@@ -116,7 +120,7 @@ namespace Hitbloq.UI
             PageNumber = 0;
         }
 
-        public async void SetScores(List<Entries.LeaderboardEntry> leaderboardEntries)
+        public async void SetScores(List<HitbloqLeaderboardEntry> leaderboardEntries)
         {
             List<LeaderboardTableView.ScoreData> scores = new List<LeaderboardTableView.ScoreData>();
             int myScorePos = -1;
@@ -278,7 +282,7 @@ namespace Hitbloq.UI
             }
         }
 
-        public void LeaderboardEntriesUpdated(List<Entries.LeaderboardEntry> leaderboardEntries)
+        public void LeaderboardEntriesUpdated(List<HitbloqLeaderboardEntry> leaderboardEntries)
         {
             this.leaderboardEntries = leaderboardEntries;
             NotifyPropertyChanged(nameof(DownEnabled));

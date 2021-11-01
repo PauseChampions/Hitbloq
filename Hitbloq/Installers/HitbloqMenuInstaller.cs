@@ -17,6 +17,7 @@ namespace Hitbloq.Installers
             Container.BindInterfacesAndSelfTo<HitbloqPanelController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<HitbloqMainViewController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<HitbloqProfileModalController>().AsSingle();
+            Container.BindInterfacesAndSelfTo<HitbloqEventModalViewController>().AsSingle();
 
             Container.BindInterfacesAndSelfTo<HitbloqFlowCoordinator>().FromNewComponentOnRoot().AsSingle();
 
@@ -29,6 +30,7 @@ namespace Hitbloq.Installers
             Container.Bind<RankInfoSource>().AsSingle();
             Container.Bind<LevelInfoSource>().AsSingle();
             Container.Bind<PoolInfoSource>().AsSingle();
+            Container.Bind<EventSource>().AsSingle();
             Container.BindInterfacesTo<GlobalLeaderboardSource>().AsSingle();
             Container.BindInterfacesTo<AroundMeLeaderboardSource>().AsSingle();
             Container.BindInterfacesAndSelfTo<FriendsLeaderboardSource>().AsSingle();

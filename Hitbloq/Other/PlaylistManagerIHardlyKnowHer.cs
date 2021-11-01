@@ -19,6 +19,8 @@ namespace Hitbloq.Other
 
         private CancellationTokenSource tokenSource;
 
+        public bool IsDownloading => tokenSource != null && !tokenSource.IsCancellationRequested;
+
         public PlaylistManagerIHardlyKnowHer(SiraClient siraClient, LevelFilteringNavigationController levelFilteringNavigationController, SelectLevelCategoryViewController selectLevelCategoryViewController)
         {
             this.siraClient = siraClient;
@@ -29,7 +31,6 @@ namespace Hitbloq.Other
 
         internal async void OpenPlaylist(string poolID, Action onDownloadComplete = null)
         {
-            tokenSource?.Dispose();
             tokenSource = new CancellationTokenSource();
             IBeatmapLevelPack playlistToSelect = await GetPlaylist(poolID);
 
@@ -42,6 +43,8 @@ namespace Hitbloq.Other
             levelCategorySegmentedControl.SelectCellWithNumber(1);
             selectLevelCategoryViewController.LevelFilterCategoryIconSegmentedControlDidSelectCell(levelCategorySegmentedControl, 1);
             levelFilteringNavigationController.SelectAnnotatedBeatmapLevelCollection(playlistToSelect);
+
+            CancelDownload();
         }
 
         internal void CancelDownload() => tokenSource?.Cancel();

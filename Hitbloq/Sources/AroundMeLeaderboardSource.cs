@@ -14,7 +14,7 @@ namespace Hitbloq.Sources
         private readonly UserIDSource userIDSource;
         private Sprite _icon;
 
-        private List<Entries.LeaderboardEntry> cachedEntries;
+        private List<HitbloqLeaderboardEntry> cachedEntries;
 
         public AroundMeLeaderboardSource(SiraClient siraClient, UserIDSource userIDSource)
         {
@@ -38,7 +38,7 @@ namespace Hitbloq.Sources
 
         public bool Scrollable => false;
 
-        public async Task<List<Entries.LeaderboardEntry>> GetScoresTask(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null, int page = 0)
+        public async Task<List<HitbloqLeaderboardEntry>> GetScoresTask(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null, int page = 0)
         {
             if (cachedEntries == null)
             {
@@ -52,7 +52,7 @@ namespace Hitbloq.Sources
                 try
                 {
                     WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/nearby_scores/{id}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                    cachedEntries = Utils.ParseWebResponse<List<Entries.LeaderboardEntry>>(webResponse);
+                    cachedEntries = Utils.ParseWebResponse<List<HitbloqLeaderboardEntry>>(webResponse);
                 }
                 catch (TaskCanceledException) { }
             }
