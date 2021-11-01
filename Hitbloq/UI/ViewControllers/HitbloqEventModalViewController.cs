@@ -17,6 +17,7 @@ namespace Hitbloq.UI
     {
         private readonly EventSource eventSource;
         private readonly SpriteLoader spriteLoader;
+        private readonly IVRPlatformHelper platformHelper;
         private readonly PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer;
 
         private HitbloqEvent currentEvent;
@@ -46,13 +47,18 @@ namespace Hitbloq.UI
         [UIComponent("event-image")]
         private readonly ImageView eventImage;
 
+        [UIComponent("text-page")]
+        private readonly TextPageScrollView descriptionTextPage;
+
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
-        public HitbloqEventModalViewController(EventSource eventSource, SpriteLoader spriteLoader, [InjectOptional] PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer)
+        public HitbloqEventModalViewController(EventSource eventSource, SpriteLoader spriteLoader, IVRPlatformHelper platformHelper,
+            [InjectOptional] PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer)
         {
             this.eventSource = eventSource;
             this.spriteLoader = spriteLoader;
+            this.platformHelper = platformHelper;
             this.playlistManagerIHardlyKnowHer = playlistManagerIHardlyKnowHer;
         }
 
@@ -66,6 +72,7 @@ namespace Hitbloq.UI
             modalTransform.SetParent(parentTransform);
             modalTransform.localPosition = modalPosition;
             modalView.SetField("_animateParentCanvas", true);
+            descriptionTextPage.ScrollTo(0, true);
         }
 
         internal void ShowModal(Transform parentTransform)
@@ -80,10 +87,11 @@ namespace Hitbloq.UI
         {
             parsed = true;
             modalView.gameObject.name = "HitbloqEventModal";
+            (descriptionTextPage as ScrollView).SetField("_platformHelper", platformHelper);
 
             currentEvent = await eventSource.GetEventAsync();
 
-            if (currentEvent != null && currentEvent.image != null && eventImage != null)
+            if (currentEvent != null && currentEvent.image != null)
             {
                 spriteLoader.DownloadSpriteAsync(currentEvent.image, (Sprite sprite) => eventImage.sprite = sprite);
             }
