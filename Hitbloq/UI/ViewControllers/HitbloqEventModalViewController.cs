@@ -1,7 +1,9 @@
 ﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Parser;
+using Hitbloq.Configuration;
 using Hitbloq.Entries;
+using Hitbloq.Interfaces;
 using Hitbloq.Other;
 using Hitbloq.Sources;
 using HMUI;
@@ -13,7 +15,7 @@ using Zenject;
 
 namespace Hitbloq.UI
 {
-    internal class HitbloqEventModalViewController : INotifyPropertyChanged
+    internal class HitbloqEventModalViewController : INotifyViewActivated, INotifyPropertyChanged
     {
         private readonly EventSource eventSource;
         private readonly SpriteLoader spriteLoader;
@@ -60,6 +62,23 @@ namespace Hitbloq.UI
             this.spriteLoader = spriteLoader;
             this.platformHelper = platformHelper;
             this.playlistManagerIHardlyKnowHer = playlistManagerIHardlyKnowHer;
+        }
+
+        public async void ViewActivated(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        {
+            if (firstActivation)
+            {
+                HitbloqEvent hitbloqEvent = await eventSource.GetEventAsync();
+                if (hitbloqEvent != null && hitbloqEvent.id != -1)
+                {
+                    if (!PluginConfig.Instance.ViewedEvents.Contains(hitbloqEvent.id))
+                    {
+                        ShowModal(hitbloqLeaderboardViewController.transform);
+                        PluginConfig.Instance.ViewedEvents.Add(hitbloqEvent.id);
+                        PluginConfig.Instance.Changed();
+                    }
+                }
+            }
         }
 
         private void Parse(Transform parentTransform)

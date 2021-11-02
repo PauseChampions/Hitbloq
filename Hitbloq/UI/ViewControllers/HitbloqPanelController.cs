@@ -2,7 +2,6 @@
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Components.Settings;
 using BeatSaberMarkupLanguage.ViewControllers;
-using Hitbloq.Configuration;
 using Hitbloq.Entries;
 using Hitbloq.Interfaces;
 using Hitbloq.Other;
@@ -172,20 +171,6 @@ namespace Hitbloq.UI
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
             NotifyPropertyChanged(nameof(PlaylistManagerActive));
-
-            if (firstActivation)
-            {
-                HitbloqEvent hitbloqEvent = await eventSource.GetEventAsync();
-                if (hitbloqEvent != null && hitbloqEvent.id != -1)
-                {
-                    if (!PluginConfig.Instance.ViewedEvents.Contains(hitbloqEvent.id))
-                    {
-                        LogoClickedEvent?.Invoke();
-                        PluginConfig.Instance.ViewedEvents.Add(hitbloqEvent.id);
-                        PluginConfig.Instance.Changed();
-                    }
-                }
-            }
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
