@@ -3,6 +3,7 @@ using Hitbloq.Sources;
 using Hitbloq.UI;
 using Hitbloq.Utilities;
 using SiraUtil;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading;
 using Zenject;
@@ -48,16 +49,19 @@ namespace Hitbloq.Other
                 return;
             }
 
-            string postData = $"url=https://scoresaber.com/u/{userInfo.platformUserId}";
-            ASCIIEncoding encoding = new ASCIIEncoding();
-            byte[] requestParams = encoding.GetBytes(postData);
-            webResponse = await siraClient.PostAsync("https://hitbloq.com/api/add_user", requestParams, CancellationToken.None);
+            var content = new Dictionary<string, string>
+            {
+                { "url", $"https://scoresaber.com/u/{userInfo.platformUserId}"}
+            };
+
+            webResponse = await siraClient.PostAsync("https://hitbloq.com/api/add_user", content, CancellationToken.None);
             HitbloqRegistrationEntry registrationEntry = Utils.ParseWebResponse<HitbloqRegistrationEntry>(webResponse);
 
             if (registrationEntry != null && registrationEntry.status != "ratelimit")
             {
                 hitbloqPanelController.PromptText = "Registering Hitbloq Account";
                 hitbloqPanelController.LoadingActive = true;
+                userIDSource.registrationRequested = true;
             }
             else
             {

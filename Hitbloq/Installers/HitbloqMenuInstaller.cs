@@ -44,8 +44,7 @@ namespace Hitbloq.Installers
                 Container.Bind<PlaylistManagerIHardlyKnowHer>().AsSingle();
             }
 
-            // Temporarily disabling due to bugs
-            //Container.BindInterfacesTo<AutomaticRegistration>().AsSingle();
+            Container.BindInterfacesTo<AutomaticRegistration>().AsSingle();
         }
     }
 }
