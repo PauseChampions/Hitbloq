@@ -31,6 +31,11 @@ namespace Hitbloq.Other
             HitbloqUserID userID = await userIDSource.GetUserIDAsync();
             if (userID.id != -1)
             {
+                // If we are in progress of registration, show it
+                if (!userID.registered)
+                {
+                    HandleRegistrationProgress();
+                }
                 return;
             }
 
@@ -46,6 +51,8 @@ namespace Hitbloq.Other
             ScoreSaberUserInfo scoreSaberUserInfo = Utils.ParseWebResponse<ScoreSaberUserInfo>(webResponse);
             if (scoreSaberUserInfo?.playerInfo == null)
             {
+                hitbloqPanelController.PromptText = "<color=red>Please submit some scores from your ScoreSaber account.</color>";
+                hitbloqPanelController.LoadingActive = false;
                 return;
             }
 
@@ -59,15 +66,20 @@ namespace Hitbloq.Other
 
             if (registrationEntry != null && registrationEntry.status != "ratelimit")
             {
-                hitbloqPanelController.PromptText = "Registering Hitbloq account, this may take a while...";
-                hitbloqPanelController.LoadingActive = true;
-                userIDSource.registrationRequested = true;
+                HandleRegistrationProgress();
             }
             else
             {
                 hitbloqPanelController.PromptText = "<color=red>Please register for Hitbloq on the Discord Server.</color>";
                 hitbloqPanelController.LoadingActive = false;
             }
+        }
+
+        private void HandleRegistrationProgress()
+        {
+            hitbloqPanelController.PromptText = "Registering Hitbloq account, this may take a while...";
+            hitbloqPanelController.LoadingActive = true;
+            userIDSource.registrationRequested = true;
         }
     }
 }
