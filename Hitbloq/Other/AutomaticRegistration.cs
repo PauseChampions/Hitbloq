@@ -59,7 +59,7 @@ namespace Hitbloq.Other
 
             if (registrationEntry != null && registrationEntry.status != "ratelimit")
             {
-                hitbloqPanelController.PromptText = "Registering Hitbloq Account";
+                hitbloqPanelController.PromptText = "Registering Hitbloq account, this may take a while...";
                 hitbloqPanelController.LoadingActive = true;
                 userIDSource.registrationRequested = true;
             }
