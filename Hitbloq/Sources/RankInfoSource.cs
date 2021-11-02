@@ -20,7 +20,7 @@ namespace Hitbloq.Sources
         public async Task<HitbloqRankInfo> GetRankInfoForSelfAsync(string poolID, CancellationToken? cancellationToken = null)
         {
             HitbloqUserID userID = await userIDSource.GetUserIDAsync(cancellationToken);
-            if (userID != null)
+            if (userID.id != -1)
             {
                 return await GetRankInfoAsync(poolID, userID.id, cancellationToken);
             }

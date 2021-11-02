@@ -126,16 +126,20 @@ namespace Hitbloq.UI
             set
             {
                 _hitbloqProfile = value;
-                spriteLoader.DownloadSpriteAsync(_hitbloqProfile.profilePictureURL, (Sprite sprite) => modalProfilePic.sprite = sprite);
 
-                if (_hitbloqProfile.profileBackgroundURL != null)
+                if (_hitbloqProfile != null)
                 {
-                    spriteLoader.DownloadSpriteAsync(_hitbloqProfile.profileBackgroundURL, (Sprite sprite) =>
+                    spriteLoader.DownloadSpriteAsync(_hitbloqProfile.profilePictureURL, (Sprite sprite) => modalProfilePic.sprite = sprite);
+
+                    if (_hitbloqProfile.profileBackgroundURL != null)
                     {
-                        modalBackground.sprite = sprite;
-                        modalBackground.color = customModalColour;
-                        modalBackground.material = noGlowRoundEdge;
-                    });
+                        spriteLoader.DownloadSpriteAsync(_hitbloqProfile.profileBackgroundURL, (Sprite sprite) =>
+                        {
+                            modalBackground.sprite = sprite;
+                            modalBackground.color = customModalColour;
+                            modalBackground.material = noGlowRoundEdge;
+                        });
+                    }
                 }
             }
         }
@@ -203,6 +207,12 @@ namespace Hitbloq.UI
         internal async void ShowModalForSelf(Transform parentTransform, HitbloqRankInfo rankInfo, string pool)
         {
             Parse(parentTransform);
+            HitbloqUserID userID = await userIDSource.GetUserIDAsync();
+
+            if (userID.id == -1)
+            {
+                return;
+            }
 
             parserParams.EmitEvent("close-modal");
             parserParams.EmitEvent("open-modal");
@@ -211,7 +221,6 @@ namespace Hitbloq.UI
 
             RankInfo = rankInfo;
             PoolInfo = await poolInfoSource.GetPoolInfoAsync(pool);
-            HitbloqUserID userID = await userIDSource.GetUserIDAsync();
             HitbloqProfile = await profileSource.GetProfileAsync(userID.id);
             addFriendButton.gameObject.SetActive(false);
 
