@@ -16,8 +16,8 @@ namespace Hitbloq.Entries
         [JsonProperty("song_id")]
         public string levelID;
 
-        [JsonProperty("time_set")]
-        public float timeSet;
+        [JsonProperty("date_set")]
+        public string dateSet;
 
         [JsonProperty("username")]
         public string username;

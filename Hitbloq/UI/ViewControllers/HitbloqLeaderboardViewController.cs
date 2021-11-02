@@ -65,9 +65,6 @@ namespace Hitbloq.UI
         [UIComponent("leaderboard")]
         private readonly LeaderboardTableView leaderboard;
 
-        [UIParams]
-        private readonly BSMLParserParams parserParams;
-
         #region Info Buttons
 
         [UIComponent("button1")]
@@ -144,12 +141,14 @@ namespace Hitbloq.UI
                     scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].score, $"<size=85%>{leaderboardEntries[i].username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#aa6eff>{leaderboardEntries[i].cr[selectedPool].ToString("F2")}<size=55%>cr</size></color>)</size>", 
                         leaderboardEntries[i].rank, false));
 
+                    infoButtons[i].gameObject.SetActive(true);
+                    HoverHint hoverHint = infoButtons[i].GetComponent<HoverHint>();
+                    hoverHint.text = $"Score Set: {leaderboardEntries[i].dateSet}";
+
                     if (leaderboardEntries[i].userID == id)
                     {
                         myScorePos = i;
                     }
-
-                    infoButtons[i].gameObject.SetActive(true);
                 }
             }
 
