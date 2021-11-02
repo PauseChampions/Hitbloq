@@ -1,4 +1,5 @@
-﻿using Hitbloq.Utilities;
+﻿using Hitbloq.Entries;
+using Hitbloq.Utilities;
 using SiraUtil;
 using System.Collections.Generic;
 using System.Threading;
@@ -11,6 +12,8 @@ namespace Hitbloq.Sources
     {
         private readonly SiraClient siraClient;
         private Sprite _icon;
+
+        private List<List<HitbloqLeaderboardEntry>> cachedEntries;
 
         public GlobalLeaderboardSource(SiraClient siraClient)
         {
@@ -33,15 +36,20 @@ namespace Hitbloq.Sources
 
         public bool Scrollable => true;
 
-        public async Task<List<Entries.LeaderboardEntry>> GetScoresTask(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null, int page = 0)
+        public async Task<List<HitbloqLeaderboardEntry>> GetScoresTask(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null, int page = 0)
         {
-            try
+            if (cachedEntries.Count < page + 1)
             {
-                WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/scores_extended/{page}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                return Utils.ParseWebResponse<List<Entries.LeaderboardEntry>>(webResponse);
+                try
+                {
+                    WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/scores_extended/{page}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                    cachedEntries.Add(Utils.ParseWebResponse<List<HitbloqLeaderboardEntry>>(webResponse));
+                }
+                catch (TaskCanceledException) { }
             }
-            catch (TaskCanceledException) { }
-            return null;
+            return page < cachedEntries.Count ? cachedEntries[page] : null;
         }
+
+        public void ClearCache() => cachedEntries = new List<List<HitbloqLeaderboardEntry>>();
     }
 }

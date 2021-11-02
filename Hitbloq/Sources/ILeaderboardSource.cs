@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using Hitbloq.Entries;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
@@ -9,7 +10,8 @@ namespace Hitbloq.Sources
     {
         public string HoverHint { get; }
         public Sprite Icon { get; }
-        public Task<List<Entries.LeaderboardEntry>> GetScoresTask(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null, int page = 0);
+        public Task<List<HitbloqLeaderboardEntry>> GetScoresTask(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null, int page = 0);
         public bool Scrollable { get; }
+        public void ClearCache();
     }
 }

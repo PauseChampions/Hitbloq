@@ -30,8 +30,16 @@
 		  <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
 		  <Private>False</Private>
 		</Reference>
+		<Reference Include="BeatSaberPlaylistsLib">
+		  <HintPath>$(BeatSaberDir)\Libs\BeatSaberPlaylistsLib.dll</HintPath>
+		  <Private>False</Private>
+		</Reference>
 		<Reference Include="LeaderboardCore">
 		  <HintPath>$(BeatSaberDir)\Plugins\LeaderboardCore.dll</HintPath>
+		  <Private>False</Private>
+		</Reference>
+		<Reference Include="PlaylistManager">
+		  <HintPath>$(BeatSaberDir)\Plugins\PlaylistManager.dll</HintPath>
 		  <Private>False</Private>
 		</Reference>
 		<Reference Include="Unity.TextMeshPro">
@@ -98,6 +106,10 @@
 		<EmbeddedResource Include="manifest.json" />
 		<EmbeddedResource Include="Images\*.png" />
 		<EmbeddedResource Include="UI\Views\*.bsml" />
+	</ItemGroup>
+	
+	<ItemGroup>
+	  <None Remove="UI\Views\HitbloqEventModal.bsml" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -13,6 +13,7 @@ namespace Hitbloq.Sources
         private readonly IPlatformUserModel platformUserModel;
 
         private HitbloqUserID hitbloqUserID;
+        public bool registrationRequested;
         public event Action UserRegisteredEvent;
 
         public UserIDSource(SiraClient siraClient, IPlatformUserModel platformUserModel)
@@ -23,7 +24,7 @@ namespace Hitbloq.Sources
 
         public async Task<HitbloqUserID> GetUserIDAsync(CancellationToken? cancellationToken = null)
         {
-            if (hitbloqUserID == null || !hitbloqUserID.registered)
+            if (hitbloqUserID == null || registrationRequested)
             {
                 UserInfo userInfo = await platformUserModel.GetUserInfo();
                 if (userInfo != null)
@@ -36,11 +37,18 @@ namespace Hitbloq.Sources
                         if (hitbloqUserID.registered)
                         {
                             UserRegisteredEvent?.Invoke();
+                            registrationRequested = false;
                         }
                     }
                     catch (TaskCanceledException) { }
                 }
             }
+
+            if (hitbloqUserID == null)
+            {
+                return new HitbloqUserID();
+            }
+
             return hitbloqUserID;
         }
     }
