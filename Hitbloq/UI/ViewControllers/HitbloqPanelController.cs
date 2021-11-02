@@ -36,7 +36,7 @@ namespace Hitbloq.UI
         private string selectedPool;
 
         private bool _cuteMode;
-        private string _promptText;
+        private string _promptText = "";
         private bool _loadingActive;
         private bool _downloadingActive;
 
