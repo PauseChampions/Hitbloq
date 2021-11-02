@@ -5,7 +5,7 @@ namespace Hitbloq.Entries
     internal class HitbloqEvent
     {
         [JsonProperty("id")]
-        public int id;
+        public int id = -1;
 
         [JsonProperty("urt_title", NullValueHandling = NullValueHandling.Ignore)]
         public string title;

@@ -69,7 +69,7 @@ namespace Hitbloq.UI
             if (firstActivation)
             {
                 HitbloqEvent hitbloqEvent = await eventSource.GetEventAsync();
-                if (hitbloqEvent != null && hitbloqEvent.id != -1)
+                if (hitbloqEvent.id != -1)
                 {
                     if (!PluginConfig.Instance.ViewedEvents.Contains(hitbloqEvent.id))
                     {
@@ -110,7 +110,7 @@ namespace Hitbloq.UI
 
             currentEvent = await eventSource.GetEventAsync();
 
-            if (currentEvent != null && currentEvent.image != null)
+            if (currentEvent.image != null)
             {
                 spriteLoader.DownloadSpriteAsync(currentEvent.image, (Sprite sprite) => eventImage.sprite = sprite);
             }

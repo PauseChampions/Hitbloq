@@ -27,6 +27,12 @@ namespace Hitbloq.Sources
                 }
                 catch (TaskCanceledException) { }
             }
+
+            if (cachedEvent == null)
+            {
+                return new HitbloqEvent();
+            }
+
             return cachedEvent;
         }
     }

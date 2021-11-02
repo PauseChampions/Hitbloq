@@ -143,7 +143,7 @@ namespace Hitbloq.UI
             cancelHighlightColor = Color.red;
 
             HitbloqEvent hitbloqEvent = await eventSource.GetEventAsync();
-            if (hitbloqEvent != null && hitbloqEvent.id != -1)
+            if (hitbloqEvent.id != -1)
             {
                 ClickableImage clickableLogo = logo.Upgrade<ImageView, ClickableImage>();
                 logo = clickableLogo;
