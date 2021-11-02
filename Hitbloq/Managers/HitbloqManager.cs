@@ -25,6 +25,7 @@ namespace Hitbloq.Managers
 
         private readonly List<INotifyUserRegistered> notifyUserRegistereds;
         private readonly List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters;
+        private readonly List<INotifyViewActivated> notifyViewActivateds;
         private readonly List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters;
         private readonly List<IPoolUpdater> poolUpdaters;
 
@@ -34,7 +35,8 @@ namespace Hitbloq.Managers
         public HitbloqManager(StandardLevelDetailViewController standardLevelDetailViewController, HitbloqLeaderboardViewController hitbloqLeaderboardViewController, 
             HitbloqPanelController hitbloqPanelController, HitbloqProfileModalController hitbloqProfileModalController, HitbloqEventModalViewController hitbloqEventModalViewController,
             UserIDSource userIDSource, LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher, List<INotifyUserRegistered> notifyUserRegistereds,
-            List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters, List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters, List<IPoolUpdater> poolUpdaters)
+            List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters, List<INotifyViewActivated> notifyViewActivateds, List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters,
+            List<IPoolUpdater> poolUpdaters)
         {
             this.standardLevelDetailViewController = standardLevelDetailViewController;
             this.hitbloqLeaderboardViewController = hitbloqLeaderboardViewController;
@@ -48,6 +50,7 @@ namespace Hitbloq.Managers
 
             this.notifyUserRegistereds = notifyUserRegistereds;
             this.difficultyBeatmapUpdaters = difficultyBeatmapUpdaters;
+            this.notifyViewActivateds = notifyViewActivateds;
             this.leaderboardEntriesUpdaters = leaderboardEntriesUpdaters;
             this.poolUpdaters = poolUpdaters;
         }
@@ -55,10 +58,14 @@ namespace Hitbloq.Managers
         public void Initialize()
         {
             userIDSource.UserRegisteredEvent += OnUserRegistered;
+
             standardLevelDetailViewController.didChangeDifficultyBeatmapEvent += OnDifficultyBeatmapChanged;
             standardLevelDetailViewController.didChangeContentEvent += OnContentChanged;
+            hitbloqLeaderboardViewController.didActivateEvent += OnViewActivated;
+
             hitbloqLeaderboardViewController.PageRequested += OnPageRequested;
             hitbloqPanelController.PoolChangedEvent += OnPoolChanged;
+
             hitbloqPanelController.RankTextClickedEvent += OnRankTextClicked;
             hitbloqPanelController.LogoClickedEvent += OnLogoClicked;
         }
@@ -66,10 +73,14 @@ namespace Hitbloq.Managers
         public void Dispose()
         {
             userIDSource.UserRegisteredEvent -= OnUserRegistered;
+
             standardLevelDetailViewController.didChangeDifficultyBeatmapEvent -= OnDifficultyBeatmapChanged;
             standardLevelDetailViewController.didChangeContentEvent -= OnContentChanged;
+            hitbloqLeaderboardViewController.didActivateEvent -= OnViewActivated;
+
             hitbloqLeaderboardViewController.PageRequested -= OnPageRequested;
             hitbloqPanelController.PoolChangedEvent -= OnPoolChanged;
+
             hitbloqPanelController.RankTextClickedEvent -= OnRankTextClicked;
             hitbloqPanelController.LogoClickedEvent -= OnLogoClicked;
         }
@@ -127,6 +138,14 @@ namespace Hitbloq.Managers
             foreach (var difficultyBeatmapUpdater in difficultyBeatmapUpdaters)
             {
                 difficultyBeatmapUpdater.DifficultyBeatmapUpdated(standardLevelDetailViewController.selectedDifficultyBeatmap, levelInfoEntry);
+            }
+        }
+
+        private void OnViewActivated(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        {
+            foreach (var notifyViewActivated in notifyViewActivateds)
+            {
+                notifyViewActivated.ViewActivated(hitbloqLeaderboardViewController, firstActivation, addedToHierarchy, screenSystemEnabling);
             }
         }
 
