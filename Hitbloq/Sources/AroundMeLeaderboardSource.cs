@@ -1,6 +1,6 @@
 ﻿using Hitbloq.Entries;
 using Hitbloq.Utilities;
-using SiraUtil;
+using SiraUtil.Web;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,15 +10,15 @@ namespace Hitbloq.Sources
 {
     internal class AroundMeLeaderboardSource : ILeaderboardSource
     {
-        private readonly SiraClient siraClient;
+        private readonly IHttpService siraHttpService;
         private readonly UserIDSource userIDSource;
         private Sprite _icon;
 
         private List<HitbloqLeaderboardEntry> cachedEntries;
 
-        public AroundMeLeaderboardSource(SiraClient siraClient, UserIDSource userIDSource)
+        public AroundMeLeaderboardSource(IHttpService siraHttpService, UserIDSource userIDSource)
         {
-            this.siraClient = siraClient;
+            this.siraHttpService = siraHttpService;
             this.userIDSource = userIDSource;
         }
 
@@ -51,8 +51,8 @@ namespace Hitbloq.Sources
 
                 try
                 {
-                    WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/nearby_scores/{id}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                    cachedEntries = Utils.ParseWebResponse<List<HitbloqLeaderboardEntry>>(webResponse);
+                    IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/nearby_scores/{id}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                    cachedEntries = await Utils.ParseWebResponse<List<HitbloqLeaderboardEntry>>(webResponse);
                 }
                 catch (TaskCanceledException) { }
             }

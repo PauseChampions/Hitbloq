@@ -1,24 +1,24 @@
 ﻿using Hitbloq.Entries;
 using Hitbloq.Utilities;
-using SiraUtil;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Linq;
 using Hitbloq.Configuration;
+using SiraUtil.Web;
 
 namespace Hitbloq.Sources
 {
     internal class FriendIDSource
     {
-        private readonly SiraClient siraClient;
+        private readonly IHttpService siraHttpService;
         private readonly IPlatformUserModel platformUserModel;
 
         private HashSet<int> hitbloqPlatformFriendIds;
 
-        public FriendIDSource(SiraClient siraClient, IPlatformUserModel platformUserModel)
+        public FriendIDSource(IHttpService siraHttpService, IPlatformUserModel platformUserModel)
         {
-            this.siraClient = siraClient;
+            this.siraHttpService = siraHttpService;
             this.platformUserModel = platformUserModel;
         }
 
@@ -44,9 +44,9 @@ namespace Hitbloq.Sources
                     {
                         { "ids", friendIDs.ToArray<string>()}
                     };
-                        WebResponse webResponse = await siraClient.PostAsync($"https://hitbloq.com/api/tools/mass_ss_to_hitbloq", content, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                        IHttpResponse webResponse = await siraHttpService.PostAsync($"https://hitbloq.com/api/tools/mass_ss_to_hitbloq", content, cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
 
-                        hitbloqPlatformFriendIds = Utils.ParseWebResponse<List<HitbloqFriendID>>(webResponse).Select(x => x.id).ToHashSet();
+                        hitbloqPlatformFriendIds = (await Utils.ParseWebResponse<List<HitbloqFriendID>>(webResponse)).Select(x => x.id).ToHashSet();
                     }
                     catch (TaskCanceledException) { }
                 }

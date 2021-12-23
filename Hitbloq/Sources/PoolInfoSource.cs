@@ -1,6 +1,6 @@
 ﻿using Hitbloq.Entries;
 using Hitbloq.Utilities;
-using SiraUtil;
+using SiraUtil.Web;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,13 +9,12 @@ namespace Hitbloq.Sources
 {
     internal class PoolInfoSource
     {
-        private readonly SiraClient siraClient;
+        private readonly IHttpService siraHttpService;
         private readonly Dictionary<string, HitbloqPoolInfo> cache;
 
-
-        public PoolInfoSource(SiraClient siraClient)
+        public PoolInfoSource(IHttpService siraHttpService)
         {
-            this.siraClient = siraClient;
+            this.siraHttpService = siraHttpService;
             cache = new Dictionary<string, HitbloqPoolInfo>();
         }
 
@@ -28,8 +27,8 @@ namespace Hitbloq.Sources
 
             try
             {
-                WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/ranked_list/{poolID}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                HitbloqPoolInfo poolInfo = Utils.ParseWebResponse<HitbloqPoolInfo>(webResponse);
+                IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/ranked_list/{poolID}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                HitbloqPoolInfo poolInfo = await Utils.ParseWebResponse<HitbloqPoolInfo>(webResponse);
 
                 cache[poolID] = poolInfo;
                 return poolInfo;

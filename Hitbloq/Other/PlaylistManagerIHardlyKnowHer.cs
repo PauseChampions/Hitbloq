@@ -1,6 +1,6 @@
 ﻿using HMUI;
 using IPA.Utilities;
-using SiraUtil;
+using SiraUtil.Web;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -12,7 +12,7 @@ namespace Hitbloq.Other
 {
     internal class PlaylistManagerIHardlyKnowHer
     {
-        private readonly SiraClient siraClient;
+        private readonly IHttpService siraHttpService;
         private readonly LevelFilteringNavigationController levelFilteringNavigationController;
         private readonly SelectLevelCategoryViewController selectLevelCategoryViewController;
         private readonly IconSegmentedControl levelCategorySegmentedControl;
@@ -21,9 +21,9 @@ namespace Hitbloq.Other
 
         public bool IsDownloading => tokenSource != null && !tokenSource.IsCancellationRequested;
 
-        public PlaylistManagerIHardlyKnowHer(SiraClient siraClient, LevelFilteringNavigationController levelFilteringNavigationController, SelectLevelCategoryViewController selectLevelCategoryViewController)
+        public PlaylistManagerIHardlyKnowHer(IHttpService siraHttpService, LevelFilteringNavigationController levelFilteringNavigationController, SelectLevelCategoryViewController selectLevelCategoryViewController)
         {
-            this.siraClient = siraClient;
+            this.siraHttpService = siraHttpService;
             this.levelFilteringNavigationController = levelFilteringNavigationController;
             this.selectLevelCategoryViewController = selectLevelCategoryViewController;
             levelCategorySegmentedControl = selectLevelCategoryViewController.GetField<IconSegmentedControl, SelectLevelCategoryViewController>("_levelFilterCategoryIconSegmentedControl");
@@ -67,8 +67,8 @@ namespace Hitbloq.Other
 
             try
             {
-                WebResponse webResponse = await siraClient.GetAsync(syncURL, tokenSource.Token).ConfigureAwait(false);
-                Stream playlistStream = new MemoryStream(webResponse.ContentToBytes());
+                IHttpResponse webResponse = await siraHttpService.GetAsync(syncURL, cancellationToken: tokenSource.Token).ConfigureAwait(false);
+                Stream playlistStream = new MemoryStream(await webResponse.ReadAsByteArrayAsync());
                 BeatSaberPlaylistsLib.Types.IPlaylist newPlaylist = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler?.Deserialize(playlistStream);
 
                 BeatSaberPlaylistsLib.PlaylistManager playlistManager = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.CreateChildManager("Hitbloq");

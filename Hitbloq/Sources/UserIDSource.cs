@@ -1,6 +1,6 @@
 ﻿using Hitbloq.Entries;
 using Hitbloq.Utilities;
-using SiraUtil;
+using SiraUtil.Web;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,16 +9,16 @@ namespace Hitbloq.Sources
 {
     internal class UserIDSource
     {
-        private readonly SiraClient siraClient;
+        private readonly IHttpService siraHttpService;
         private readonly IPlatformUserModel platformUserModel;
 
         private HitbloqUserID hitbloqUserID;
         public bool registrationRequested;
         public event Action UserRegisteredEvent;
 
-        public UserIDSource(SiraClient siraClient, IPlatformUserModel platformUserModel)
+        public UserIDSource(IHttpService siraHttpService, IPlatformUserModel platformUserModel)
         {
-            this.siraClient = siraClient;
+            this.siraHttpService = siraHttpService;
             this.platformUserModel = platformUserModel;
         }
 
@@ -31,8 +31,8 @@ namespace Hitbloq.Sources
                 {
                     try
                     {
-                        WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/tools/ss_registered/{userInfo.platformUserId}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                        hitbloqUserID = Utils.ParseWebResponse<HitbloqUserID>(webResponse);
+                        IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/tools/ss_registered/{userInfo.platformUserId}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                        hitbloqUserID = await Utils.ParseWebResponse<HitbloqUserID>(webResponse);
 
                         if (hitbloqUserID.registered)
                         {
