@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -21,7 +22,14 @@ namespace Hitbloq.Utilities
         {
             if (webResponse.Successful && (await webResponse.ReadAsByteArrayAsync()).Length > 3)
             {
-                return JsonConvert.DeserializeObject<T>(await webResponse.ReadAsStringAsync());
+                using (StreamReader streamReader = new StreamReader(await webResponse.ReadAsStreamAsync()))
+                {
+                    using (JsonTextReader jsonTextReader = new JsonTextReader(streamReader))
+                    {
+                        JsonSerializer jsonSerializer = new JsonSerializer();
+                        return jsonSerializer.Deserialize<T>(jsonTextReader);
+                    }
+                }
             }
             return default(T);
         }
