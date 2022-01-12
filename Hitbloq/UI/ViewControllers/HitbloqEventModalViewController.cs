@@ -19,7 +19,6 @@ namespace Hitbloq.UI
     {
         private readonly EventSource eventSource;
         private readonly SpriteLoader spriteLoader;
-        private readonly IVRPlatformHelper platformHelper;
         private readonly PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer;
 
         private HitbloqEvent currentEvent;
@@ -55,12 +54,10 @@ namespace Hitbloq.UI
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
-        public HitbloqEventModalViewController(EventSource eventSource, SpriteLoader spriteLoader, IVRPlatformHelper platformHelper,
-            [InjectOptional] PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer)
+        public HitbloqEventModalViewController(EventSource eventSource, SpriteLoader spriteLoader, [InjectOptional] PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer)
         {
             this.eventSource = eventSource;
             this.spriteLoader = spriteLoader;
-            this.platformHelper = platformHelper;
             this.playlistManagerIHardlyKnowHer = playlistManagerIHardlyKnowHer;
         }
 
@@ -106,8 +103,6 @@ namespace Hitbloq.UI
         {
             parsed = true;
             modalView.gameObject.name = "HitbloqEventModal";
-            (descriptionTextPage as ScrollView).SetField("_platformHelper", platformHelper);
-
             currentEvent = await eventSource.GetEventAsync();
 
             if (currentEvent.image != null)

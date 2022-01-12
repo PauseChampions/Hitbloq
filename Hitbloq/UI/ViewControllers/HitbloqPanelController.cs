@@ -26,7 +26,6 @@ namespace Hitbloq.UI
         private MainFlowCoordinator mainFlowCoordinator;
         private HitbloqFlowCoordinator hitbloqFlowCoordinator;
         private PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer;
-        private IVRPlatformHelper platformHelper;
         private RankInfoSource rankInfoSource;
         private PoolInfoSource poolInfoSource;
         private EventSource eventSource;
@@ -93,12 +92,11 @@ namespace Hitbloq.UI
 
         [Inject]
         private void Inject(MainFlowCoordinator mainFlowCoordinator, HitbloqFlowCoordinator hitbloqFlowCoordinator, [InjectOptional] PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer, 
-            IVRPlatformHelper platformHelper, RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource, EventSource eventSource)
+            RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource, EventSource eventSource)
         {
             this.mainFlowCoordinator = mainFlowCoordinator;
             this.hitbloqFlowCoordinator = hitbloqFlowCoordinator;
             this.playlistManagerIHardlyKnowHer = playlistManagerIHardlyKnowHer;
-            this.platformHelper = platformHelper;
             this.rankInfoSource = rankInfoSource;
             this.poolInfoSource = poolInfoSource;
             this.eventSource = eventSource;
@@ -143,8 +141,6 @@ namespace Hitbloq.UI
             dropDownListSetting.UpdateChoices();
             int poolIndex = poolNames.IndexOf(selectedPool);
             dropDownListSetting.dropdown.SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
-
-            dropDownListSetting.GetComponentInChildren<ScrollView>(true).SetField("_platformHelper", platformHelper);
 
             defaultHighlightColour = playlistManagerImage.HighlightColor;
             cancelHighlightColor = Color.red;
