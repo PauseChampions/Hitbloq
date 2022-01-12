@@ -11,7 +11,6 @@ using HMUI;
 using IPA.Utilities;
 using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
@@ -255,9 +254,13 @@ namespace Hitbloq.UI
                     HitbloqPoolInfo poolInfo = await poolInfoSource.GetPoolInfoAsync(pool.Key, poolInfoTokenSource.Token);
 
                     string poolName = poolInfo.shownName;
-                    if (poolName.Length > 15)
+                    if (poolName.HasNonASCIIChars())
                     {
-                        poolName = $"{new StringInfo(poolName).SubstringByTextElements(0, 12)}...";
+                        poolName = poolInfo.id;
+                    }
+                    if (poolName.Length > 18)
+                    {
+                        poolName = $"{poolName.Substring(0, 15)}...";
                     }
 
                     pools.Add($"{poolName} - {pool.Value}⭐");

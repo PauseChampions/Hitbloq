@@ -6,11 +6,11 @@ using Hitbloq.Configuration;
 using Hitbloq.Entries;
 using Hitbloq.Other;
 using Hitbloq.Sources;
+using Hitbloq.Utilities;
 using HMUI;
 using IPA.Utilities;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -334,9 +334,13 @@ namespace Hitbloq.UI
             get
             {
                 string poolName = $"{PoolInfo?.shownName}";
-                if (poolName.Length > 15)
+                if (poolName.HasNonASCIIChars())
                 {
-                    return $"{new StringInfo(poolName).SubstringByTextElements(0, 12)}...";
+                    poolName = $"{PoolInfo?.id}";
+                }
+                if (poolName.Length > 16)
+                {
+                    return $"{poolName.Substring(0, 13)}...";
                 }
                 return poolName;
             }

@@ -53,5 +53,10 @@ namespace Hitbloq.Utilities
             gameObject.SetActive(goState);
             return upgradedMonoBehaviour;
         }
+
+        public static bool HasNonASCIIChars(this string str)
+        {
+            return (System.Text.Encoding.UTF8.GetByteCount(str) != str.Length);
+        }
     }
 }
