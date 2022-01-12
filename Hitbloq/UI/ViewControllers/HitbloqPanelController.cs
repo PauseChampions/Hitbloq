@@ -107,6 +107,7 @@ namespace Hitbloq.UI
         [UIAction("#post-parse")]
         private async void PostParse()
         {
+            // Backround related stuff
             container.background.material = BeatSaberMarkupLanguage.Utilities.ImageResources.NoGlowMat;
             ImageView background = container.background as ImageView;
             background.color0 = Color.white;
@@ -115,6 +116,7 @@ namespace Hitbloq.UI
             background.SetField("_gradient", true);
             background.SetField("_skew", 0.18f);
 
+            // Loading up logos
             logoSprite = logo.sprite;
             flushedSprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.LogoFlushed.png");
             logo.sprite = CuteMode ? flushedSprite : logoSprite;
@@ -126,10 +128,14 @@ namespace Hitbloq.UI
             separator.SetVerticesDirty();
             separator.SetField("_skew", 0.18f);
 
+            // Dropdown needs to be modified to look good
             CurvedTextMeshPro dropdownText = dropDownListTransform.GetComponentInChildren<CurvedTextMeshPro>();
             dropdownText.fontSize = 3.5f;
             dropdownText.transform.localPosition = new Vector3(-1.5f, 0, 0);
 
+            // A bit of explanation of what is going on
+            // I want to make a maximum of 2 cells visible, however I first need to parse exactly 2 cells and clean them up
+            // After that I populate the current pool options
             (dropDownListSetting.dropdown as DropdownWithTableView).SetField("_numberOfVisibleCells", 2);
             dropDownListSetting.values = new List<object>() { "1", "2" };
             dropDownListSetting.UpdateChoices();

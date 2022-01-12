@@ -191,6 +191,7 @@ namespace Hitbloq.UI
                 placeholder.Add(new LeaderboardTableView.ScoreData(0, "", 0, false));
             }
 
+            // To set rich text, I have to make 10 empty cells, set each cell to allow rich text and next time they will have it
             LeaderboardTableCell[] leaderboardTableCells = leaderboardTransform.GetComponentsInChildren<LeaderboardTableCell>(true);
             foreach (var leaderboardTableCell in leaderboardTableCells)
             {
