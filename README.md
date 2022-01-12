@@ -23,6 +23,7 @@ Download the latest version of the mod (v1.2.0) [here](https://github.com/PauseC
 
 ## Issues and Support
 If you encounter any issues with this mod, DM me on Discord PixelBoom#0001 or file an Issue on GitHub and I'll fix it as soon as I can For support with the mod, DM me or ask a question on the #mod-support channel on the [Hitbloq Discord](https://discord.com/invite/pxWwtWJ)
+Alternatively you can also ask on the #pc-help channel on the BSMG Discord
 
 ## Contribution
 If you're a developer and would like to contribute to this mod, your contributions are welcome! Just submit a PR and I will take a look at it.
