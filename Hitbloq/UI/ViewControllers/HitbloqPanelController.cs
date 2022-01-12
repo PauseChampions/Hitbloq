@@ -21,7 +21,7 @@ namespace Hitbloq.UI
 {
     [HotReload(RelativePathToLayout = @"..\Views\HitbloqPanel.bsml")]
     [ViewDefinition("Hitbloq.UI.Views.HitbloqPanel.bsml")]
-    internal class HitbloqPanelController : BSMLAutomaticViewController, IDisposable, INotifyUserRegistered, IDifficultyBeatmapUpdater, IPoolUpdater, ILeaderboardEntriesUpdater
+    internal class HitbloqPanelController : BSMLAutomaticViewController, IInitializable, IDisposable, INotifyUserRegistered, IDifficultyBeatmapUpdater, IPoolUpdater, ILeaderboardEntriesUpdater
     {
         private MainFlowCoordinator mainFlowCoordinator;
         private HitbloqFlowCoordinator hitbloqFlowCoordinator;
@@ -166,8 +166,21 @@ namespace Hitbloq.UI
             }
         }
 
+        public void Initialize()
+        {
+            if (playlistManagerIHardlyKnowHer != null)
+            {
+                playlistManagerIHardlyKnowHer.HitbloqPlaylistSelected += OnPlaylistSelected;
+            }
+        }
+
         public void Dispose()
         {
+            if (playlistManagerIHardlyKnowHer != null)
+            {
+                playlistManagerIHardlyKnowHer.HitbloqPlaylistSelected -= OnPlaylistSelected;
+            }
+
             if (logo is ClickableImage clickableLogo)
             {
                 clickableLogo.OnClickEvent -= LogoClicked;
@@ -217,6 +230,8 @@ namespace Hitbloq.UI
         }
 
         private void LogoClicked(PointerEventData pointerEventData) => LogoClickedEvent?.Invoke();
+
+        private void OnPlaylistSelected(string pool) => selectedPool = pool;
 
         public void UserRegistered()
         {

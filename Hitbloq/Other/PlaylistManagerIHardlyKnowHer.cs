@@ -7,10 +7,11 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Zenject;
 
 namespace Hitbloq.Other
 {
-    internal class PlaylistManagerIHardlyKnowHer
+    internal class PlaylistManagerIHardlyKnowHer : IInitializable, IDisposable
     {
         private readonly IHttpService siraHttpService;
         private readonly LevelFilteringNavigationController levelFilteringNavigationController;
@@ -20,6 +21,7 @@ namespace Hitbloq.Other
         private CancellationTokenSource tokenSource;
 
         public bool IsDownloading => tokenSource != null && !tokenSource.IsCancellationRequested;
+        public event Action<string> HitbloqPlaylistSelected;
 
         public PlaylistManagerIHardlyKnowHer(IHttpService siraHttpService, LevelFilteringNavigationController levelFilteringNavigationController, SelectLevelCategoryViewController selectLevelCategoryViewController)
         {
@@ -27,6 +29,16 @@ namespace Hitbloq.Other
             this.levelFilteringNavigationController = levelFilteringNavigationController;
             this.selectLevelCategoryViewController = selectLevelCategoryViewController;
             levelCategorySegmentedControl = selectLevelCategoryViewController.GetField<IconSegmentedControl, SelectLevelCategoryViewController>("_levelFilterCategoryIconSegmentedControl");
+        }
+
+        public void Initialize()
+        {
+            PlaylistManager.Utilities.Events.playlistSelected += OnPlaylistSelected;
+        }
+
+        public void Dispose()
+        {
+            PlaylistManager.Utilities.Events.playlistSelected -= OnPlaylistSelected;
         }
 
         internal async void OpenPlaylist(string poolID, Action onDownloadComplete = null)
@@ -78,6 +90,21 @@ namespace Hitbloq.Other
             catch (TaskCanceledException)
             {
                 return null;
+            }
+        }
+
+        private void OnPlaylistSelected(BeatSaberPlaylistsLib.Types.IPlaylist playlist, BeatSaberPlaylistsLib.PlaylistManager parentManager)
+        {
+            if (playlist.TryGetCustomData("syncURL", out object url) && url is string urlString)
+            {
+                if (urlString.Contains("https://hitbloq.com/static/hashlists/"))
+                {
+                    string pool = urlString.Split('/').LastOrDefault().Split('.').FirstOrDefault();
+                    if (!string.IsNullOrEmpty(pool))
+                    {
+                        HitbloqPlaylistSelected?.Invoke(pool);
+                    }
+                }
             }
         }
     }
