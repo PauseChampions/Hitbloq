@@ -1,8 +1,10 @@
 ﻿using Hitbloq.Installers;
+using Hitbloq.Other;
 using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
 using SiraUtil.Zenject;
+using Zenject;
 using IPALogger = IPA.Logging.Logger;
 
 namespace Hitbloq
@@ -25,7 +27,15 @@ namespace Hitbloq
             Plugin.Log = logger;
             Configuration.PluginConfig.Instance = conf.Generated<Configuration.PluginConfig>();
             zenjector.UseHttpService();
+            zenjector.Install(Location.App, (DiContainer Container) =>
+            {
+                Container.Bind<BeatmapListener>().AsSingle();
+            });
             zenjector.Install<HitbloqMenuInstaller>(Location.Menu);
+            zenjector.Install(Location.StandardPlayer, (DiContainer Container) =>
+            {
+                Container.BindInterfacesTo<BeatmapReporter>().AsSingle();
+            });
         }
     }
 }

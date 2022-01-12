@@ -1,10 +1,8 @@
 ﻿using Hitbloq.Entries;
 using Hitbloq.Sources;
 using Hitbloq.UI;
-using IPA.Utilities;
 using SiraUtil.Web;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Hitbloq.Other
@@ -12,18 +10,16 @@ namespace Hitbloq.Other
     internal class LeaderboardRefresher
     {
         private readonly IHttpService siraHttpService;
-        private readonly ResultsViewController resultsViewController;
-        private readonly StandardLevelDetailViewController standardLevelDetailViewController;
+        private readonly BeatmapListener beatmapListener;
         private readonly HitbloqPanelController hitbloqPanelController;
         private readonly UserIDSource userIDSource;
         private readonly LevelInfoSource levelInfoSource;
 
-        public LeaderboardRefresher(IHttpService siraHttpService, ResultsViewController resultsViewController, StandardLevelDetailViewController standardLevelDetailViewController,
+        public LeaderboardRefresher(IHttpService siraHttpService, BeatmapListener beatmapListener,
             HitbloqPanelController hitbloqPanelController, UserIDSource userIDSource, LevelInfoSource levelInfoSource)
         {
             this.siraHttpService = siraHttpService;
-            this.resultsViewController = resultsViewController;
-            this.standardLevelDetailViewController = standardLevelDetailViewController;
+            this.beatmapListener = beatmapListener;
             this.hitbloqPanelController = hitbloqPanelController;
             this.userIDSource = userIDSource;
             this.levelInfoSource = levelInfoSource;
@@ -81,22 +77,13 @@ namespace Hitbloq.Other
                 return false;
             }
 
-            IDifficultyBeatmap lastPlayedBeatmap = resultsViewController.GetField<IDifficultyBeatmap, ResultsViewController>("_difficultyBeatmap");
-            HitbloqLevelInfo levelInfo;
-
-            if (lastPlayedBeatmap != null)
+            if (beatmapListener.lastPlayedDifficultyBeatmap != null)
             {
-                levelInfo = await levelInfoSource.GetLevelInfoAsync(lastPlayedBeatmap);
+                HitbloqLevelInfo levelInfo = await levelInfoSource.GetLevelInfoAsync(beatmapListener.lastPlayedDifficultyBeatmap);
                 if (levelInfo != null)
                 {
                     return true;
                 }
-            }
-
-            levelInfo = await levelInfoSource.GetLevelInfoAsync(standardLevelDetailViewController.selectedDifficultyBeatmap);
-            if (levelInfo != null)
-            {
-                return true;
             }
 
             return false;
