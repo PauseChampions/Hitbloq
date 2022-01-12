@@ -10,6 +10,7 @@ using HMUI;
 using IPA.Utilities;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using UnityEngine;
@@ -319,7 +320,7 @@ namespace Hitbloq.UI
             get
             {
                 string userName = $"{RankInfo?.username}";
-                if (userName.Length > 13)
+                if (userName.Length > 16)
                 {
                     return $"{userName.Substring(0, 13)}...";
                 }
@@ -328,7 +329,18 @@ namespace Hitbloq.UI
         }
 
         [UIValue("pool-name")]
-        private string PoolName => $"{PoolInfo?.shownName}";
+        private string PoolName
+        {
+            get
+            {
+                string poolName = $"{PoolInfo?.shownName}";
+                if (poolName.Length > 15)
+                {
+                    return $"{new StringInfo(poolName).SubstringByTextElements(0, 12)}...";
+                }
+                return poolName;
+            }
+        }
 
         [UIValue("rank")]
         private string Rank => $"#{RankInfo?.rank}";

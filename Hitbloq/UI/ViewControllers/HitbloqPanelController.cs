@@ -11,6 +11,7 @@ using HMUI;
 using IPA.Utilities;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading;
 using UnityEngine;
@@ -252,7 +253,14 @@ namespace Hitbloq.UI
                 foreach(var pool in levelInfoEntry.pools)
                 {
                     HitbloqPoolInfo poolInfo = await poolInfoSource.GetPoolInfoAsync(pool.Key, poolInfoTokenSource.Token);
-                    pools.Add($"{poolInfo.shownName} - {pool.Value}⭐");
+
+                    string poolName = poolInfo.shownName;
+                    if (poolName.Length > 15)
+                    {
+                        poolName = $"{new StringInfo(poolName).SubstringByTextElements(0, 12)}...";
+                    }
+
+                    pools.Add($"{poolName} - {pool.Value}⭐");
                 }
                 poolNames = levelInfoEntry.pools.Keys.ToList();
             }
