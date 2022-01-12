@@ -6,6 +6,7 @@ using Hitbloq.Entries;
 using Hitbloq.Interfaces;
 using Hitbloq.Other;
 using Hitbloq.Sources;
+using Hitbloq.Utilities;
 using HMUI;
 using IPA.Utilities;
 using System.ComponentModel;
@@ -40,7 +41,7 @@ namespace Hitbloq.UI
         }
 
         [UIComponent("modal")]
-        private readonly ModalView modalView;
+        private ModalView modalView;
 
         [UIComponent("modal")]
         private readonly RectTransform modalTransform;
@@ -87,7 +88,7 @@ namespace Hitbloq.UI
             }
             modalTransform.SetParent(parentTransform);
             modalTransform.localPosition = modalPosition;
-            modalView.SetField("_animateParentCanvas", true);
+            Accessors.AnimateCanvasAccessor(ref modalView) = true;
             descriptionTextPage.ScrollTo(0, true);
         }
 

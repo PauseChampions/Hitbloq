@@ -79,7 +79,7 @@ namespace Hitbloq.UI
         private ImageView logo;
 
         [UIComponent("separator")]
-        private readonly ImageView separator;
+        private ImageView separator;
 
         [UIComponent("dropdown-list")]
         private readonly DropDownListSetting dropDownListSetting;
@@ -111,8 +111,8 @@ namespace Hitbloq.UI
             background.color0 = Color.white;
             background.color1 = new Color(1f, 1f, 1f, 0f);
             background.color = Color.gray;
-            background.SetField("_gradient", true);
-            background.SetField("_skew", 0.18f);
+            Accessors.GradientAccessor(ref background) = true;
+            Accessors.SkewAccessor(ref background) = 0.18f;
 
             // Loading up logos
             logoSprite = logo.sprite;
@@ -120,11 +120,11 @@ namespace Hitbloq.UI
             logo.sprite = CuteMode ? flushedSprite : logoSprite;
             logo.GetComponent<HoverHint>().enabled = CuteMode;
 
-            logo.SetField("_skew", 0.18f);
+            Accessors.SkewAccessor(ref logo) = 0.18f;
             logo.SetVerticesDirty();
 
+            Accessors.SkewAccessor(ref separator) = 0.18f;
             separator.SetVerticesDirty();
-            separator.SetField("_skew", 0.18f);
 
             // Dropdown needs to be modified to look good
             CurvedTextMeshPro dropdownText = dropDownListTransform.GetComponentInChildren<CurvedTextMeshPro>();
@@ -139,7 +139,7 @@ namespace Hitbloq.UI
             dropDownListSetting.UpdateChoices();
             dropDownListSetting.values = pools.Count != 0 ? pools : new List<object> { "None" };
             dropDownListSetting.UpdateChoices();
-            int poolIndex = poolNames.IndexOf(selectedPool);
+            int poolIndex = poolNames == null ? 0 : poolNames.IndexOf(selectedPool);
             dropDownListSetting.dropdown.SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
 
             defaultHighlightColour = playlistManagerImage.HighlightColor;

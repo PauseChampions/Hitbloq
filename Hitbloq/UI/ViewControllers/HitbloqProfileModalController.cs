@@ -56,7 +56,7 @@ namespace Hitbloq.UI
         private ImageView modalBackground;
 
         [UIComponent("modal")]
-        private readonly ModalView modalView;
+        private ModalView modalView;
 
         [UIComponent("modal")]
         private readonly RectTransform modalTransform;
@@ -202,7 +202,7 @@ namespace Hitbloq.UI
             modalBackground.color = originalModalColour;
             modalBackground.material = fogBG;
 
-            modalView.SetField("_animateParentCanvas", true);
+            Accessors.AnimateCanvasAccessor(ref modalView) = true;
         }
 
         internal async void ShowModalForSelf(Transform parentTransform, HitbloqRankInfo rankInfo, string pool)

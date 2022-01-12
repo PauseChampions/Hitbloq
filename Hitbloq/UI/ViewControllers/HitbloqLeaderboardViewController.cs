@@ -42,7 +42,7 @@ namespace Hitbloq.UI
                 if (leaderboardTransform != null)
                 {
                     leaderboard.SetScores(new List<LeaderboardTableView.ScoreData>(), 0);
-                    leaderboardTransform.Find("LoadingControl").gameObject.SetActive(true);
+                    loadingControl.SetActive(true);
                 }
                 PageRequested?.Invoke(difficultyBeatmap, leaderboardSources[SelectedCellIndex], value);
             }
@@ -63,6 +63,8 @@ namespace Hitbloq.UI
 
         [UIComponent("leaderboard")]
         private readonly LeaderboardTableView leaderboard;
+
+        private GameObject loadingControl;
 
         #region Info Buttons
 
@@ -161,7 +163,7 @@ namespace Hitbloq.UI
 
             if (leaderboardTransform != null)
             {
-                leaderboardTransform.Find("LoadingControl").gameObject.SetActive(false);
+                loadingControl.SetActive(false);
                 leaderboard.SetScores(scores, myScorePos);
             }
         }
@@ -198,6 +200,7 @@ namespace Hitbloq.UI
                 leaderboardTableCell.transform.Find("PlayerName").GetComponent<CurvedTextMeshPro>().richText = true;
             }
             Destroy(leaderboardTransform.Find("LoadingControl").Find("LoadingContainer").Find("Text").gameObject);
+            loadingControl = leaderboardTransform.Find("LoadingControl").gameObject;
 
             infoButtons = new List<Button>();
 
