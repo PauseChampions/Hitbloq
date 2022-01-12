@@ -4,7 +4,6 @@ using Hitbloq.UI;
 using Hitbloq.Utilities;
 using SiraUtil.Web;
 using System.Collections.Generic;
-using System.Threading;
 using Zenject;
 
 namespace Hitbloq.Other
@@ -46,9 +45,9 @@ namespace Hitbloq.Other
             }
 
             // If a valid scoresaber id doesnt exist, return
-            IHttpResponse webResponse = await siraHttpService.GetAsync($"https://new.scoresaber.com/api/player/{userInfo.platformUserId}/full").ConfigureAwait(false);
+            IHttpResponse webResponse = await siraHttpService.GetAsync($"https://scoresaber.com/api/player/{userInfo.platformUserId}/full").ConfigureAwait(false);
             ScoreSaberUserInfo scoreSaberUserInfo = await Utils.ParseWebResponse<ScoreSaberUserInfo>(webResponse);
-            if (scoreSaberUserInfo?.playerInfo == null)
+            if (scoreSaberUserInfo?.errorMessage == "Player not found")
             {
                 hitbloqPanelController.PromptText = "<color=red>Please submit some scores from your ScoreSaber account.</color>";
                 hitbloqPanelController.LoadingActive = false;
