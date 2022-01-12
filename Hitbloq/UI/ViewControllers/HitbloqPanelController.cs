@@ -249,8 +249,8 @@ namespace Hitbloq.UI
                 {
                     HitbloqPoolInfo poolInfo = await poolInfoSource.GetPoolInfoAsync(pool.Key, poolInfoTokenSource.Token);
 
-                    string poolName = poolInfo.shownName;
-                    if (poolName.HasNonASCIIChars())
+                    string poolName = poolInfo.shownName.RemoveSpecialCharacters();
+                    if (poolName.DoesNotHaveAlphaNumericCharacters())
                     {
                         poolName = poolInfo.id;
                     }

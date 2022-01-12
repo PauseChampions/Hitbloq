@@ -8,7 +8,6 @@ using Hitbloq.Other;
 using Hitbloq.Sources;
 using Hitbloq.Utilities;
 using HMUI;
-using IPA.Utilities;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -333,8 +332,8 @@ namespace Hitbloq.UI
         {
             get
             {
-                string poolName = $"{PoolInfo?.shownName}";
-                if (poolName.HasNonASCIIChars())
+                string poolName = $"{PoolInfo?.shownName}".RemoveSpecialCharacters();
+                if (poolName.DoesNotHaveAlphaNumericCharacters())
                 {
                     poolName = $"{PoolInfo?.id}";
                 }

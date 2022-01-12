@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
 using SiraUtil.Web;
@@ -62,9 +63,30 @@ namespace Hitbloq.Utilities
             return upgradedMonoBehaviour;
         }
 
-        public static bool HasNonASCIIChars(this string str)
+        public static bool DoesNotHaveAlphaNumericCharacters(this string str)
         {
-            return (System.Text.Encoding.UTF8.GetByteCount(str) != str.Length);
+            StringBuilder sb = new StringBuilder();
+            foreach (char c in str)
+            {
+                if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+                {
+                    sb.Append(c);
+                }
+            }
+            return sb.Length == 0;
+        }
+
+        public static string RemoveSpecialCharacters(this string str)
+        {
+            StringBuilder sb = new StringBuilder();
+            foreach (char c in str)
+            {
+                if (c <= 255)
+                {
+                    sb.Append(c);
+                }
+            }
+            return sb.ToString();
         }
     }
 }
