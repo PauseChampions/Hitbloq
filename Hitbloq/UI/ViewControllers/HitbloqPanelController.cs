@@ -133,9 +133,10 @@ namespace Hitbloq.UI
             (dropDownListSetting.dropdown as DropdownWithTableView).SetField("_numberOfVisibleCells", 2);
             dropDownListSetting.values = new List<object>() { "1", "2" };
             dropDownListSetting.UpdateChoices();
-            dropDownListSetting.dropdown.SelectCellWithIdx(0);
             dropDownListSetting.values = pools.Count != 0 ? pools : new List<object> { "None" };
             dropDownListSetting.UpdateChoices();
+            int poolIndex = poolNames.IndexOf(selectedPool);
+            dropDownListSetting.dropdown.SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
 
             dropDownListSetting.GetComponentInChildren<ScrollView>(true).SetField("_platformHelper", platformHelper);
 
@@ -167,7 +168,7 @@ namespace Hitbloq.UI
             }
         }
 
-        protected override async void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
             NotifyPropertyChanged(nameof(PlaylistManagerActive));
@@ -233,18 +234,20 @@ namespace Hitbloq.UI
                     pools.Add($"{poolInfo.shownName} - {pool.Value}⭐");
                 }
                 poolNames = levelInfoEntry.pools.Keys.ToList();
-                PoolUpdated(poolNames.First());
             }
             else
             {
                 poolNames = new List<string> { "None" };
             }
 
+            int poolIndex = poolNames.IndexOf(selectedPool);
+            PoolChangedEvent?.Invoke(poolNames[poolIndex == -1 ? 0 : poolIndex]);
+
             if (dropDownListSetting != null)
             {
                 dropDownListSetting.values = pools.Count != 0 ? pools : new List<object> { "None" };
                 dropDownListSetting.UpdateChoices();
-                dropDownListSetting.dropdown.SelectCellWithIdx(0);
+                dropDownListSetting.dropdown.SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
 
                 if (!LoadingActive && !PromptText.Contains("<color=red>"))
                 {

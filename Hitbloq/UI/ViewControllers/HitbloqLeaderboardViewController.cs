@@ -1,5 +1,4 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
-using BeatSaberMarkupLanguage.Parser;
 using BeatSaberMarkupLanguage.ViewControllers;
 using Hitbloq.Entries;
 using Hitbloq.Interfaces;
@@ -122,9 +121,12 @@ namespace Hitbloq.UI
             List<LeaderboardTableView.ScoreData> scores = new List<LeaderboardTableView.ScoreData>();
             int myScorePos = -1;
 
-            foreach (var button in infoButtons)
+            if (infoButtons != null)
             {
-                button.gameObject.SetActive(false);
+                foreach (var button in infoButtons)
+                {
+                    button.gameObject.SetActive(false);
+                }
             }
 
             if (leaderboardEntries == null || leaderboardEntries.Count == 0)
@@ -133,6 +135,11 @@ namespace Hitbloq.UI
             }
             else
             {
+                if (!leaderboardEntries.First().cr.ContainsKey(selectedPool))
+                {
+                    return;
+                }
+
                 HitbloqUserID userID = await userIDSource.GetUserIDAsync();
                 int id = userID.id;
 
@@ -269,7 +276,6 @@ namespace Hitbloq.UI
             if (levelInfoEntry != null)
             {
                 this.difficultyBeatmap = difficultyBeatmap;
-                selectedPool = levelInfoEntry.pools.Keys.First();
                 if (isActiveAndEnabled)
                 {
                     foreach (ILeaderboardSource leaderboardSource in leaderboardSources)
@@ -291,7 +297,10 @@ namespace Hitbloq.UI
         public void PoolUpdated(string pool)
         {
             this.selectedPool = pool;
-            SetScores(leaderboardEntries);
+            if (isActiveAndEnabled)
+            {
+                SetScores(leaderboardEntries);
+            }
         }
 
         [UIValue("cell-data")]
