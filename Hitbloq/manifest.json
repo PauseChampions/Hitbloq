@@ -1,15 +1,24 @@
 {
-  "$schema": "https://raw.githubusercontent.com/bsmg/BSIPA-MetadataFileSchema/master/Schema.json",
-  "id": "Hitbloq",
-  "name": "Hitbloq",
-  "author": "Hitbloq",
-  "version": "1.1.1",
-  "description": "Hitbloq offers a unique competitive experience for Beat Saber through its use of map pools and the relative ranking algorithm.",
-  "gameVersion": "1.19.0",
+    "$schema": "https://raw.githubusercontent.com/bsmg/BSIPA-MetadataFileSchema/master/Schema.json",
+    "id": "Hitbloq",
+    "name": "Hitbloq",
+    "author": "PauseChampions & DaFluffyPotato",
+    "version": "1.2.0",
+    "description": [
+        "#![Hitbloq.Description.md]",
+        "Hitbloq offers a unique competitive experience for Beat Saber through its use of map pools and the relative ranking algorithm."
+    ],
+    "gameVersion": "1.19.0",
+    "icon": "Hitbloq.Images.Logo.png",
     "dependsOn": {
         "BSIPA": "^4.2.1",
-        "BeatSaberMarkupLanguage": "^1.5.10",
+        "BeatSaberMarkupLanguage": "^1.6.0",
         "SiraUtil": "^3.0.0",
-        "LeaderboardCore": "^1.0.0"
+        "LeaderboardCore": "^1.1.0"
+    },
+    "links": {
+        "project-home": "https://hitbloq.com/",
+        "project-source": "https://github.com/PauseChampions/Hitbloq",
+        "donate": "https://patreon.com/hitbloq"
     }
 }
