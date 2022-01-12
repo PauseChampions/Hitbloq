@@ -1,6 +1,6 @@
 ﻿using Hitbloq.Entries;
 using Hitbloq.Utilities;
-using SiraUtil;
+using SiraUtil.Web;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -9,12 +9,12 @@ namespace Hitbloq.Sources
 {
     internal class LevelInfoSource
     {
-        private readonly SiraClient siraClient;
+        private readonly IHttpService siraHttpService;
         private readonly Dictionary<IDifficultyBeatmap, HitbloqLevelInfo> cache;
 
-        public LevelInfoSource(SiraClient siraClient)
+        public LevelInfoSource(IHttpService siraHttpService)
         {
-            this.siraClient = siraClient;
+            this.siraHttpService = siraHttpService;
             cache = new Dictionary<IDifficultyBeatmap, HitbloqLevelInfo>();
         }
 
@@ -27,8 +27,8 @@ namespace Hitbloq.Sources
 
             try
             {
-                WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/info", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                HitbloqLevelInfo levelInfo = Utils.ParseWebResponse<HitbloqLevelInfo>(webResponse);
+                IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/info", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                HitbloqLevelInfo levelInfo = await Utils.ParseWebResponse<HitbloqLevelInfo>(webResponse);
 
                 cache[difficultyBeatmap] = levelInfo;
                 return levelInfo;

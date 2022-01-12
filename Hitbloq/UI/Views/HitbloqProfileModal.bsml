@@ -25,5 +25,5 @@
 			</vertical>
 		</vertical>
 	</horizontal>
-	<icon-button id='add-friend' hover-hint='~add-friend-hover' interactable='~add-friend-interactable' on-click='add-friend-click' anchor-pos-x='76' anchor-pos-y='-3' />
+	<icon-button id='add-friend' hover-hint='~add-friend-hover' interactable='~add-friend-interactable' on-click='add-friend-click' anchor-pos-x='76' anchor-pos-y='-3' active='~is-not-loading' />
 </modal>

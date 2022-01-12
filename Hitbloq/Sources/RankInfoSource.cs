@@ -1,6 +1,6 @@
 ﻿using Hitbloq.Entries;
 using Hitbloq.Utilities;
-using SiraUtil;
+using SiraUtil.Web;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,12 +8,12 @@ namespace Hitbloq.Sources
 {
     internal class RankInfoSource
     {
-        private readonly SiraClient siraClient;
+        private readonly IHttpService siraHttpService;
         private readonly UserIDSource userIDSource;
 
-        public RankInfoSource(SiraClient siraClient, UserIDSource userIDSource)
+        public RankInfoSource(IHttpService siraHttpService, UserIDSource userIDSource)
         {
-            this.siraClient = siraClient;
+            this.siraHttpService = siraHttpService;
             this.userIDSource = userIDSource;
         }
 
@@ -31,8 +31,8 @@ namespace Hitbloq.Sources
         {
             try
             {
-                WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/player_rank/{poolID}/{userID}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                return Utils.ParseWebResponse<HitbloqRankInfo>(webResponse);
+                IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/player_rank/{poolID}/{userID}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                return await Utils.ParseWebResponse<HitbloqRankInfo>(webResponse);
             }
             catch (TaskCanceledException) { }
             return null;

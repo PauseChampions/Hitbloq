@@ -1,5 +1,4 @@
 ﻿using BeatSaberMarkupLanguage.Attributes;
-using BeatSaberMarkupLanguage.Parser;
 using BeatSaberMarkupLanguage.ViewControllers;
 using Hitbloq.Entries;
 using Hitbloq.Interfaces;
@@ -43,7 +42,7 @@ namespace Hitbloq.UI
                 if (leaderboardTransform != null)
                 {
                     leaderboard.SetScores(new List<LeaderboardTableView.ScoreData>(), 0);
-                    leaderboardTransform.Find("LoadingControl").gameObject.SetActive(true);
+                    loadingControl.SetActive(true);
                 }
                 PageRequested?.Invoke(difficultyBeatmap, leaderboardSources[SelectedCellIndex], value);
             }
@@ -64,6 +63,8 @@ namespace Hitbloq.UI
 
         [UIComponent("leaderboard")]
         private readonly LeaderboardTableView leaderboard;
+
+        private GameObject loadingControl;
 
         #region Info Buttons
 
@@ -122,9 +123,12 @@ namespace Hitbloq.UI
             List<LeaderboardTableView.ScoreData> scores = new List<LeaderboardTableView.ScoreData>();
             int myScorePos = -1;
 
-            foreach (var button in infoButtons)
+            if (infoButtons != null)
             {
-                button.gameObject.SetActive(false);
+                foreach (var button in infoButtons)
+                {
+                    button.gameObject.SetActive(false);
+                }
             }
 
             if (leaderboardEntries == null || leaderboardEntries.Count == 0)
@@ -133,6 +137,11 @@ namespace Hitbloq.UI
             }
             else
             {
+                if (!leaderboardEntries.First().cr.ContainsKey(selectedPool))
+                {
+                    return;
+                }
+
                 HitbloqUserID userID = await userIDSource.GetUserIDAsync();
                 int id = userID.id;
 
@@ -154,7 +163,7 @@ namespace Hitbloq.UI
 
             if (leaderboardTransform != null)
             {
-                leaderboardTransform.Find("LoadingControl").gameObject.SetActive(false);
+                loadingControl.SetActive(false);
                 leaderboard.SetScores(scores, myScorePos);
             }
         }
@@ -184,12 +193,14 @@ namespace Hitbloq.UI
                 placeholder.Add(new LeaderboardTableView.ScoreData(0, "", 0, false));
             }
 
+            // To set rich text, I have to make 10 empty cells, set each cell to allow rich text and next time they will have it
             LeaderboardTableCell[] leaderboardTableCells = leaderboardTransform.GetComponentsInChildren<LeaderboardTableCell>(true);
             foreach (var leaderboardTableCell in leaderboardTableCells)
             {
                 leaderboardTableCell.transform.Find("PlayerName").GetComponent<CurvedTextMeshPro>().richText = true;
             }
             Destroy(leaderboardTransform.Find("LoadingControl").Find("LoadingContainer").Find("Text").gameObject);
+            loadingControl = leaderboardTransform.Find("LoadingControl").gameObject;
 
             infoButtons = new List<Button>();
 
@@ -269,7 +280,6 @@ namespace Hitbloq.UI
             if (levelInfoEntry != null)
             {
                 this.difficultyBeatmap = difficultyBeatmap;
-                selectedPool = levelInfoEntry.pools.Keys.First();
                 if (isActiveAndEnabled)
                 {
                     foreach (ILeaderboardSource leaderboardSource in leaderboardSources)
@@ -291,7 +301,10 @@ namespace Hitbloq.UI
         public void PoolUpdated(string pool)
         {
             this.selectedPool = pool;
-            SetScores(leaderboardEntries);
+            if (isActiveAndEnabled)
+            {
+                SetScores(leaderboardEntries);
+            }
         }
 
         [UIValue("cell-data")]

@@ -6,9 +6,9 @@ using Hitbloq.Entries;
 using Hitbloq.Interfaces;
 using Hitbloq.Other;
 using Hitbloq.Sources;
+using Hitbloq.Utilities;
 using HMUI;
 using IPA.Utilities;
-using SiraUtil;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,12 +21,11 @@ namespace Hitbloq.UI
 {
     [HotReload(RelativePathToLayout = @"..\Views\HitbloqPanel.bsml")]
     [ViewDefinition("Hitbloq.UI.Views.HitbloqPanel.bsml")]
-    internal class HitbloqPanelController : BSMLAutomaticViewController, IDisposable, INotifyUserRegistered, IDifficultyBeatmapUpdater, IPoolUpdater, ILeaderboardEntriesUpdater
+    internal class HitbloqPanelController : BSMLAutomaticViewController, IInitializable, IDisposable, INotifyUserRegistered, IDifficultyBeatmapUpdater, IPoolUpdater, ILeaderboardEntriesUpdater
     {
         private MainFlowCoordinator mainFlowCoordinator;
         private HitbloqFlowCoordinator hitbloqFlowCoordinator;
         private PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer;
-        private IVRPlatformHelper platformHelper;
         private RankInfoSource rankInfoSource;
         private PoolInfoSource poolInfoSource;
         private EventSource eventSource;
@@ -80,7 +79,7 @@ namespace Hitbloq.UI
         private ImageView logo;
 
         [UIComponent("separator")]
-        private readonly ImageView separator;
+        private ImageView separator;
 
         [UIComponent("dropdown-list")]
         private readonly DropDownListSetting dropDownListSetting;
@@ -93,12 +92,11 @@ namespace Hitbloq.UI
 
         [Inject]
         private void Inject(MainFlowCoordinator mainFlowCoordinator, HitbloqFlowCoordinator hitbloqFlowCoordinator, [InjectOptional] PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer, 
-            IVRPlatformHelper platformHelper, RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource, EventSource eventSource)
+            RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource, EventSource eventSource)
         {
             this.mainFlowCoordinator = mainFlowCoordinator;
             this.hitbloqFlowCoordinator = hitbloqFlowCoordinator;
             this.playlistManagerIHardlyKnowHer = playlistManagerIHardlyKnowHer;
-            this.platformHelper = platformHelper;
             this.rankInfoSource = rankInfoSource;
             this.poolInfoSource = poolInfoSource;
             this.eventSource = eventSource;
@@ -107,37 +105,42 @@ namespace Hitbloq.UI
         [UIAction("#post-parse")]
         private async void PostParse()
         {
+            // Backround related stuff
             container.background.material = BeatSaberMarkupLanguage.Utilities.ImageResources.NoGlowMat;
             ImageView background = container.background as ImageView;
             background.color0 = Color.white;
             background.color1 = new Color(1f, 1f, 1f, 0f);
             background.color = Color.gray;
-            background.SetField("_gradient", true);
-            background.SetField("_skew", 0.18f);
+            Accessors.GradientAccessor(ref background) = true;
+            Accessors.SkewAccessor(ref background) = 0.18f;
 
+            // Loading up logos
             logoSprite = logo.sprite;
             flushedSprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.LogoFlushed.png");
             logo.sprite = CuteMode ? flushedSprite : logoSprite;
             logo.GetComponent<HoverHint>().enabled = CuteMode;
 
-            logo.SetField("_skew", 0.18f);
+            Accessors.SkewAccessor(ref logo) = 0.18f;
             logo.SetVerticesDirty();
 
+            Accessors.SkewAccessor(ref separator) = 0.18f;
             separator.SetVerticesDirty();
-            separator.SetField("_skew", 0.18f);
 
+            // Dropdown needs to be modified to look good
             CurvedTextMeshPro dropdownText = dropDownListTransform.GetComponentInChildren<CurvedTextMeshPro>();
             dropdownText.fontSize = 3.5f;
             dropdownText.transform.localPosition = new Vector3(-1.5f, 0, 0);
 
+            // A bit of explanation of what is going on
+            // I want to make a maximum of 2 cells visible, however I first need to parse exactly 2 cells and clean them up
+            // After that I populate the current pool options
             (dropDownListSetting.dropdown as DropdownWithTableView).SetField("_numberOfVisibleCells", 2);
             dropDownListSetting.values = new List<object>() { "1", "2" };
             dropDownListSetting.UpdateChoices();
-            dropDownListSetting.dropdown.SelectCellWithIdx(0);
             dropDownListSetting.values = pools.Count != 0 ? pools : new List<object> { "None" };
             dropDownListSetting.UpdateChoices();
-
-            dropDownListSetting.GetComponentInChildren<ScrollView>(true).SetField("_platformHelper", platformHelper);
+            int poolIndex = poolNames == null ? 0 : poolNames.IndexOf(selectedPool);
+            dropDownListSetting.dropdown.SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
 
             defaultHighlightColour = playlistManagerImage.HighlightColor;
             cancelHighlightColor = Color.red;
@@ -159,15 +162,28 @@ namespace Hitbloq.UI
             }
         }
 
+        public void Initialize()
+        {
+            if (playlistManagerIHardlyKnowHer != null)
+            {
+                playlistManagerIHardlyKnowHer.HitbloqPlaylistSelected += OnPlaylistSelected;
+            }
+        }
+
         public void Dispose()
         {
+            if (playlistManagerIHardlyKnowHer != null)
+            {
+                playlistManagerIHardlyKnowHer.HitbloqPlaylistSelected -= OnPlaylistSelected;
+            }
+
             if (logo is ClickableImage clickableLogo)
             {
                 clickableLogo.OnClickEvent -= LogoClicked;
             }
         }
 
-        protected override async void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
             NotifyPropertyChanged(nameof(PlaylistManagerActive));
@@ -211,6 +227,8 @@ namespace Hitbloq.UI
 
         private void LogoClicked(PointerEventData pointerEventData) => LogoClickedEvent?.Invoke();
 
+        private void OnPlaylistSelected(string pool) => selectedPool = pool;
+
         public void UserRegistered()
         {
             PromptText = "";
@@ -230,21 +248,34 @@ namespace Hitbloq.UI
                 foreach(var pool in levelInfoEntry.pools)
                 {
                     HitbloqPoolInfo poolInfo = await poolInfoSource.GetPoolInfoAsync(pool.Key, poolInfoTokenSource.Token);
-                    pools.Add($"{poolInfo.shownName} - {pool.Value}⭐");
+
+                    string poolName = poolInfo.shownName.RemoveSpecialCharacters();
+                    if (poolName.DoesNotHaveAlphaNumericCharacters())
+                    {
+                        poolName = poolInfo.id;
+                    }
+                    if (poolName.Length > 18)
+                    {
+                        poolName = $"{poolName.Substring(0, 15)}...";
+                    }
+
+                    pools.Add($"{poolName} - {pool.Value}⭐");
                 }
                 poolNames = levelInfoEntry.pools.Keys.ToList();
-                PoolUpdated(poolNames.First());
             }
             else
             {
                 poolNames = new List<string> { "None" };
             }
 
+            int poolIndex = poolNames.IndexOf(selectedPool);
+            PoolChangedEvent?.Invoke(poolNames[poolIndex == -1 ? 0 : poolIndex]);
+
             if (dropDownListSetting != null)
             {
                 dropDownListSetting.values = pools.Count != 0 ? pools : new List<object> { "None" };
                 dropDownListSetting.UpdateChoices();
-                dropDownListSetting.dropdown.SelectCellWithIdx(0);
+                dropDownListSetting.dropdown.SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
 
                 if (!LoadingActive && !PromptText.Contains("<color=red>"))
                 {

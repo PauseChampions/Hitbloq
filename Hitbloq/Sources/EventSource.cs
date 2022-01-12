@@ -1,6 +1,6 @@
 ﻿using Hitbloq.Entries;
 using Hitbloq.Utilities;
-using SiraUtil;
+using SiraUtil.Web;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,12 +8,12 @@ namespace Hitbloq.Sources
 {
     internal class EventSource
     {
-        private readonly SiraClient siraClient;
+        private readonly IHttpService siraHttpService;
         private HitbloqEvent cachedEvent;
 
-        public EventSource(SiraClient siraClient)
+        public EventSource(IHttpService siraHttpService)
         {
-            this.siraClient = siraClient;
+            this.siraHttpService = siraHttpService;
         }
 
         public async Task<HitbloqEvent> GetEventAsync(CancellationToken? cancellationToken = null)
@@ -22,8 +22,8 @@ namespace Hitbloq.Sources
             {
                 try
                 {
-                    WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/event", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                    cachedEvent = Utils.ParseWebResponse<HitbloqEvent>(webResponse);
+                    IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/event", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                    cachedEvent = await Utils.ParseWebResponse<HitbloqEvent>(webResponse);
                 }
                 catch (TaskCanceledException) { }
             }

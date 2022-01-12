@@ -6,6 +6,7 @@ using Hitbloq.Entries;
 using Hitbloq.Interfaces;
 using Hitbloq.Other;
 using Hitbloq.Sources;
+using Hitbloq.Utilities;
 using HMUI;
 using IPA.Utilities;
 using System.ComponentModel;
@@ -19,7 +20,6 @@ namespace Hitbloq.UI
     {
         private readonly EventSource eventSource;
         private readonly SpriteLoader spriteLoader;
-        private readonly IVRPlatformHelper platformHelper;
         private readonly PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer;
 
         private HitbloqEvent currentEvent;
@@ -41,7 +41,7 @@ namespace Hitbloq.UI
         }
 
         [UIComponent("modal")]
-        private readonly ModalView modalView;
+        private ModalView modalView;
 
         [UIComponent("modal")]
         private readonly RectTransform modalTransform;
@@ -55,12 +55,10 @@ namespace Hitbloq.UI
         [UIParams]
         private readonly BSMLParserParams parserParams;
 
-        public HitbloqEventModalViewController(EventSource eventSource, SpriteLoader spriteLoader, IVRPlatformHelper platformHelper,
-            [InjectOptional] PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer)
+        public HitbloqEventModalViewController(EventSource eventSource, SpriteLoader spriteLoader, [InjectOptional] PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer)
         {
             this.eventSource = eventSource;
             this.spriteLoader = spriteLoader;
-            this.platformHelper = platformHelper;
             this.playlistManagerIHardlyKnowHer = playlistManagerIHardlyKnowHer;
         }
 
@@ -90,7 +88,7 @@ namespace Hitbloq.UI
             }
             modalTransform.SetParent(parentTransform);
             modalTransform.localPosition = modalPosition;
-            modalView.SetField("_animateParentCanvas", true);
+            Accessors.AnimateCanvasAccessor(ref modalView) = true;
             descriptionTextPage.ScrollTo(0, true);
         }
 
@@ -106,8 +104,6 @@ namespace Hitbloq.UI
         {
             parsed = true;
             modalView.gameObject.name = "HitbloqEventModal";
-            (descriptionTextPage as ScrollView).SetField("_platformHelper", platformHelper);
-
             currentEvent = await eventSource.GetEventAsync();
 
             if (currentEvent.image != null)

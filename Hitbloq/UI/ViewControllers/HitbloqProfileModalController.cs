@@ -6,8 +6,8 @@ using Hitbloq.Configuration;
 using Hitbloq.Entries;
 using Hitbloq.Other;
 using Hitbloq.Sources;
+using Hitbloq.Utilities;
 using HMUI;
-using IPA.Utilities;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -55,7 +55,7 @@ namespace Hitbloq.UI
         private ImageView modalBackground;
 
         [UIComponent("modal")]
-        private readonly ModalView modalView;
+        private ModalView modalView;
 
         [UIComponent("modal")]
         private readonly RectTransform modalTransform;
@@ -201,7 +201,7 @@ namespace Hitbloq.UI
             modalBackground.color = originalModalColour;
             modalBackground.material = fogBG;
 
-            modalView.SetField("_animateParentCanvas", true);
+            Accessors.AnimateCanvasAccessor(ref modalView) = true;
         }
 
         internal async void ShowModalForSelf(Transform parentTransform, HitbloqRankInfo rankInfo, string pool)
@@ -319,7 +319,7 @@ namespace Hitbloq.UI
             get
             {
                 string userName = $"{RankInfo?.username}";
-                if (userName.Length > 13)
+                if (userName.Length > 16)
                 {
                     return $"{userName.Substring(0, 13)}...";
                 }
@@ -328,7 +328,22 @@ namespace Hitbloq.UI
         }
 
         [UIValue("pool-name")]
-        private string PoolName => $"{PoolInfo?.shownName}";
+        private string PoolName
+        {
+            get
+            {
+                string poolName = $"{PoolInfo?.shownName}".RemoveSpecialCharacters();
+                if (poolName.DoesNotHaveAlphaNumericCharacters())
+                {
+                    poolName = $"{PoolInfo?.id}";
+                }
+                if (poolName.Length > 16)
+                {
+                    return $"{poolName.Substring(0, 13)}...";
+                }
+                return poolName;
+            }
+        }
 
         [UIValue("rank")]
         private string Rank => $"#{RankInfo?.rank}";

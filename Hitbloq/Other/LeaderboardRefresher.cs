@@ -1,29 +1,25 @@
 ﻿using Hitbloq.Entries;
 using Hitbloq.Sources;
 using Hitbloq.UI;
-using IPA.Utilities;
-using SiraUtil;
+using SiraUtil.Web;
 using System.Collections.Generic;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Hitbloq.Other
 {
     internal class LeaderboardRefresher
     {
-        private readonly SiraClient siraClient;
-        private readonly ResultsViewController resultsViewController;
-        private readonly StandardLevelDetailViewController standardLevelDetailViewController;
+        private readonly IHttpService siraHttpService;
+        private readonly BeatmapListener beatmapListener;
         private readonly HitbloqPanelController hitbloqPanelController;
         private readonly UserIDSource userIDSource;
         private readonly LevelInfoSource levelInfoSource;
 
-        public LeaderboardRefresher(SiraClient siraClient, ResultsViewController resultsViewController, StandardLevelDetailViewController standardLevelDetailViewController,
+        public LeaderboardRefresher(IHttpService siraHttpService, BeatmapListener beatmapListener,
             HitbloqPanelController hitbloqPanelController, UserIDSource userIDSource, LevelInfoSource levelInfoSource)
         {
-            this.siraClient = siraClient;
-            this.resultsViewController = resultsViewController;
-            this.standardLevelDetailViewController = standardLevelDetailViewController;
+            this.siraHttpService = siraHttpService;
+            this.beatmapListener = beatmapListener;
             this.hitbloqPanelController = hitbloqPanelController;
             this.userIDSource = userIDSource;
             this.levelInfoSource = levelInfoSource;
@@ -38,8 +34,8 @@ namespace Hitbloq.Other
 
                 await Task.Delay(3000);
                 HitbloqUserID userID = await userIDSource.GetUserIDAsync();
-                WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/update_user/{userID.id}", CancellationToken.None).ConfigureAwait(false);
-                HitbloqRefreshEntry refreshEntry = Utilities.Utils.ParseWebResponse<HitbloqRefreshEntry>(webResponse);
+                IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/update_user/{userID.id}").ConfigureAwait(false);
+                HitbloqRefreshEntry refreshEntry = await Utilities.Utils.ParseWebResponse<HitbloqRefreshEntry>(webResponse);
 
                 if (refreshEntry != null && refreshEntry.error == null)
                 {
@@ -48,8 +44,8 @@ namespace Hitbloq.Other
                     {
                         await Task.Delay(3000);
 
-                        webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/actions", CancellationToken.None).ConfigureAwait(false);
-                        List<HitbloqActionQueueEntry> actionQueueEntries = Utilities.Utils.ParseWebResponse<List<HitbloqActionQueueEntry>>(webResponse);
+                        webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/actions").ConfigureAwait(false);
+                        List<HitbloqActionQueueEntry> actionQueueEntries = await Utilities.Utils.ParseWebResponse<List<HitbloqActionQueueEntry>>(webResponse);
 
                         if (actionQueueEntries == null || !actionQueueEntries.Exists(entry => entry.id == refreshEntry.id))
                         {
@@ -81,22 +77,13 @@ namespace Hitbloq.Other
                 return false;
             }
 
-            IDifficultyBeatmap lastPlayedBeatmap = resultsViewController.GetField<IDifficultyBeatmap, ResultsViewController>("_difficultyBeatmap");
-            HitbloqLevelInfo levelInfo;
-
-            if (lastPlayedBeatmap != null)
+            if (beatmapListener.lastPlayedDifficultyBeatmap != null)
             {
-                levelInfo = await levelInfoSource.GetLevelInfoAsync(lastPlayedBeatmap);
+                HitbloqLevelInfo levelInfo = await levelInfoSource.GetLevelInfoAsync(beatmapListener.lastPlayedDifficultyBeatmap);
                 if (levelInfo != null)
                 {
                     return true;
                 }
-            }
-
-            levelInfo = await levelInfoSource.GetLevelInfoAsync(standardLevelDetailViewController.selectedDifficultyBeatmap);
-            if (levelInfo != null)
-            {
-                return true;
             }
 
             return false;

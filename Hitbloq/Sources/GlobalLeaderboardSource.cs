@@ -1,6 +1,6 @@
 ﻿using Hitbloq.Entries;
 using Hitbloq.Utilities;
-using SiraUtil;
+using SiraUtil.Web;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,14 +10,14 @@ namespace Hitbloq.Sources
 {
     internal class GlobalLeaderboardSource : ILeaderboardSource
     {
-        private readonly SiraClient siraClient;
+        private readonly IHttpService siraHttpService;
         private Sprite _icon;
 
         private List<List<HitbloqLeaderboardEntry>> cachedEntries;
 
-        public GlobalLeaderboardSource(SiraClient siraClient)
+        public GlobalLeaderboardSource(IHttpService siraHttpService)
         {
-            this.siraClient = siraClient;
+            this.siraHttpService = siraHttpService;
         }
 
         public string HoverHint => "Global";
@@ -42,8 +42,8 @@ namespace Hitbloq.Sources
             {
                 try
                 {
-                    WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/scores_extended/{page}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                    cachedEntries.Add(Utils.ParseWebResponse<List<HitbloqLeaderboardEntry>>(webResponse));
+                    IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/scores_extended/{page}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                    cachedEntries.Add(await Utils.ParseWebResponse<List<HitbloqLeaderboardEntry>>(webResponse));
                 }
                 catch (TaskCanceledException) { }
             }

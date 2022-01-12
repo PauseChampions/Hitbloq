@@ -9,6 +9,9 @@ namespace Hitbloq.Entries
         [JsonProperty("shown_name")]
         public string shownName;
 
+        [JsonProperty("_id")]
+        public string id;
+
         [OnDeserialized]
         private void OnDeserialized(StreamingContext context)
         {

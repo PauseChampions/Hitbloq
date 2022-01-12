@@ -1,5 +1,6 @@
-﻿using SiraUtil;
+﻿using SiraUtil.Web;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading;
 using UnityEngine;
@@ -8,27 +9,21 @@ namespace Hitbloq.Other
 {
     internal class SpriteLoader
     {
-        private readonly SiraClient siraClient;
-        private readonly Dictionary<string, Sprite> cachedSprites;
+        private readonly IHttpService siraHttpService;
+        private readonly Dictionary<string, Sprite> cachedURLSprites;
+        private readonly ConcurrentQueue<Action> spriteQueue;
 
-        private readonly Queue<Action> spriteQueue;
-        private readonly object loaderLock;
-        private bool coroutineRunning;
-
-        public SpriteLoader(SiraClient siraClient)
+        public SpriteLoader(IHttpService siraHttpService)
         {
-            this.siraClient = siraClient;
-            cachedSprites = new Dictionary<string, Sprite>();
-
-            spriteQueue = new Queue<Action>();
-            loaderLock = new object();
-            coroutineRunning = false;
+            this.siraHttpService = siraHttpService;
+            cachedURLSprites = new Dictionary<string, Sprite>();
+            spriteQueue = new ConcurrentQueue<Action>();
         }
 
         public async void DownloadSpriteAsync(string spriteURL, Action<Sprite> onCompletion)
         {
             // Check Cache
-            if (cachedSprites.TryGetValue(spriteURL, out Sprite cachedSprite))
+            if (cachedURLSprites.TryGetValue(spriteURL, out Sprite cachedSprite))
             {
                 onCompletion?.Invoke(cachedSprite);
                 return;
@@ -36,9 +31,9 @@ namespace Hitbloq.Other
 
             try
             {
-                WebResponse webResponse = await siraClient.GetAsync(spriteURL, CancellationToken.None).ConfigureAwait(false);
-                byte[] imageBytes = webResponse.ContentToBytes();
-                QueueLoadSprite(spriteURL, imageBytes, onCompletion);
+                IHttpResponse webResponse = await siraHttpService.GetAsync(spriteURL, cancellationToken: CancellationToken.None).ConfigureAwait(false);
+                byte[] imageBytes = await webResponse.ReadAsByteArrayAsync();
+                QueueLoadSprite(spriteURL, cachedURLSprites, imageBytes, onCompletion);
             }
             catch (Exception)
             {
@@ -46,7 +41,7 @@ namespace Hitbloq.Other
             }
         }
 
-        private void QueueLoadSprite(string spriteURL, byte[] imageBytes, Action<Sprite> onCompletion)
+        private void QueueLoadSprite(string key, Dictionary<string, Sprite> cache, byte[] imageBytes, Action<Sprite> onCompletion)
         {
             spriteQueue.Enqueue(() =>
             {
@@ -54,7 +49,7 @@ namespace Hitbloq.Other
                 {
                     Sprite sprite = BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(imageBytes);
                     sprite.texture.wrapMode = TextureWrapMode.Clamp;
-                    cachedSprites[spriteURL] = sprite;
+                    cache[key] = sprite;
                     onCompletion?.Invoke(sprite);
                 }
                 catch (Exception)
@@ -62,35 +57,17 @@ namespace Hitbloq.Other
                     onCompletion?.Invoke(BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
                 }
             });
-
-            if (!coroutineRunning)
-            {
-                SharedCoroutineStarter.instance.StartCoroutine(SpriteLoadCoroutine());
-            }
+            SharedCoroutineStarter.instance.StartCoroutine(SpriteLoadCoroutine());
         }
 
         public static YieldInstruction LoadWait = new WaitForEndOfFrame();
 
         private IEnumerator<YieldInstruction> SpriteLoadCoroutine()
         {
-            lock (loaderLock)
-            {
-                if (coroutineRunning)
-                    yield break;
-                coroutineRunning = true;
-            }
-
-            while (spriteQueue.Count > 0)
+            while (spriteQueue.TryDequeue(out var loader))
             {
                 yield return LoadWait;
-                var loader = spriteQueue.Dequeue();
                 loader?.Invoke();
-            }
-
-            coroutineRunning = false;
-            if (spriteQueue.Count > 0)
-            {
-                SharedCoroutineStarter.instance.StartCoroutine(SpriteLoadCoroutine());
             }
         }
     }

@@ -1,6 +1,6 @@
 ﻿using Hitbloq.Entries;
 using Hitbloq.Utilities;
-using SiraUtil;
+using SiraUtil.Web;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,19 +8,19 @@ namespace Hitbloq.Sources
 {
     internal class ProfileSource
     {
-        private readonly SiraClient siraClient;
+        private readonly IHttpService siraHttpService;
 
-        public ProfileSource(SiraClient siraClient)
+        public ProfileSource(IHttpService siraHttpService)
         {
-            this.siraClient = siraClient;
+            this.siraHttpService = siraHttpService;
         }
 
         public async Task<HitbloqProfile> GetProfileAsync(int userID, CancellationToken? cancellationToken = null)
         {
             try
             {
-                WebResponse webResponse = await siraClient.GetAsync($"https://hitbloq.com/api/users/{userID}", cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                return Utils.ParseWebResponse<HitbloqProfile>(webResponse);
+                IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/users/{userID}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                return await Utils.ParseWebResponse<HitbloqProfile>(webResponse);
             }
             catch (TaskCanceledException) { }
             return null;

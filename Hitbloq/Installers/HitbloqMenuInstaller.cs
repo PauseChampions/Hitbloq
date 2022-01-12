@@ -41,7 +41,7 @@ namespace Hitbloq.Installers
             PluginMetadata playlistManager = PluginManager.GetPluginFromId("PlaylistManager");
             if (playlistManager != null && playlistManager.Assembly.GetName().Version >= new Version("1.5.0"))
             {
-                Container.Bind<PlaylistManagerIHardlyKnowHer>().AsSingle();
+                Container.BindInterfacesAndSelfTo<PlaylistManagerIHardlyKnowHer>().AsSingle();
             }
 
             Container.BindInterfacesTo<AutomaticRegistration>().AsSingle();

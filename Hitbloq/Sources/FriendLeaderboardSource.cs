@@ -1,6 +1,6 @@
 ﻿using Hitbloq.Entries;
 using Hitbloq.Utilities;
-using SiraUtil;
+using SiraUtil.Web;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
@@ -10,7 +10,7 @@ namespace Hitbloq.Sources
 {
     internal class FriendsLeaderboardSource : ILeaderboardSource
     {
-        private readonly SiraClient siraClient;
+        private readonly IHttpService siraHttpService;
         private Sprite _icon;
 
         private readonly UserIDSource userIDSource;
@@ -18,9 +18,9 @@ namespace Hitbloq.Sources
 
         private List<List<HitbloqLeaderboardEntry>> cachedEntries;
 
-        public FriendsLeaderboardSource(SiraClient siraClient, UserIDSource userIDSource, FriendIDSource friendIDSource)
+        public FriendsLeaderboardSource(IHttpService siraHttpService, UserIDSource userIDSource, FriendIDSource friendIDSource)
         {
-            this.siraClient = siraClient;
+            this.siraHttpService = siraHttpService;
             this.userIDSource = userIDSource;
             this.friendIDSource = friendIDSource;
         }
@@ -67,10 +67,10 @@ namespace Hitbloq.Sources
                     {
                         { "friends", ids}
                     };
-                    WebResponse webResponse = await siraClient.PostAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/friends", content, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                    IHttpResponse webResponse = await siraHttpService.PostAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/friends", content, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
                     // like an hour of debugging and we had to remove the slash from the end of the url. that was it. not pog.
 
-                    List<HitbloqLeaderboardEntry> leaderboardEntries = Utils.ParseWebResponse<List<HitbloqLeaderboardEntry>>(webResponse);
+                    List<HitbloqLeaderboardEntry> leaderboardEntries = await Utils.ParseWebResponse<List<HitbloqLeaderboardEntry>>(webResponse);
                     cachedEntries = new List<List<HitbloqLeaderboardEntry>>();
 
                     if (leaderboardEntries != null)
