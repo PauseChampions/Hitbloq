@@ -56,7 +56,7 @@ namespace Hitbloq.Other
                     }
                     hitbloqPanelController.PromptText = "<color=red>The action queue is very busy, your score cannot be refreshed for now.</color>";
                 }
-                else if (refreshEntry.error != null)
+                else if (refreshEntry != null && refreshEntry.error != null)
                 {
                     hitbloqPanelController.PromptText = $"<color=red>Error: {refreshEntry.error}</color>";
                 }

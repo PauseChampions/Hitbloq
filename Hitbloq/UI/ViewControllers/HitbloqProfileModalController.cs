@@ -181,8 +181,10 @@ namespace Hitbloq.UI
             addFriend = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.AddFriend.png");
             friendAdded = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.FriendAdded.png");
 
-            ImageView verticalBackground = modalInfoVertical.background as ImageView;
-            verticalBackground.color = new Color(0f, 0f, 0f, 0.75f);
+            if (modalInfoVertical.background is ImageView verticalBackground)
+            {
+                verticalBackground.color = new Color(0f, 0f, 0f, 0.75f);
+            }
         }
 
         private void Parse(Transform parentTransform)

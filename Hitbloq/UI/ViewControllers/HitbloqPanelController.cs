@@ -106,13 +106,15 @@ namespace Hitbloq.UI
         private async void PostParse()
         {
             // Backround related stuff
-            container.background.material = BeatSaberMarkupLanguage.Utilities.ImageResources.NoGlowMat;
-            ImageView background = container.background as ImageView;
-            background.color0 = Color.white;
-            background.color1 = new Color(1f, 1f, 1f, 0f);
-            background.color = Color.gray;
-            Accessors.GradientAccessor(ref background) = true;
-            Accessors.SkewAccessor(ref background) = 0.18f;
+            if (container.background is ImageView background)
+            {
+                background.material = BeatSaberMarkupLanguage.Utilities.ImageResources.NoGlowMat;
+                background.color0 = Color.white;
+                background.color1 = new Color(1f, 1f, 1f, 0f);
+                background.color = Color.gray;
+                Accessors.GradientAccessor(ref background) = true;
+                Accessors.SkewAccessor(ref background) = 0.18f;
+            }
 
             // Loading up logos
             logoSprite = logo.sprite;

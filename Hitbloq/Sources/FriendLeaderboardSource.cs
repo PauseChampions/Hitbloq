@@ -48,7 +48,7 @@ namespace Hitbloq.Sources
                 HitbloqUserID userID = await userIDSource.GetUserIDAsync(cancellationToken);
                 List<int> friendIDs = await friendIDSource.GetFriendIDsAsync(cancellationToken);
 
-                if (userID.id == -1)
+                if (userID.id == -1 || friendIDs == null)
                 {
                     return null;
                 }
@@ -91,6 +91,12 @@ namespace Hitbloq.Sources
                 }
                 catch (TaskCanceledException) { }
             }
+
+            if (cachedEntries == null)
+            {
+                return null;
+            }
+
             return page < cachedEntries.Count ? cachedEntries[page] : null;
         }
 
