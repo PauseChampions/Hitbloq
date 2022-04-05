@@ -28,6 +28,9 @@ namespace Hitbloq.Entries
 
         [JsonProperty("rank")]
         public int Rank { get; private set; }
+        
+        [JsonProperty("custom_color")]
+        public string? CustomColor { get; private set; }
 
         [JsonProperty("cr")]
         public ReadOnlyDictionary<string, float> CR { get; private set; } = null!;

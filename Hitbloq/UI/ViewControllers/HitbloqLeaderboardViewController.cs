@@ -144,7 +144,7 @@ namespace Hitbloq.UI
 
                 for(var i = 0; i < (leaderboardEntries.Count > 10 ? 10: leaderboardEntries.Count); i++)
                 {
-                    scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].Score, $"<size=85%>{leaderboardEntries[i].Username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].Accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#aa6eff>{leaderboardEntries[i].CR[selectedPool].ToString("F2")}<size=55%>cr</size></color>)</size>", 
+                    scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].Score, $"<color={leaderboardEntries[i].CustomColor ?? "#ffffff"}><size=85%>{leaderboardEntries[i].Username}</color> - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].Accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#aa6eff>{leaderboardEntries[i].CR[selectedPool].ToString("F2")}<size=55%>cr</size></color>)</size>", 
                         leaderboardEntries[i].Rank, false));
 
                     if (infoButtons != null)
