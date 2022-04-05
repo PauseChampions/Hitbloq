@@ -37,7 +37,7 @@ namespace Hitbloq.Other
                 var webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/update_user/{userID.ID}").ConfigureAwait(false);
                 var refreshEntry = await Utilities.Utils.ParseWebResponse<HitbloqRefreshEntry>(webResponse);
 
-                if (refreshEntry != null && refreshEntry.Error == null)
+                if (refreshEntry is {Error: null})
                 {
                     // Try checking action queue if our action is completed, timeout at 7 times
                     for (var i = 0; i < 7; i++)
@@ -56,7 +56,7 @@ namespace Hitbloq.Other
                     }
                     hitbloqPanelController.PromptText = "<color=red>The action queue is very busy, your score cannot be refreshed for now.</color>";
                 }
-                else if (refreshEntry != null && refreshEntry.Error != null)
+                else if (refreshEntry is {Error: { }})
                 {
                     hitbloqPanelController.PromptText = $"<color=red>Error: {refreshEntry.Error}</color>";
                 }

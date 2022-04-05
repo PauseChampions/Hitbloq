@@ -46,7 +46,7 @@ namespace Hitbloq.Other
             tokenSource?.Cancel();
             tokenSource?.Dispose();
             tokenSource = new CancellationTokenSource();
-            var playlistToSelect = await GetPlaylist(poolID);
+            var playlistToSelect = await GetPlaylist(poolID, tokenSource.Token);
 
             if (playlistToSelect == null)
             {
@@ -63,7 +63,7 @@ namespace Hitbloq.Other
 
         internal void CancelDownload() => tokenSource?.Cancel();
 
-        private async Task<IBeatmapLevelPack> GetPlaylist(string poolID)
+        private async Task<IBeatmapLevelPack?> GetPlaylist(string poolID, CancellationToken token = default)
         {
             var syncURL = $"https://hitbloq.com/static/hashlists/{poolID}.bplist";
 
@@ -81,12 +81,16 @@ namespace Hitbloq.Other
 
             try
             {
-                var webResponse = await siraHttpService.GetAsync(syncURL, cancellationToken: tokenSource.Token).ConfigureAwait(false);
+                var webResponse = await siraHttpService.GetAsync(syncURL, cancellationToken: token).ConfigureAwait(false);
                 Stream playlistStream = new MemoryStream(await webResponse.ReadAsByteArrayAsync());
                 var newPlaylist = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler?.Deserialize(playlistStream);
 
-                var playlistManager = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.CreateChildManager("Hitbloq");
-                playlistManager.StorePlaylist(newPlaylist);
+                if (newPlaylist != null)
+                {
+                    var playlistManager = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.CreateChildManager("Hitbloq");
+                    playlistManager.StorePlaylist(newPlaylist);   
+                }
+                
                 return newPlaylist;
             }
             catch (TaskCanceledException)
@@ -101,10 +105,10 @@ namespace Hitbloq.Other
             {
                 if (urlString.Contains("https://hitbloq.com/static/hashlists/"))
                 {
-                    var pool = urlString.Split('/').LastOrDefault().Split('.').FirstOrDefault();
+                    var pool = urlString.Split('/').LastOrDefault()?.Split('.').FirstOrDefault();
                     if (!string.IsNullOrEmpty(pool))
                     {
-                        HitbloqPlaylistSelected?.Invoke(pool);
+                        HitbloqPlaylistSelected?.Invoke(pool!);
                     }
                 }
             }

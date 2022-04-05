@@ -19,20 +19,16 @@ namespace Hitbloq.Utilities
             return $"{hash}%7C_{difficulty}_Solo{characteristic}";
         }
 
-        public static async Task<T> ParseWebResponse<T>(IHttpResponse webResponse)
+        public static async Task<T?> ParseWebResponse<T>(IHttpResponse webResponse)
         {
             if (webResponse.Successful && (await webResponse.ReadAsByteArrayAsync()).Length > 3)
             {
-                using (var streamReader = new StreamReader(await webResponse.ReadAsStreamAsync()))
-                {
-                    using (var jsonTextReader = new JsonTextReader(streamReader))
-                    {
-                        var jsonSerializer = new JsonSerializer();
-                        return jsonSerializer.Deserialize<T>(jsonTextReader);
-                    }
-                }
+                using var streamReader = new StreamReader(await webResponse.ReadAsStreamAsync());
+                using var jsonTextReader = new JsonTextReader(streamReader);
+                var jsonSerializer = new JsonSerializer();
+                return jsonSerializer.Deserialize<T>(jsonTextReader);
             }
-            return default(T);
+            return default(T?);
         }
 
         // Yoinked from SiraUtil
@@ -41,7 +37,7 @@ namespace Hitbloq.Utilities
             return (U)Upgrade(monoBehaviour, typeof(U));
         }
 
-        public static Component Upgrade(this Component monoBehaviour, Type upgradingType)
+        private static Component Upgrade(this Component monoBehaviour, Type upgradingType)
         {
             var originalType = monoBehaviour.GetType();
 
