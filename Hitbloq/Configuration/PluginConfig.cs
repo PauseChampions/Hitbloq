@@ -9,7 +9,7 @@ namespace Hitbloq.Configuration
 {
     internal class PluginConfig
     {
-        public static PluginConfig Instance { get; set; }
+        public static PluginConfig Instance { get; set; } = null!;
 
         public virtual string HitbloqURL { get; set; } = "https://hitbloq.com/";
 

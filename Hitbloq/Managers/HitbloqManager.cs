@@ -28,9 +28,9 @@ namespace Hitbloq.Managers
         private readonly List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters;
         private readonly List<IPoolUpdater> poolUpdaters;
 
-        private IDifficultyBeatmap selectedDifficultyBeatmap;
-        private CancellationTokenSource levelInfoTokenSource;
-        private CancellationTokenSource leaderboardTokenSource;
+        private IDifficultyBeatmap? selectedDifficultyBeatmap;
+        private CancellationTokenSource? levelInfoTokenSource;
+        private CancellationTokenSource? leaderboardTokenSource;
 
         public HitbloqManager(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, HitbloqPanelController hitbloqPanelController, HitbloqProfileModalController hitbloqProfileModalController,
             HitbloqEventModalViewController hitbloqEventModalViewController, UserIDSource userIDSource, LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher, List<INotifyUserRegistered> notifyUserRegistereds,
@@ -85,22 +85,19 @@ namespace Hitbloq.Managers
             }
         }
 
-        public async void OnLeaderboardSet(IDifficultyBeatmap difficultyBeatmap)
+        public async void OnLeaderboardSet(IDifficultyBeatmap? difficultyBeatmap)
         {
             if (difficultyBeatmap != null)
             {
                 selectedDifficultyBeatmap = difficultyBeatmap;
                 levelInfoTokenSource?.Cancel();
-                HitbloqLevelInfo levelInfoEntry;
+                levelInfoTokenSource?.Dispose();
+                HitbloqLevelInfo? levelInfoEntry = null;
 
                 if (difficultyBeatmap.level is CustomPreviewBeatmapLevel)
                 {
                     levelInfoTokenSource = new CancellationTokenSource();
                     levelInfoEntry = await levelInfoSource.GetLevelInfoAsync(difficultyBeatmap, levelInfoTokenSource.Token);
-                }
-                else
-                {
-                    levelInfoEntry = null;
                 }
 
                 if (levelInfoEntry != null)
@@ -137,6 +134,7 @@ namespace Hitbloq.Managers
         private async void OnPageRequested(IDifficultyBeatmap difficultyBeatmap, ILeaderboardSource leaderboardSource, int page)
         {
             leaderboardTokenSource?.Cancel();
+            leaderboardTokenSource?.Dispose();
             leaderboardTokenSource = new CancellationTokenSource();
             var leaderboardEntries = await leaderboardSource.GetScoresAsync(difficultyBeatmap, leaderboardTokenSource.Token, page);
 

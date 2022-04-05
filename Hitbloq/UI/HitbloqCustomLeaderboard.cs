@@ -29,7 +29,7 @@ namespace Hitbloq.UI
             customLeaderboardManager.Unregister(this);
         }
 
-        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo levelInfoEntry)
+        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo? levelInfoEntry)
         {
             if (levelInfoEntry != null)
             {
