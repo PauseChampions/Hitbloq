@@ -6,17 +6,13 @@ namespace Hitbloq.UI
 {
     internal class HitbloqFlowCoordinator : FlowCoordinator
     {
-        private FlowCoordinator mainFlowCoordinator;
-        private FlowCoordinator parentFlowCoordinator;
-        private ViewController hitbloqMainViewController;
-
         [Inject]
-        public void Construct(MainFlowCoordinator mainFlowCoordinator, HitbloqMainViewController hitbloqMainViewController)
-        {
-            this.mainFlowCoordinator = mainFlowCoordinator;
-            parentFlowCoordinator = mainFlowCoordinator;
-            this.hitbloqMainViewController = hitbloqMainViewController;
-        }
+        private readonly FlowCoordinator mainFlowCoordinator = null!;
+        
+        private FlowCoordinator? parentFlowCoordinator;
+        
+        [Inject]
+        private readonly ViewController hitbloqMainViewController = null!;
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {

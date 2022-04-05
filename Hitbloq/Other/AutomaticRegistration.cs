@@ -27,10 +27,10 @@ namespace Hitbloq.Other
         {
             // Check if user id exists, if it does this is not needed
             var userID = await userIDSource.GetUserIDAsync();
-            if (userID.ID != -1)
+            if (userID == null || userID.ID != -1)
             {
                 // If we are in progress of registration, show it
-                if (!userID.Registered)
+                if (userID is {Registered: false})
                 {
                     HandleRegistrationProgress();
                 }

@@ -49,7 +49,7 @@ namespace Hitbloq.Sources
                 var userID = await userIDSource.GetUserIDAsync(cancellationToken);
                 var friendIDs = await friendIDSource.GetFriendIDsAsync(cancellationToken);
 
-                if (userID.ID == -1)
+                if (userID == null || userID.ID == -1)
                 {
                     return null;
                 }

@@ -34,6 +34,12 @@ namespace Hitbloq.Other
 
                 await Task.Delay(3000);
                 var userID = await userIDSource.GetUserIDAsync();
+
+                if (userID == null)
+                {
+                    return false;
+                }
+                
                 var webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/update_user/{userID.ID}").ConfigureAwait(false);
                 var refreshEntry = await Utilities.Utils.ParseWebResponse<HitbloqRefreshEntry>(webResponse);
 
@@ -72,7 +78,7 @@ namespace Hitbloq.Other
         private async Task<bool> RefreshNeeded()
         {
             var userID = await userIDSource.GetUserIDAsync();
-            if (!userID.Registered)
+            if (userID == null || !userID.Registered)
             {
                 return false;
             }
