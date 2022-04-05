@@ -11,49 +11,48 @@ using HMUI;
 using IPA.Utilities;
 using System.ComponentModel;
 using System.Reflection;
+using BeatSaberMarkupLanguage.Components;
 using UnityEngine;
 using Zenject;
 
 namespace Hitbloq.UI
 {
-    internal class HitbloqEventModalViewController : INotifyViewActivated, INotifyPropertyChanged
+    internal class HitbloqEventModalViewController : NotifiableBase, INotifyViewActivated
     {
         private readonly EventSource eventSource;
         private readonly SpriteLoader spriteLoader;
-        private readonly PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer;
+        private readonly PlaylistManagerIHardlyKnowHer? playlistManagerIHardlyKnowHer;
 
-        private HitbloqEvent currentEvent;
+        private HitbloqEvent? currentEvent;
         private bool parsed;
-        private bool _downloadingActive;
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private Vector3 modalPosition;
+        private bool downloadingActive;
+        
+        private Vector3? modalPosition;
 
         private bool DownloadingActive
         {
-            get => _downloadingActive;
+            get => downloadingActive;
             set
             {
-                _downloadingActive = value;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PoolText)));
+                downloadingActive = value;
+                NotifyPropertyChanged(nameof(PoolText));
             }
         }
 
         [UIComponent("modal")]
-        private ModalView modalView;
+        private ModalView? modalView;
 
         [UIComponent("modal")]
-        private readonly RectTransform modalTransform;
+        private readonly RectTransform? modalTransform = null!;
 
         [UIComponent("event-image")]
-        private readonly ImageView eventImage;
+        private readonly ImageView? eventImage = null!;
 
         [UIComponent("text-page")]
-        private readonly TextPageScrollView descriptionTextPage;
+        private readonly TextPageScrollView? descriptionTextPage = null!;
 
         [UIParams]
-        private readonly BSMLParserParams parserParams;
+        private readonly BSMLParserParams? parserParams = null!;
 
         public HitbloqEventModalViewController(EventSource eventSource, SpriteLoader spriteLoader, [InjectOptional] PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer)
         {
@@ -84,36 +83,36 @@ namespace Hitbloq.UI
             if (!parsed)
             {
                 BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqEventModal.bsml"), parentTransform.gameObject, this);
-                modalPosition = modalTransform.localPosition;
+                modalPosition = modalTransform!.localPosition;
             }
-            modalTransform.SetParent(parentTransform);
-            modalTransform.localPosition = modalPosition;
-            Accessors.AnimateCanvasAccessor(ref modalView) = true;
-            descriptionTextPage.ScrollTo(0, true);
+            modalTransform!.SetParent(parentTransform);
+            modalTransform.localPosition = modalPosition!.Value;
+            Accessors.AnimateCanvasAccessor(ref modalView!) = true;
+            descriptionTextPage!.ScrollTo(0, true);
         }
 
         internal void ShowModal(Transform parentTransform)
         {
             Parse(parentTransform);
-            parserParams.EmitEvent("close-modal");
-            parserParams.EmitEvent("open-modal");
+            parserParams?.EmitEvent("close-modal");
+            parserParams?.EmitEvent("open-modal");
         }
 
         [UIAction("#post-parse")]
         private async void PostParse()
         {
             parsed = true;
-            modalView.gameObject.name = "HitbloqEventModal";
+            modalView!.gameObject.name = "HitbloqEventModal";
             currentEvent = await eventSource.GetAsync();
 
-            if (currentEvent.Image != null)
+            if (currentEvent?.Image != null)
             {
-                spriteLoader.DownloadSpriteAsync(currentEvent.Image, sprite => eventImage.sprite = sprite);
+                spriteLoader.DownloadSpriteAsync(currentEvent.Image, sprite => eventImage!.sprite = sprite);
             }
 
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(EventTitle)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(EventDescription)));
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PoolExists)));
+            NotifyPropertyChanged(nameof(EventTitle));
+            NotifyPropertyChanged(nameof(EventDescription));
+            NotifyPropertyChanged(nameof(PoolExists));
         }
 
         [UIAction("pool-click")]
@@ -121,14 +120,14 @@ namespace Hitbloq.UI
         {
             if (PoolExists)
             {
-                DownloadingActive = playlistManagerIHardlyKnowHer.IsDownloading;
+                DownloadingActive = playlistManagerIHardlyKnowHer!.IsDownloading;
                 if (DownloadingActive)
                 {
                     playlistManagerIHardlyKnowHer.CancelDownload();
                 }
                 else
                 {
-                    playlistManagerIHardlyKnowHer.OpenPlaylist(currentEvent.Pool, () => DownloadingActive = false);
+                    playlistManagerIHardlyKnowHer.OpenPlaylist(currentEvent!.Pool!, () => DownloadingActive = false);
                 }
                 DownloadingActive = playlistManagerIHardlyKnowHer.IsDownloading;
             }
