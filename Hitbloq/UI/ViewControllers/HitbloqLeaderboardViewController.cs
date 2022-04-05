@@ -193,8 +193,14 @@ namespace Hitbloq.UI
             {
                 leaderboardTableCell.transform.Find("PlayerName").GetComponent<CurvedTextMeshPro>().richText = true;
             }
-            Destroy(leaderboardTransform.Find("LoadingControl").Find("LoadingContainer").Find("Text").gameObject);
+            
             loadingControl = leaderboardTransform.Find("LoadingControl").gameObject;
+
+            var loadingContainer = loadingControl.transform.Find("LoadingContainer");
+            loadingContainer.gameObject.SetActive(true);
+            Destroy(loadingContainer.Find("Text").gameObject);
+            Destroy(loadingControl.transform.Find("RefreshContainer").gameObject);
+            Destroy(loadingControl.transform.Find("DownloadingContainer").gameObject);
 
             infoButtons = new List<Button>();
 
