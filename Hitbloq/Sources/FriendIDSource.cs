@@ -33,7 +33,7 @@ namespace Hitbloq.Sources
         {
             if (hitbloqPlatformFriendIds == null)
             {
-                IReadOnlyList<string> friendIDs = await platformUserModel.GetUserFriendsUserIds(true);
+                var friendIDs = await platformUserModel.GetUserFriendsUserIds(true);
                 if (friendIDs != null)
                 {
                     try
@@ -44,7 +44,7 @@ namespace Hitbloq.Sources
                     {
                         { "ids", friendIDs.ToArray<string>()}
                     };
-                        IHttpResponse webResponse = await siraHttpService.PostAsync($"https://hitbloq.com/api/tools/mass_ss_to_hitbloq", content, cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                        var webResponse = await siraHttpService.PostAsync($"https://hitbloq.com/api/tools/mass_ss_to_hitbloq", content, cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
 
                         hitbloqPlatformFriendIds = (await Utils.ParseWebResponse<List<HitbloqFriendID>>(webResponse)).Select(x => x.ID).ToHashSet();
                     }

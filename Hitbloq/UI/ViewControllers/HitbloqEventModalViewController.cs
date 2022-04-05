@@ -66,7 +66,7 @@ namespace Hitbloq.UI
         {
             if (firstActivation)
             {
-                HitbloqEvent hitbloqEvent = await eventSource.GetEventAsync();
+                var hitbloqEvent = await eventSource.GetEventAsync();
                 if (hitbloqEvent.ID != -1)
                 {
                     if (!PluginConfig.Instance.ViewedEvents.Contains(hitbloqEvent.ID))

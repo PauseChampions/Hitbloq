@@ -42,16 +42,16 @@ namespace Hitbloq.Sources
         {
             if (cachedEntries == null)
             {
-                HitbloqUserID userID = await userIDSource.GetUserIDAsync(cancellationToken);
+                var userID = await userIDSource.GetUserIDAsync(cancellationToken);
                 if (userID.ID == -1)
                 {
                     return null;
                 }
-                int id = userID.ID;
+                var id = userID.ID;
 
                 try
                 {
-                    IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/nearby_scores/{id}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                    var webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/nearby_scores/{id}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
                     cachedEntries = await Utils.ParseWebResponse<List<HitbloqLeaderboardEntry>>(webResponse);
                 }
                 catch (TaskCanceledException) { }

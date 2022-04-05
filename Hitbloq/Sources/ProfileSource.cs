@@ -19,7 +19,7 @@ namespace Hitbloq.Sources
         {
             try
             {
-                IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/users/{userID}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                var webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/users/{userID}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
                 return await Utils.ParseWebResponse<HitbloqProfile>(webResponse);
             }
             catch (TaskCanceledException) { }

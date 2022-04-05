@@ -20,15 +20,15 @@ namespace Hitbloq.Sources
 
         public async Task<HitbloqLevelInfo> GetLevelInfoAsync(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null)
         {
-            if (cache.TryGetValue(difficultyBeatmap, out HitbloqLevelInfo cachedValue))
+            if (cache.TryGetValue(difficultyBeatmap, out var cachedValue))
             {
                 return cachedValue;
             }
 
             try
             {
-                IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/info", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                HitbloqLevelInfo levelInfo = await Utils.ParseWebResponse<HitbloqLevelInfo>(webResponse);
+                var webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/info", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                var levelInfo = await Utils.ParseWebResponse<HitbloqLevelInfo>(webResponse);
 
                 cache[difficultyBeatmap] = levelInfo;
                 return levelInfo;

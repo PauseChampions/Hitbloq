@@ -45,18 +45,18 @@ namespace Hitbloq.Sources
         {
             if (cachedEntries == null)
             {
-                HitbloqUserID userID = await userIDSource.GetUserIDAsync(cancellationToken);
-                List<int> friendIDs = await friendIDSource.GetFriendIDsAsync(cancellationToken);
+                var userID = await userIDSource.GetUserIDAsync(cancellationToken);
+                var friendIDs = await friendIDSource.GetFriendIDsAsync(cancellationToken);
 
                 if (userID.ID == -1 || friendIDs == null)
                 {
                     return null;
                 }
 
-                int friendCount = friendIDs == null ? 0 : friendIDs.Count;
-                int[] ids = new int[friendCount + 1];
+                var friendCount = friendIDs == null ? 0 : friendIDs.Count;
+                var ids = new int[friendCount + 1];
                 ids[0] = userID.ID;
-                for (int i = 0; i < friendCount; i++)
+                for (var i = 0; i < friendCount; i++)
                 {
                     ids[i + 1] = friendIDs[i];
                 }
@@ -67,18 +67,18 @@ namespace Hitbloq.Sources
                     {
                         { "friends", ids}
                     };
-                    IHttpResponse webResponse = await siraHttpService.PostAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/friends", content, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                    var webResponse = await siraHttpService.PostAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/friends", content, cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
                     // like an hour of debugging and we had to remove the slash from the end of the url. that was it. not pog.
 
-                    List<HitbloqLeaderboardEntry> leaderboardEntries = await Utils.ParseWebResponse<List<HitbloqLeaderboardEntry>>(webResponse);
+                    var leaderboardEntries = await Utils.ParseWebResponse<List<HitbloqLeaderboardEntry>>(webResponse);
                     cachedEntries = new List<List<HitbloqLeaderboardEntry>>();
 
                     if (leaderboardEntries != null)
                     {
                         // Splitting entries into lists of 10
-                        int p = 0;
+                        var p = 0;
                         cachedEntries.Add(new List<HitbloqLeaderboardEntry>());
-                        for (int i = 0; i < leaderboardEntries.Count; i++)
+                        for (var i = 0; i < leaderboardEntries.Count; i++)
                         {
                             if (cachedEntries[p].Count == 10)
                             {

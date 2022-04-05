@@ -20,15 +20,15 @@ namespace Hitbloq.Sources
 
         public async Task<HitbloqPoolInfo> GetPoolInfoAsync(string poolID, CancellationToken? cancellationToken = null)
         {
-            if (cache.TryGetValue(poolID, out HitbloqPoolInfo cachedValue))
+            if (cache.TryGetValue(poolID, out var cachedValue))
             {
                 return cachedValue;
             }
 
             try
             {
-                IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/ranked_list/{poolID}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                HitbloqPoolInfo poolInfo = await Utils.ParseWebResponse<HitbloqPoolInfo>(webResponse);
+                var webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/ranked_list/{poolID}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                var poolInfo = await Utils.ParseWebResponse<HitbloqPoolInfo>(webResponse);
 
                 cache[poolID] = poolInfo;
                 return poolInfo;

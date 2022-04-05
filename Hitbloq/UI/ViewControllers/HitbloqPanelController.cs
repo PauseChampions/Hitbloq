@@ -63,7 +63,7 @@ namespace Hitbloq.UI
                     if (logo != null)
                     {
                         logo.sprite = value ? flushedSprite : logoSprite;
-                        HoverHint hoverHint = logo.GetComponent<HoverHint>();
+                        var hoverHint = logo.GetComponent<HoverHint>();
                         hoverHint.text = value ? "Pink Cute!" : spriteHoverText;
                         hoverHint.enabled = value || !string.IsNullOrEmpty(spriteHoverText);
                     }
@@ -129,7 +129,7 @@ namespace Hitbloq.UI
             separator.SetVerticesDirty();
 
             // Dropdown needs to be modified to look good
-            CurvedTextMeshPro dropdownText = dropDownListTransform.GetComponentInChildren<CurvedTextMeshPro>();
+            var dropdownText = dropDownListTransform.GetComponentInChildren<CurvedTextMeshPro>();
             dropdownText.fontSize = 3.5f;
             dropdownText.transform.localPosition = new Vector3(-1.5f, 0, 0);
 
@@ -141,22 +141,22 @@ namespace Hitbloq.UI
             dropDownListSetting.UpdateChoices();
             dropDownListSetting.values = pools.Count != 0 ? pools : new List<object> { "None" };
             dropDownListSetting.UpdateChoices();
-            int poolIndex = poolNames == null ? 0 : poolNames.IndexOf(selectedPool);
+            var poolIndex = poolNames == null ? 0 : poolNames.IndexOf(selectedPool);
             dropDownListSetting.dropdown.SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
 
             defaultHighlightColour = playlistManagerImage.HighlightColor;
             cancelHighlightColor = Color.red;
 
-            HitbloqEvent hitbloqEvent = await eventSource.GetEventAsync();
+            var hitbloqEvent = await eventSource.GetEventAsync();
             if (hitbloqEvent.ID != -1)
             {
-                ClickableImage clickableLogo = logo.Upgrade<ImageView, ClickableImage>();
+                var clickableLogo = logo.Upgrade<ImageView, ClickableImage>();
                 logo = clickableLogo;
                 logoSprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.LogoEvent.png");
                 logo.sprite = CuteMode ? flushedSprite : logoSprite;
 
                 spriteHoverText = "Show event info";
-                HoverHint hoverHint = logo.GetComponent<HoverHint>();
+                var hoverHint = logo.GetComponent<HoverHint>();
                 hoverHint.text = CuteMode ? "Pink Cute!" : spriteHoverText;
                 hoverHint.enabled = CuteMode || !string.IsNullOrEmpty(spriteHoverText);
 
@@ -249,9 +249,9 @@ namespace Hitbloq.UI
             {
                 foreach(var pool in levelInfoEntry.Pools)
                 {
-                    HitbloqPoolInfo poolInfo = await poolInfoSource.GetPoolInfoAsync(pool.Key, poolInfoTokenSource.Token);
+                    var poolInfo = await poolInfoSource.GetPoolInfoAsync(pool.Key, poolInfoTokenSource.Token);
 
-                    string poolName = poolInfo.ShownName.RemoveSpecialCharacters();
+                    var poolName = poolInfo.ShownName.RemoveSpecialCharacters();
                     if (poolName.DoesNotHaveAlphaNumericCharacters())
                     {
                         poolName = poolInfo.ID;
@@ -270,7 +270,7 @@ namespace Hitbloq.UI
                 poolNames = new List<string> { "None" };
             }
 
-            int poolIndex = poolNames.IndexOf(selectedPool);
+            var poolIndex = poolNames.IndexOf(selectedPool);
             PoolChangedEvent?.Invoke(poolNames[poolIndex == -1 ? 0 : poolIndex]);
 
             if (dropDownListSetting != null)

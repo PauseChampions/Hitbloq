@@ -209,7 +209,7 @@ namespace Hitbloq.UI
         internal async void ShowModalForSelf(Transform parentTransform, HitbloqRankInfo rankInfo, string pool)
         {
             Parse(parentTransform);
-            HitbloqUserID userID = await userIDSource.GetUserIDAsync();
+            var userID = await userIDSource.GetUserIDAsync();
 
             if (userID.ID == -1)
             {
@@ -242,9 +242,9 @@ namespace Hitbloq.UI
             PoolInfo = await poolInfoSource.GetPoolInfoAsync(pool);
             HitbloqProfile = await profileSource.GetProfileAsync(userID);
 
-            HitbloqUserID selfID = await userIDSource.GetUserIDAsync();
+            var selfID = await userIDSource.GetUserIDAsync();
             addFriendButton.gameObject.SetActive(selfID.ID != userID);
-            HashSet<int> platformFriends = await friendIDSource.GetPlatformFriendIDsAsync();
+            var platformFriends = await friendIDSource.GetPlatformFriendIDsAsync();
             if (platformFriends.Contains(userID))
             {
                 addFriendButton.image.sprite = friendAdded;
@@ -320,7 +320,7 @@ namespace Hitbloq.UI
         {
             get
             {
-                string userName = $"{RankInfo?.Username}";
+                var userName = $"{RankInfo?.Username}";
                 if (userName.Length > 16)
                 {
                     return $"{userName.Substring(0, 13)}...";
@@ -334,7 +334,7 @@ namespace Hitbloq.UI
         {
             get
             {
-                string poolName = $"{PoolInfo?.ShownName}".RemoveSpecialCharacters();
+                var poolName = $"{PoolInfo?.ShownName}".RemoveSpecialCharacters();
                 if (poolName.DoesNotHaveAlphaNumericCharacters())
                 {
                     poolName = $"{PoolInfo?.ID}";

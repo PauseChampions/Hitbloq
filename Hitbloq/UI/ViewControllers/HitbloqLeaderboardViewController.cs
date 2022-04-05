@@ -111,7 +111,7 @@ namespace Hitbloq.UI
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
-            foreach (ILeaderboardSource leaderboardSource in leaderboardSources)
+            foreach (var leaderboardSource in leaderboardSources)
             {
                 leaderboardSource.ClearCache();
             }
@@ -120,8 +120,8 @@ namespace Hitbloq.UI
 
         public async void SetScores(List<HitbloqLeaderboardEntry> leaderboardEntries)
         {
-            List<LeaderboardTableView.ScoreData> scores = new List<LeaderboardTableView.ScoreData>();
-            int myScorePos = -1;
+            var scores = new List<LeaderboardTableView.ScoreData>();
+            var myScorePos = -1;
 
             if (infoButtons != null)
             {
@@ -142,10 +142,10 @@ namespace Hitbloq.UI
                     return;
                 }
 
-                HitbloqUserID userID = await userIDSource.GetUserIDAsync();
-                int id = userID.ID;
+                var userID = await userIDSource.GetUserIDAsync();
+                var id = userID.ID;
 
-                for(int i = 0; i < (leaderboardEntries.Count > 10 ? 10: leaderboardEntries.Count); i++)
+                for(var i = 0; i < (leaderboardEntries.Count > 10 ? 10: leaderboardEntries.Count); i++)
                 {
                     scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].Score, $"<size=85%>{leaderboardEntries[i].Username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].Accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#aa6eff>{leaderboardEntries[i].CR[selectedPool].ToString("F2")}<size=55%>cr</size></color>)</size>", 
                         leaderboardEntries[i].Rank, false));
@@ -153,7 +153,7 @@ namespace Hitbloq.UI
                     if (infoButtons != null)
                     {
                         infoButtons[i].gameObject.SetActive(true);
-                        HoverHint hoverHint = infoButtons[i].GetComponent<HoverHint>();
+                        var hoverHint = infoButtons[i].GetComponent<HoverHint>();
                         hoverHint.text = $"Score Set: {leaderboardEntries[i].DateSet}";
                     }
 
@@ -173,8 +173,8 @@ namespace Hitbloq.UI
 
         private void ChangeButtonScale(Button button, float scale)
         {
-            Transform transform = button.transform;
-            Vector3 localScale = transform.localScale;
+            var transform = button.transform;
+            var localScale = transform.localScale;
             transform.localScale = localScale * scale;
             infoButtons.Add(button);
         }
@@ -190,14 +190,14 @@ namespace Hitbloq.UI
         [UIAction("#post-parse")]
         private void PostParse()
         {
-            List<LeaderboardTableView.ScoreData> placeholder = new List<LeaderboardTableView.ScoreData>();
-            for (int i = 0; i < 10; i++)
+            var placeholder = new List<LeaderboardTableView.ScoreData>();
+            for (var i = 0; i < 10; i++)
             {
                 placeholder.Add(new LeaderboardTableView.ScoreData(0, "", 0, false));
             }
 
             // To set rich text, I have to make 10 empty cells, set each cell to allow rich text and next time they will have it
-            LeaderboardTableCell[] leaderboardTableCells = leaderboardTransform.GetComponentsInChildren<LeaderboardTableCell>(true);
+            var leaderboardTableCells = leaderboardTransform.GetComponentsInChildren<LeaderboardTableCell>(true);
             foreach (var leaderboardTableCell in leaderboardTableCells)
             {
                 leaderboardTableCell.transform.Find("PlayerName").GetComponent<CurvedTextMeshPro>().richText = true;
@@ -285,7 +285,7 @@ namespace Hitbloq.UI
                 this.difficultyBeatmap = difficultyBeatmap;
                 if (isActiveAndEnabled)
                 {
-                    foreach (ILeaderboardSource leaderboardSource in leaderboardSources)
+                    foreach (var leaderboardSource in leaderboardSources)
                     {
                         leaderboardSource.ClearCache();
                     }
@@ -315,7 +315,7 @@ namespace Hitbloq.UI
         {
             get
             {
-                List<IconSegmentedControl.DataItem> list = new List<IconSegmentedControl.DataItem>();
+                var list = new List<IconSegmentedControl.DataItem>();
                 foreach (var leaderboardSource in leaderboardSources)
                 {
                     list.Add(new IconSegmentedControl.DataItem(leaderboardSource.Icon, leaderboardSource.HoverHint));

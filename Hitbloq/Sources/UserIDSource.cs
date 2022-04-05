@@ -26,12 +26,12 @@ namespace Hitbloq.Sources
         {
             if (hitbloqUserID == null || registrationRequested)
             {
-                UserInfo userInfo = await platformUserModel.GetUserInfo();
+                var userInfo = await platformUserModel.GetUserInfo();
                 if (userInfo != null)
                 {
                     try
                     {
-                        IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/tools/ss_registered/{userInfo.platformUserId}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                        var webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/tools/ss_registered/{userInfo.platformUserId}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
                         hitbloqUserID = await Utils.ParseWebResponse<HitbloqUserID>(webResponse);
 
                         if (hitbloqUserID.Registered)

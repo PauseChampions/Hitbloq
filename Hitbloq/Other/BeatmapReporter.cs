@@ -15,7 +15,7 @@ namespace Hitbloq.Other
 
         public void Initialize()
         {
-            beatmapListener.lastPlayedDifficultyBeatmap = difficultyBeatmap;
+            beatmapListener.LastPlayedDifficultyBeatmap = difficultyBeatmap;
         }
     }
 }

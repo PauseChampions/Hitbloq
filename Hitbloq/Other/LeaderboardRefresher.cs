@@ -33,19 +33,19 @@ namespace Hitbloq.Other
                 hitbloqPanelController.PromptText = "Refreshing Score...";
 
                 await Task.Delay(3000);
-                HitbloqUserID userID = await userIDSource.GetUserIDAsync();
-                IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/update_user/{userID.ID}").ConfigureAwait(false);
-                HitbloqRefreshEntry refreshEntry = await Utilities.Utils.ParseWebResponse<HitbloqRefreshEntry>(webResponse);
+                var userID = await userIDSource.GetUserIDAsync();
+                var webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/update_user/{userID.ID}").ConfigureAwait(false);
+                var refreshEntry = await Utilities.Utils.ParseWebResponse<HitbloqRefreshEntry>(webResponse);
 
                 if (refreshEntry != null && refreshEntry.Error == null)
                 {
                     // Try checking action queue if our action is completed, timeout at 7 times
-                    for (int i = 0; i < 7; i++)
+                    for (var i = 0; i < 7; i++)
                     {
                         await Task.Delay(3000);
 
                         webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/actions").ConfigureAwait(false);
-                        List<HitbloqActionQueueEntry> actionQueueEntries = await Utilities.Utils.ParseWebResponse<List<HitbloqActionQueueEntry>>(webResponse);
+                        var actionQueueEntries = await Utilities.Utils.ParseWebResponse<List<HitbloqActionQueueEntry>>(webResponse);
 
                         if (actionQueueEntries == null || !actionQueueEntries.Exists(entry => entry.ID == refreshEntry.ID))
                         {
@@ -71,15 +71,15 @@ namespace Hitbloq.Other
 
         private async Task<bool> RefreshNeeded()
         {
-            HitbloqUserID userID = await userIDSource.GetUserIDAsync();
+            var userID = await userIDSource.GetUserIDAsync();
             if (!userID.Registered)
             {
                 return false;
             }
 
-            if (beatmapListener.lastPlayedDifficultyBeatmap != null)
+            if (beatmapListener.LastPlayedDifficultyBeatmap != null)
             {
-                HitbloqLevelInfo levelInfo = await levelInfoSource.GetLevelInfoAsync(beatmapListener.lastPlayedDifficultyBeatmap);
+                var levelInfo = await levelInfoSource.GetLevelInfoAsync(beatmapListener.LastPlayedDifficultyBeatmap);
                 if (levelInfo != null)
                 {
                     return true;

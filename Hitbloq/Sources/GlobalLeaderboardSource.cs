@@ -42,7 +42,7 @@ namespace Hitbloq.Sources
             {
                 try
                 {
-                    IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/scores_extended/{page}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                    var webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/scores_extended/{page}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
                     cachedEntries.Add(await Utils.ParseWebResponse<List<HitbloqLeaderboardEntry>>(webResponse));
                 }
                 catch (TaskCanceledException) { }

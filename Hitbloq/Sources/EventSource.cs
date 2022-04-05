@@ -22,7 +22,7 @@ namespace Hitbloq.Sources
             {
                 try
                 {
-                    IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/event", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                    var webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/event", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
                     cachedEvent = await Utils.ParseWebResponse<HitbloqEvent>(webResponse);
                 }
                 catch (TaskCanceledException) { }
