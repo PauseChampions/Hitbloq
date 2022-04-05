@@ -19,6 +19,7 @@ namespace Hitbloq.Installers
             Container.BindInterfacesAndSelfTo<HitbloqProfileModalController>().AsSingle();
             Container.BindInterfacesAndSelfTo<HitbloqEventModalViewController>().AsSingle();
 
+            Container.BindInterfacesTo<MenuButtonUI>().AsSingle();
             Container.BindInterfacesAndSelfTo<HitbloqFlowCoordinator>().FromNewComponentOnRoot().AsSingle();
 
             Container.BindInterfacesTo<HitbloqCustomLeaderboard>().AsSingle();

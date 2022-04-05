@@ -7,12 +7,12 @@ namespace Hitbloq.UI
     internal class HitbloqFlowCoordinator : FlowCoordinator
     {
         [Inject]
-        private readonly FlowCoordinator mainFlowCoordinator = null!;
+        private readonly MainFlowCoordinator mainFlowCoordinator = null!;
         
         private FlowCoordinator? parentFlowCoordinator;
         
         [Inject]
-        private readonly ViewController hitbloqMainViewController = null!;
+        private readonly HitbloqMainViewController hitbloqMainViewController = null!;
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
@@ -28,19 +28,8 @@ namespace Hitbloq.UI
 
         internal void Show()
         {
-            parentFlowCoordinator = DeepestChildFlowCoordinator(mainFlowCoordinator);
+            parentFlowCoordinator = mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
             parentFlowCoordinator.PresentFlowCoordinator(this);
-        }
-
-        private FlowCoordinator DeepestChildFlowCoordinator(FlowCoordinator root)
-        {
-            var flow = root.childFlowCoordinator;
-            if (flow == null) return root;
-            if (flow.childFlowCoordinator == null || flow.childFlowCoordinator == flow)
-            {
-                return flow;
-            }
-            return DeepestChildFlowCoordinator(flow);
         }
     }
 }
