@@ -11,6 +11,7 @@ using HMUI;
 using IPA.Utilities;
 using System.ComponentModel;
 using System.Reflection;
+using System.Threading.Tasks;
 using BeatSaberMarkupLanguage.Components;
 using UnityEngine;
 using Zenject;
@@ -61,7 +62,10 @@ namespace Hitbloq.UI
             this.playlistManagerIHardlyKnowHer = playlistManagerIHardlyKnowHer;
         }
 
-        public async void ViewActivated(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+        public void ViewActivated(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) =>
+            _ = ViewActivatedAsync(hitbloqLeaderboardViewController, firstActivation);
+
+        private async Task ViewActivatedAsync(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, bool firstActivation)
         {
             if (firstActivation)
             {
@@ -70,7 +74,7 @@ namespace Hitbloq.UI
                 {
                     if (!PluginConfig.Instance.ViewedEvents.Contains(hitbloqEvent.ID))
                     {
-                        ShowModal(hitbloqLeaderboardViewController.transform);
+                        await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => ShowModal(hitbloqLeaderboardViewController.transform));
                         PluginConfig.Instance.ViewedEvents.Add(hitbloqEvent.ID);
                         PluginConfig.Instance.Changed();
                     }
@@ -99,7 +103,9 @@ namespace Hitbloq.UI
         }
 
         [UIAction("#post-parse")]
-        private async void PostParse()
+        private void PostParse() => _ = PostParseAsync();
+
+        private async Task PostParseAsync()
         {
             parsed = true;
             modalView!.gameObject.name = "HitbloqEventModal";

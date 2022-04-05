@@ -5,6 +5,7 @@ using Hitbloq.UI;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using Zenject;
 using LeaderboardCore.Interfaces;
 using Hitbloq.Other;
@@ -77,15 +78,19 @@ namespace Hitbloq.Managers
             hitbloqPanelController.LogoClickedEvent -= OnLogoClicked;
         }
 
-        public async void OnScoreUploaded()
+        public void OnScoreUploaded() => _ = OnScoreUploadAsync();
+        private async Task OnScoreUploadAsync()
         {
             if (await leaderboardRefresher.Refresh())
             {
-                OnLeaderboardSet(selectedDifficultyBeatmap);
+                await OnLeaderboardSetAsync(selectedDifficultyBeatmap);
             }
         }
 
-        public async void OnLeaderboardSet(IDifficultyBeatmap? difficultyBeatmap)
+        public void OnLeaderboardSet(IDifficultyBeatmap? difficultyBeatmap) =>
+            _ = OnLeaderboardSetAsync(difficultyBeatmap);
+
+        private async Task OnLeaderboardSetAsync(IDifficultyBeatmap? difficultyBeatmap)
         {
             if (difficultyBeatmap != null)
             {
@@ -110,7 +115,7 @@ namespace Hitbloq.Managers
 
                 foreach (var difficultyBeatmapUpdater in difficultyBeatmapUpdaters)
                 {
-                    difficultyBeatmapUpdater.DifficultyBeatmapUpdated(difficultyBeatmap, levelInfoEntry);
+                    await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => difficultyBeatmapUpdater.DifficultyBeatmapUpdated(difficultyBeatmap, levelInfoEntry));
                 }
             }
         }
@@ -131,7 +136,10 @@ namespace Hitbloq.Managers
             }
         }
 
-        private async void OnPageRequested(IDifficultyBeatmap difficultyBeatmap, ILeaderboardSource leaderboardSource, int page)
+        private void OnPageRequested(IDifficultyBeatmap difficultyBeatmap, ILeaderboardSource leaderboardSource, int page) =>
+            _ = OnPageRequestedAsync(difficultyBeatmap, leaderboardSource, page);
+
+        private async Task OnPageRequestedAsync(IDifficultyBeatmap difficultyBeatmap, ILeaderboardSource leaderboardSource, int page)
         {
             leaderboardTokenSource?.Cancel();
             leaderboardTokenSource?.Dispose();
@@ -148,7 +156,7 @@ namespace Hitbloq.Managers
 
             foreach(var leaderboardEntriesUpdater in leaderboardEntriesUpdaters)
             {
-                leaderboardEntriesUpdater.LeaderboardEntriesUpdated(leaderboardEntries);
+                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => leaderboardEntriesUpdater.LeaderboardEntriesUpdated(leaderboardEntries));
             }
         }
 

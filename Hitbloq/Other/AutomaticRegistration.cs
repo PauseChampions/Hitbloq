@@ -4,6 +4,7 @@ using Hitbloq.UI;
 using Hitbloq.Utilities;
 using SiraUtil.Web;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using Zenject;
 
 namespace Hitbloq.Other
@@ -23,8 +24,10 @@ namespace Hitbloq.Other
             this.userIDSource = userIDSource;
         }
 
-        public async void Initialize()
-        {
+        public void Initialize() => _ = InitializeAsync();
+
+        private async Task InitializeAsync()
+        { 
             // Check if user id exists, if it does this is not needed
             var userID = await userIDSource.GetUserIDAsync();
             if (userID == null || userID.ID != -1)

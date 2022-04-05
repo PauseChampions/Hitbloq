@@ -12,6 +12,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Hitbloq.UI
@@ -215,9 +216,14 @@ namespace Hitbloq.UI
             Accessors.AnimateCanvasAccessor(ref modalView!) = true;
         }
 
-        internal async void ShowModalForSelf(Transform parentTransform, HitbloqRankInfo rankInfo, string pool)
+        internal void ShowModalForSelf(Transform parentTransform, HitbloqRankInfo rankInfo, string pool)
         {
             Parse(parentTransform);
+            _ = ShowModalForSelfAsync(rankInfo, pool);
+        }
+
+        private async Task ShowModalForSelfAsync(HitbloqRankInfo rankInfo, string pool)
+        {
             var userID = await userIDSource.GetUserIDAsync();
 
             if (userID == null || userID.ID == -1)
@@ -225,8 +231,11 @@ namespace Hitbloq.UI
                 return;
             }
 
-            parserParams?.EmitEvent("close-modal");
-            parserParams?.EmitEvent("open-modal");
+            await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+            {
+                parserParams?.EmitEvent("close-modal");
+                parserParams?.EmitEvent("open-modal");
+            });
 
             IsLoading = true;
 
@@ -238,7 +247,7 @@ namespace Hitbloq.UI
             IsLoading = false;
         }
 
-        internal async void ShowModalForUser(Transform parentTransform, int userID, string pool)
+        internal void ShowModalForUser(Transform parentTransform, int userID, string pool)
         {
             Parse(parentTransform);
 
@@ -247,6 +256,11 @@ namespace Hitbloq.UI
 
             IsLoading = true;
 
+            _ = ShowModalForUserAsync(userID, pool);
+        }
+
+        private async Task ShowModalForUserAsync(int userID, string pool)
+        {
             RankInfo = await rankInfoSource.GetRankInfoAsync(pool, userID);
             PoolInfo = await poolInfoSource.GetPoolInfoAsync(pool);
             HitbloqProfile = await profileSource.GetProfileAsync(userID);

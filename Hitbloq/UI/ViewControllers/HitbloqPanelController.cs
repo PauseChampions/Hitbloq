@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using Zenject;
@@ -35,8 +36,8 @@ namespace Hitbloq.UI
         [Inject]
         private readonly PoolInfoSource poolInfoSource = null!;
         
-        [Inject]
-        private readonly EventSource eventSource = null!;
+        //[Inject]
+        //private readonly EventSource eventSource = null!;
 
         private HitbloqRankInfo? rankInfo;
         private List<string>? poolNames;
@@ -99,7 +100,7 @@ namespace Hitbloq.UI
         private readonly ClickableImage? playlistManagerImage = null!;
 
         [UIAction("#post-parse")]
-        private async void PostParse()
+        private void PostParse()
         {
             // Backround related stuff
             if (container!.background is ImageView background)
@@ -142,6 +143,7 @@ namespace Hitbloq.UI
 
             defaultHighlightColour = playlistManagerImage!.HighlightColor;
             
+            /*
             var hitbloqEvent = await eventSource.GetAsync();
             if (hitbloqEvent != null && hitbloqEvent.ID != -1)
             {
@@ -157,6 +159,7 @@ namespace Hitbloq.UI
 
                 clickableLogo.OnClickEvent += LogoClicked;
             }
+            */
         }
 
         public void Initialize()
@@ -241,7 +244,10 @@ namespace Hitbloq.UI
             LoadingActive = false;
         }
 
-        public async void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo? levelInfoEntry)
+        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo? levelInfoEntry) =>
+            _ = DifficultyBeatmapUpdatedAsync(levelInfoEntry);
+
+        private async Task DifficultyBeatmapUpdatedAsync(HitbloqLevelInfo? levelInfoEntry)
         {
             poolInfoTokenSource?.Cancel();
             poolInfoTokenSource?.Dispose();
@@ -276,22 +282,28 @@ namespace Hitbloq.UI
             }
 
             var poolIndex = poolNames.IndexOf(selectedPool ?? "");
-            PoolChangedEvent?.Invoke(poolNames[poolIndex == -1 ? 0 : poolIndex]);
 
-            if (dropDownListSetting != null)
+            await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
             {
-                dropDownListSetting.values = pools.Count != 0 ? pools : new List<object> { "None" };
-                dropDownListSetting.UpdateChoices();
-                dropDownListSetting.dropdown.SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
-
-                if (!LoadingActive && !PromptText.Contains("<color=red>"))
+                PoolChangedEvent?.Invoke(poolNames[poolIndex == -1 ? 0 : poolIndex]);
+                
+                if (dropDownListSetting != null)
                 {
-                    PromptText = "";
+                    dropDownListSetting.values = pools.Count != 0 ? pools : new List<object> { "None" };
+                    dropDownListSetting.UpdateChoices();
+                    dropDownListSetting.dropdown.SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
+
+                    if (!LoadingActive && !PromptText.Contains("<color=red>"))
+                    {
+                        PromptText = "";
+                    }
                 }
-            }
+            });
         }
 
-        public async void PoolUpdated(string pool)
+        public void PoolUpdated(string pool) => _ = PoolUpdatedAsync(pool);
+
+        private async Task PoolUpdatedAsync(string pool)
         {
             rankInfoTokenSource?.Cancel();
             rankInfoTokenSource?.Dispose();

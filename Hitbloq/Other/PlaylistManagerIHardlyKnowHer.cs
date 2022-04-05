@@ -41,7 +41,10 @@ namespace Hitbloq.Other
             PlaylistManager.Utilities.Events.playlistSelected -= OnPlaylistSelected;
         }
 
-        internal async void OpenPlaylist(string poolID, Action? onDownloadComplete = null)
+        internal void OpenPlaylist(string poolID, Action? onDownloadComplete = null)
+            => _ = OpenPlaylistAsync(poolID, onDownloadComplete);
+
+        private async Task OpenPlaylistAsync(string poolID, Action? onDownloadComplete = null)
         {
             tokenSource?.Cancel();
             tokenSource?.Dispose();
@@ -53,12 +56,16 @@ namespace Hitbloq.Other
                 return;
             }
 
-            onDownloadComplete?.Invoke();
-            levelCategorySegmentedControl.SelectCellWithNumber(1);
-            selectLevelCategoryViewController.LevelFilterCategoryIconSegmentedControlDidSelectCell(levelCategorySegmentedControl, 1);
-            levelFilteringNavigationController.SelectAnnotatedBeatmapLevelCollection(playlistToSelect);
+            await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+            {
+                onDownloadComplete?.Invoke();
+                levelCategorySegmentedControl.SelectCellWithNumber(1);
+                selectLevelCategoryViewController.LevelFilterCategoryIconSegmentedControlDidSelectCell(levelCategorySegmentedControl, 1);
+                levelFilteringNavigationController.SelectAnnotatedBeatmapLevelCollection(playlistToSelect);
+            });
 
-            CancelDownload();
+            tokenSource.Dispose();
+            tokenSource = null;
         }
 
         internal void CancelDownload() => tokenSource?.Cancel();

@@ -7,6 +7,7 @@ using HMUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
@@ -115,17 +116,20 @@ namespace Hitbloq.UI
             PageNumber = 0;
         }
 
-        public async void SetScores(List<HitbloqLeaderboardEntry>? leaderboardEntries)
+        private async Task SetScores(List<HitbloqLeaderboardEntry>? leaderboardEntries)
         {
             var scores = new List<LeaderboardTableView.ScoreData>();
             var myScorePos = -1;
 
             if (infoButtons != null)
             {
-                foreach (var button in infoButtons)
+                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
                 {
-                    button.gameObject.SetActive(false);
-                }
+                    foreach (var button in infoButtons)
+                    {
+                        button.gameObject.SetActive(false);
+                    }
+                });
             }
 
             if (leaderboardEntries == null || leaderboardEntries.Count == 0)
@@ -142,29 +146,36 @@ namespace Hitbloq.UI
                 var userID = await userIDSource.GetUserIDAsync();
                 var id = userID?.ID ?? -1;
 
-                for(var i = 0; i < (leaderboardEntries.Count > 10 ? 10: leaderboardEntries.Count); i++)
+                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
                 {
-                    scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].Score, $"<color={leaderboardEntries[i].CustomColor ?? "#ffffff"}><size=85%>{leaderboardEntries[i].Username}</color> - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].Accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#aa6eff>{leaderboardEntries[i].CR[selectedPool].ToString("F2")}<size=55%>cr</size></color>)</size>", 
-                        leaderboardEntries[i].Rank, false));
-
-                    if (infoButtons != null)
+                    for (var i = 0; i < (leaderboardEntries.Count > 10 ? 10 : leaderboardEntries.Count); i++)
                     {
-                        infoButtons[i].gameObject.SetActive(true);
-                        var hoverHint = infoButtons[i].GetComponent<HoverHint>();
-                        hoverHint.text = $"Score Set: {leaderboardEntries[i].DateSet}";
-                    }
+                        scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].Score,
+                            $"<color={leaderboardEntries[i].CustomColor ?? "#ffffff"}><size=85%>{leaderboardEntries[i].Username}</color> - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].Accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#aa6eff>{leaderboardEntries[i].CR[selectedPool].ToString("F2")}<size=55%>cr</size></color>)</size>",
+                            leaderboardEntries[i].Rank, false));
 
-                    if (leaderboardEntries[i].UserID == id)
-                    {
-                        myScorePos = i;
+                        if (infoButtons != null)
+                        {
+                            infoButtons[i].gameObject.SetActive(true);
+                            var hoverHint = infoButtons[i].GetComponent<HoverHint>();
+                            hoverHint.text = $"Score Set: {leaderboardEntries[i].DateSet}";
+                        }
+
+                        if (leaderboardEntries[i].UserID == id)
+                        {
+                            myScorePos = i;
+                        }
                     }
-                }
+                });
             }
 
             if (loadingControl != null && leaderboard != null)
             {
-                loadingControl.SetActive(false);
-                leaderboard.SetScores(scores, myScorePos);
+                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+                {
+                    loadingControl.SetActive(false);
+                    leaderboard.SetScores(scores, myScorePos);
+                });
             }
         }
 
@@ -295,7 +306,7 @@ namespace Hitbloq.UI
         {
             this.leaderboardEntries = leaderboardEntries;
             NotifyPropertyChanged(nameof(DownEnabled));
-            SetScores(leaderboardEntries);
+            _ = SetScores(leaderboardEntries);
         }
 
         public void PoolUpdated(string pool)
@@ -303,7 +314,7 @@ namespace Hitbloq.UI
             this.selectedPool = pool;
             if (isActiveAndEnabled)
             {
-                SetScores(leaderboardEntries);
+                _ = SetScores(leaderboardEntries);
             }
         }
 
