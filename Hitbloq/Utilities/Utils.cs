@@ -28,7 +28,7 @@ namespace Hitbloq.Utilities
                 var jsonSerializer = new JsonSerializer();
                 return jsonSerializer.Deserialize<T>(jsonTextReader);
             }
-            return default(T?);
+            return default;
         }
 
         // Yoinked from SiraUtil

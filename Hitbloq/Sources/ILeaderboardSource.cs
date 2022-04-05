@@ -10,7 +10,7 @@ namespace Hitbloq.Sources
     {
         public string HoverHint { get; }
         public Sprite Icon { get; }
-        public Task<List<HitbloqLeaderboardEntry>> GetScoresTask(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null, int page = 0);
+        public Task<List<HitbloqLeaderboardEntry>?> GetScoresAsync(IDifficultyBeatmap difficultyBeatmap, CancellationToken cancellationToken = default, int page = 0);
         public bool Scrollable { get; }
         public void ClearCache();
     }

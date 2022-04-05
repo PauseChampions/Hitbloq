@@ -17,7 +17,7 @@ namespace Hitbloq.Sources
             this.userIDSource = userIDSource;
         }
 
-        public async Task<HitbloqRankInfo> GetRankInfoForSelfAsync(string poolID, CancellationToken? cancellationToken = null)
+        public async Task<HitbloqRankInfo?> GetRankInfoForSelfAsync(string poolID, CancellationToken? cancellationToken = null)
         {
             var userID = await userIDSource.GetUserIDAsync(cancellationToken);
             if (userID.ID != -1)
@@ -27,7 +27,7 @@ namespace Hitbloq.Sources
             return null;
         }
 
-        public async Task<HitbloqRankInfo> GetRankInfoAsync(string poolID, int userID, CancellationToken? cancellationToken = null)
+        public async Task<HitbloqRankInfo?> GetRankInfoAsync(string poolID, int userID, CancellationToken? cancellationToken = null)
         {
             try
             {

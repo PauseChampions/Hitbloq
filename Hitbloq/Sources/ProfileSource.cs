@@ -15,7 +15,7 @@ namespace Hitbloq.Sources
             this.siraHttpService = siraHttpService;
         }
 
-        public async Task<HitbloqProfile> GetProfileAsync(int userID, CancellationToken? cancellationToken = null)
+        public async Task<HitbloqProfile?> GetProfileAsync(int userID, CancellationToken? cancellationToken = null)
         {
             try
             {

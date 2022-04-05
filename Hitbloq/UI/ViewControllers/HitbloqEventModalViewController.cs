@@ -66,8 +66,8 @@ namespace Hitbloq.UI
         {
             if (firstActivation)
             {
-                var hitbloqEvent = await eventSource.GetEventAsync();
-                if (hitbloqEvent.ID != -1)
+                var hitbloqEvent = await eventSource.GetAsync();
+                if (hitbloqEvent != null && hitbloqEvent.ID != -1)
                 {
                     if (!PluginConfig.Instance.ViewedEvents.Contains(hitbloqEvent.ID))
                     {
@@ -104,11 +104,11 @@ namespace Hitbloq.UI
         {
             parsed = true;
             modalView.gameObject.name = "HitbloqEventModal";
-            currentEvent = await eventSource.GetEventAsync();
+            currentEvent = await eventSource.GetAsync();
 
             if (currentEvent.Image != null)
             {
-                spriteLoader.DownloadSpriteAsync(currentEvent.Image, (Sprite sprite) => eventImage.sprite = sprite);
+                spriteLoader.DownloadSpriteAsync(currentEvent.Image, sprite => eventImage.sprite = sprite);
             }
 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(EventTitle)));

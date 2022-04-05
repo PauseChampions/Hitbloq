@@ -11,6 +11,8 @@ namespace Hitbloq.Configuration
     {
         public static PluginConfig Instance { get; set; }
 
+        public virtual string HitbloqURL { get; set; } = "https://hitbloq.com/";
+
         [UseConverter(typeof(ListConverter<int>))]
         [NonNullable]
         public virtual List<int> Friends { get; set; } = new List<int>();

@@ -12,9 +12,9 @@ namespace Hitbloq.Sources
         private readonly IHttpService siraHttpService;
         private readonly IPlatformUserModel platformUserModel;
 
-        private HitbloqUserID hitbloqUserID;
+        private HitbloqUserID? hitbloqUserID;
         public bool registrationRequested;
-        public event Action UserRegisteredEvent;
+        public event Action? UserRegisteredEvent;
 
         public UserIDSource(IHttpService siraHttpService, IPlatformUserModel platformUserModel)
         {
@@ -22,7 +22,7 @@ namespace Hitbloq.Sources
             this.platformUserModel = platformUserModel;
         }
 
-        public async Task<HitbloqUserID> GetUserIDAsync(CancellationToken? cancellationToken = null)
+        public async Task<HitbloqUserID?> GetUserIDAsync(CancellationToken? cancellationToken = null)
         {
             if (hitbloqUserID == null || registrationRequested)
             {
@@ -34,7 +34,7 @@ namespace Hitbloq.Sources
                         var webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/tools/ss_registered/{userInfo.platformUserId}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
                         hitbloqUserID = await Utils.ParseWebResponse<HitbloqUserID>(webResponse);
 
-                        if (hitbloqUserID.Registered)
+                        if (hitbloqUserID is {Registered: true})
                         {
                             UserRegisteredEvent?.Invoke();
                             registrationRequested = false;
@@ -43,12 +43,6 @@ namespace Hitbloq.Sources
                     catch (TaskCanceledException) { }
                 }
             }
-
-            if (hitbloqUserID == null)
-            {
-                return new HitbloqUserID();
-            }
-
             return hitbloqUserID;
         }
     }

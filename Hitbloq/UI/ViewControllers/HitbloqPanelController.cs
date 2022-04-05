@@ -147,8 +147,8 @@ namespace Hitbloq.UI
             defaultHighlightColour = playlistManagerImage.HighlightColor;
             cancelHighlightColor = Color.red;
 
-            var hitbloqEvent = await eventSource.GetEventAsync();
-            if (hitbloqEvent.ID != -1)
+            var hitbloqEvent = await eventSource.GetAsync();
+            if (hitbloqEvent != null && hitbloqEvent.ID != -1)
             {
                 var clickableLogo = logo.Upgrade<ImageView, ClickableImage>();
                 logo = clickableLogo;
