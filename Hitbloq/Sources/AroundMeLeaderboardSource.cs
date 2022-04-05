@@ -43,11 +43,11 @@ namespace Hitbloq.Sources
             if (cachedEntries == null)
             {
                 HitbloqUserID userID = await userIDSource.GetUserIDAsync(cancellationToken);
-                if (userID.id == -1)
+                if (userID.ID == -1)
                 {
                     return null;
                 }
-                int id = userID.id;
+                int id = userID.ID;
 
                 try
                 {

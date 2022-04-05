@@ -46,7 +46,7 @@ namespace Hitbloq.Sources
                     };
                         IHttpResponse webResponse = await siraHttpService.PostAsync($"https://hitbloq.com/api/tools/mass_ss_to_hitbloq", content, cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
 
-                        hitbloqPlatformFriendIds = (await Utils.ParseWebResponse<List<HitbloqFriendID>>(webResponse)).Select(x => x.id).ToHashSet();
+                        hitbloqPlatformFriendIds = (await Utils.ParseWebResponse<List<HitbloqFriendID>>(webResponse)).Select(x => x.ID).ToHashSet();
                     }
                     catch (TaskCanceledException) { }
                 }

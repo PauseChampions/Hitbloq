@@ -67,12 +67,12 @@ namespace Hitbloq.UI
             if (firstActivation)
             {
                 HitbloqEvent hitbloqEvent = await eventSource.GetEventAsync();
-                if (hitbloqEvent.id != -1)
+                if (hitbloqEvent.ID != -1)
                 {
-                    if (!PluginConfig.Instance.ViewedEvents.Contains(hitbloqEvent.id))
+                    if (!PluginConfig.Instance.ViewedEvents.Contains(hitbloqEvent.ID))
                     {
                         ShowModal(hitbloqLeaderboardViewController.transform);
-                        PluginConfig.Instance.ViewedEvents.Add(hitbloqEvent.id);
+                        PluginConfig.Instance.ViewedEvents.Add(hitbloqEvent.ID);
                         PluginConfig.Instance.Changed();
                     }
                 }
@@ -106,9 +106,9 @@ namespace Hitbloq.UI
             modalView.gameObject.name = "HitbloqEventModal";
             currentEvent = await eventSource.GetEventAsync();
 
-            if (currentEvent.image != null)
+            if (currentEvent.Image != null)
             {
-                spriteLoader.DownloadSpriteAsync(currentEvent.image, (Sprite sprite) => eventImage.sprite = sprite);
+                spriteLoader.DownloadSpriteAsync(currentEvent.Image, (Sprite sprite) => eventImage.sprite = sprite);
             }
 
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(EventTitle)));
@@ -128,22 +128,22 @@ namespace Hitbloq.UI
                 }
                 else
                 {
-                    playlistManagerIHardlyKnowHer.OpenPlaylist(currentEvent.pool, () => DownloadingActive = false);
+                    playlistManagerIHardlyKnowHer.OpenPlaylist(currentEvent.Pool, () => DownloadingActive = false);
                 }
                 DownloadingActive = playlistManagerIHardlyKnowHer.IsDownloading;
             }
         }
 
         [UIValue("event-title")]
-        private string EventTitle => $"{currentEvent?.title}";
+        private string EventTitle => $"{currentEvent?.Title}";
 
         [UIValue("event-description")]
-        private string EventDescription => $"{currentEvent?.description}";
+        private string EventDescription => $"{currentEvent?.Description}";
 
         [UIValue("pool-text")]
         private string PoolText => DownloadingActive ? "Cancel Download" : "Open Pool!";
 
         [UIValue("pool-exists")]
-        private bool PoolExists => playlistManagerIHardlyKnowHer != null && currentEvent != null && currentEvent.pool != null;
+        private bool PoolExists => playlistManagerIHardlyKnowHer != null && currentEvent != null && currentEvent.Pool != null;
     }
 }

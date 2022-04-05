@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 
@@ -8,33 +9,33 @@ namespace Hitbloq.Entries
     internal class HitbloqLeaderboardEntry
     {
         [JsonProperty("accuracy")]
-        public float accuracy;
+        public float Accuracy { get; private set; }
 
         [JsonProperty("score")]
-        public int score;
+        public int Score { get; private set; }
 
-        [JsonProperty("song_id")]
-        public string levelID;
+        [JsonProperty("song_id")] 
+        public string LevelID { get; private set; } = null!;
 
         [JsonProperty("date_set")]
-        public string dateSet;
+        public string DateSet { get; private set; } = null!;
 
         [JsonProperty("username")]
-        public string username;
+        public string Username { get; private set; } = null!;
 
         [JsonProperty("user")]
-        public int userID;
+        public int UserID { get; private set; }
 
         [JsonProperty("rank")]
-        public int rank;
+        public int Rank { get; private set; }
 
         [JsonProperty("cr")]
-        public Dictionary<string, float> cr;
+        public ReadOnlyDictionary<string, float> CR { get; private set; } = null!;
 
         [OnDeserialized]
         private void OnDeserialized(StreamingContext context)
         {
-            username = Regex.Replace(username, "<[^>]*(>|$)", "");
+            Username = Regex.Replace(Username, "<[^>]*(>|$)", "");
         }
     }
 }

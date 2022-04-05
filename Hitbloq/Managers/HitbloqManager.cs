@@ -105,7 +105,7 @@ namespace Hitbloq.Managers
 
                 if (levelInfoEntry != null)
                 {
-                    if (levelInfoEntry.pools.Count == 0)
+                    if (levelInfoEntry.Pools.Count == 0)
                     {
                         levelInfoEntry = null;
                     }
@@ -142,7 +142,7 @@ namespace Hitbloq.Managers
 
             if (leaderboardEntries != null)
             {
-                if (leaderboardEntries.Count == 0 || leaderboardEntries[0].cr.Count == 0)
+                if (leaderboardEntries.Count == 0 || leaderboardEntries[0].CR.Count == 0)
                 {
                     leaderboardEntries = null;
                 }

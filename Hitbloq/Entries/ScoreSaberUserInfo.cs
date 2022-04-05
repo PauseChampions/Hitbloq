@@ -4,7 +4,7 @@ namespace Hitbloq.Entries
 {
     internal class ScoreSaberUserInfo
     {
-        [JsonProperty("errorMessage", NullValueHandling = NullValueHandling.Ignore)]
-        public string errorMessage;
+        [JsonProperty("errorMessage")]
+        public string? ErrorMessage { get; private set; }
     }
 }

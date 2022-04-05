@@ -137,27 +137,27 @@ namespace Hitbloq.UI
             }
             else
             {
-                if (!leaderboardEntries.First().cr.ContainsKey(selectedPool))
+                if (!leaderboardEntries.First().CR.ContainsKey(selectedPool))
                 {
                     return;
                 }
 
                 HitbloqUserID userID = await userIDSource.GetUserIDAsync();
-                int id = userID.id;
+                int id = userID.ID;
 
                 for(int i = 0; i < (leaderboardEntries.Count > 10 ? 10: leaderboardEntries.Count); i++)
                 {
-                    scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].score, $"<size=85%>{leaderboardEntries[i].username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#aa6eff>{leaderboardEntries[i].cr[selectedPool].ToString("F2")}<size=55%>cr</size></color>)</size>", 
-                        leaderboardEntries[i].rank, false));
+                    scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].Score, $"<size=85%>{leaderboardEntries[i].Username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].Accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#aa6eff>{leaderboardEntries[i].CR[selectedPool].ToString("F2")}<size=55%>cr</size></color>)</size>", 
+                        leaderboardEntries[i].Rank, false));
 
                     if (infoButtons != null)
                     {
                         infoButtons[i].gameObject.SetActive(true);
                         HoverHint hoverHint = infoButtons[i].GetComponent<HoverHint>();
-                        hoverHint.text = $"Score Set: {leaderboardEntries[i].dateSet}";
+                        hoverHint.text = $"Score Set: {leaderboardEntries[i].DateSet}";
                     }
 
-                    if (leaderboardEntries[i].userID == id)
+                    if (leaderboardEntries[i].UserID == id)
                     {
                         myScorePos = i;
                     }
@@ -183,7 +183,7 @@ namespace Hitbloq.UI
         {
             if (index < leaderboardEntries.Count)
             {
-                profileModalController.ShowModalForUser(transform, leaderboardEntries[index].userID, selectedPool);
+                profileModalController.ShowModalForUser(transform, leaderboardEntries[index].UserID, selectedPool);
             }
         }
 

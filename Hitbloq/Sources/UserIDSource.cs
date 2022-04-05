@@ -34,7 +34,7 @@ namespace Hitbloq.Sources
                         IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/tools/ss_registered/{userInfo.platformUserId}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
                         hitbloqUserID = await Utils.ParseWebResponse<HitbloqUserID>(webResponse);
 
-                        if (hitbloqUserID.registered)
+                        if (hitbloqUserID.Registered)
                         {
                             UserRegisteredEvent?.Invoke();
                             registrationRequested = false;

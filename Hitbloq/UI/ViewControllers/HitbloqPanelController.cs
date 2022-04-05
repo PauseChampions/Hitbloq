@@ -148,7 +148,7 @@ namespace Hitbloq.UI
             cancelHighlightColor = Color.red;
 
             HitbloqEvent hitbloqEvent = await eventSource.GetEventAsync();
-            if (hitbloqEvent.id != -1)
+            if (hitbloqEvent.ID != -1)
             {
                 ClickableImage clickableLogo = logo.Upgrade<ImageView, ClickableImage>();
                 logo = clickableLogo;
@@ -247,14 +247,14 @@ namespace Hitbloq.UI
 
             if (levelInfoEntry != null)
             {
-                foreach(var pool in levelInfoEntry.pools)
+                foreach(var pool in levelInfoEntry.Pools)
                 {
                     HitbloqPoolInfo poolInfo = await poolInfoSource.GetPoolInfoAsync(pool.Key, poolInfoTokenSource.Token);
 
-                    string poolName = poolInfo.shownName.RemoveSpecialCharacters();
+                    string poolName = poolInfo.ShownName.RemoveSpecialCharacters();
                     if (poolName.DoesNotHaveAlphaNumericCharacters())
                     {
-                        poolName = poolInfo.id;
+                        poolName = poolInfo.ID;
                     }
                     if (poolName.Length > 18)
                     {
@@ -263,7 +263,7 @@ namespace Hitbloq.UI
 
                     pools.Add($"{poolName} - {pool.Value}⭐");
                 }
-                poolNames = levelInfoEntry.pools.Keys.ToList();
+                poolNames = levelInfoEntry.Pools.Keys.ToList();
             }
             else
             {
@@ -297,7 +297,7 @@ namespace Hitbloq.UI
 
         public void LeaderboardEntriesUpdated(List<HitbloqLeaderboardEntry> leaderboardEntries)
         {
-            CuteMode = leaderboardEntries != null && leaderboardEntries.Exists(u => u.userID == 726);
+            CuteMode = leaderboardEntries != null && leaderboardEntries.Exists(u => u.UserID == 726);
         }
 
         [UIValue("prompt-text")]
@@ -336,7 +336,7 @@ namespace Hitbloq.UI
         }
 
         [UIValue("pool-ranking-text")]
-        private string PoolRankingText => $"<b>Pool Ranking:</b> #{rankInfo?.rank} <size=75%>(<color=#aa6eff>{rankInfo?.cr.ToString("F2")}cr</color>)";
+        private string PoolRankingText => $"<b>Pool Ranking:</b> #{rankInfo?.Rank} <size=75%>(<color=#aa6eff>{rankInfo?.CR.ToString("F2")}cr</color>)";
 
         [UIValue("pools")]
         private List<object> pools = new List<object> { "None" };

@@ -129,11 +129,11 @@ namespace Hitbloq.UI
 
                 if (_hitbloqProfile != null)
                 {
-                    spriteLoader.DownloadSpriteAsync(_hitbloqProfile.profilePictureURL, (Sprite sprite) => modalProfilePic.sprite = sprite);
+                    spriteLoader.DownloadSpriteAsync(_hitbloqProfile.ProfilePictureURL, (Sprite sprite) => modalProfilePic.sprite = sprite);
 
-                    if (_hitbloqProfile.profileBackgroundURL != null)
+                    if (_hitbloqProfile.ProfileBackgroundURL != null)
                     {
-                        spriteLoader.DownloadSpriteAsync(_hitbloqProfile.profileBackgroundURL, (Sprite sprite) =>
+                        spriteLoader.DownloadSpriteAsync(_hitbloqProfile.ProfileBackgroundURL, (Sprite sprite) =>
                         {
                             modalBackground.sprite = sprite;
                             modalBackground.color = customModalColour;
@@ -211,7 +211,7 @@ namespace Hitbloq.UI
             Parse(parentTransform);
             HitbloqUserID userID = await userIDSource.GetUserIDAsync();
 
-            if (userID.id == -1)
+            if (userID.ID == -1)
             {
                 return;
             }
@@ -223,7 +223,7 @@ namespace Hitbloq.UI
 
             RankInfo = rankInfo;
             PoolInfo = await poolInfoSource.GetPoolInfoAsync(pool);
-            HitbloqProfile = await profileSource.GetProfileAsync(userID.id);
+            HitbloqProfile = await profileSource.GetProfileAsync(userID.ID);
             addFriendButton.gameObject.SetActive(false);
 
             IsLoading = false;
@@ -243,7 +243,7 @@ namespace Hitbloq.UI
             HitbloqProfile = await profileSource.GetProfileAsync(userID);
 
             HitbloqUserID selfID = await userIDSource.GetUserIDAsync();
-            addFriendButton.gameObject.SetActive(selfID.id != userID);
+            addFriendButton.gameObject.SetActive(selfID.ID != userID);
             HashSet<int> platformFriends = await friendIDSource.GetPlatformFriendIDsAsync();
             if (platformFriends.Contains(userID))
             {
@@ -320,7 +320,7 @@ namespace Hitbloq.UI
         {
             get
             {
-                string userName = $"{RankInfo?.username}";
+                string userName = $"{RankInfo?.Username}";
                 if (userName.Length > 16)
                 {
                     return $"{userName.Substring(0, 13)}...";
@@ -334,10 +334,10 @@ namespace Hitbloq.UI
         {
             get
             {
-                string poolName = $"{PoolInfo?.shownName}".RemoveSpecialCharacters();
+                string poolName = $"{PoolInfo?.ShownName}".RemoveSpecialCharacters();
                 if (poolName.DoesNotHaveAlphaNumericCharacters())
                 {
-                    poolName = $"{PoolInfo?.id}";
+                    poolName = $"{PoolInfo?.ID}";
                 }
                 if (poolName.Length > 16)
                 {
@@ -348,12 +348,12 @@ namespace Hitbloq.UI
         }
 
         [UIValue("rank")]
-        private string Rank => $"#{RankInfo?.rank}";
+        private string Rank => $"#{RankInfo?.Rank}";
 
         [UIValue("cr")]
-        private string CR => $"{RankInfo?.cr}";
+        private string CR => $"{RankInfo?.CR}";
 
         [UIValue("score-count")]
-        private string ScoreCount => $"{RankInfo?.scoreCount}";
+        private string ScoreCount => $"{RankInfo?.ScoreCount}";
     }
 }

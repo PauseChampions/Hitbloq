@@ -27,10 +27,10 @@ namespace Hitbloq.Other
         {
             // Check if user id exists, if it does this is not needed
             HitbloqUserID userID = await userIDSource.GetUserIDAsync();
-            if (userID.id != -1)
+            if (userID.ID != -1)
             {
                 // If we are in progress of registration, show it
-                if (!userID.registered)
+                if (!userID.Registered)
                 {
                     HandleRegistrationProgress();
                 }
@@ -47,7 +47,7 @@ namespace Hitbloq.Other
             // If a valid scoresaber id doesnt exist, return
             IHttpResponse webResponse = await siraHttpService.GetAsync($"https://scoresaber.com/api/player/{userInfo.platformUserId}/full").ConfigureAwait(false);
             ScoreSaberUserInfo scoreSaberUserInfo = await Utils.ParseWebResponse<ScoreSaberUserInfo>(webResponse);
-            if (scoreSaberUserInfo?.errorMessage == "Player not found")
+            if (scoreSaberUserInfo?.ErrorMessage == "Player not found")
             {
                 hitbloqPanelController.PromptText = "<color=red>Please submit some scores from your ScoreSaber account.</color>";
                 hitbloqPanelController.LoadingActive = false;
@@ -62,7 +62,7 @@ namespace Hitbloq.Other
             webResponse = await siraHttpService.PostAsync("https://hitbloq.com/api/add_user", content);
             HitbloqRegistrationEntry registrationEntry = await Utils.ParseWebResponse<HitbloqRegistrationEntry>(webResponse);
 
-            if (registrationEntry != null && registrationEntry.status != "ratelimit")
+            if (registrationEntry != null && registrationEntry.Status != "ratelimit")
             {
                 HandleRegistrationProgress();
             }

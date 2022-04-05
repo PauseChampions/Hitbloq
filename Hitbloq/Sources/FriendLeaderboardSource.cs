@@ -48,14 +48,14 @@ namespace Hitbloq.Sources
                 HitbloqUserID userID = await userIDSource.GetUserIDAsync(cancellationToken);
                 List<int> friendIDs = await friendIDSource.GetFriendIDsAsync(cancellationToken);
 
-                if (userID.id == -1 || friendIDs == null)
+                if (userID.ID == -1 || friendIDs == null)
                 {
                     return null;
                 }
 
                 int friendCount = friendIDs == null ? 0 : friendIDs.Count;
                 int[] ids = new int[friendCount + 1];
-                ids[0] = userID.id;
+                ids[0] = userID.ID;
                 for (int i = 0; i < friendCount; i++)
                 {
                     ids[i + 1] = friendIDs[i];

@@ -34,10 +34,10 @@ namespace Hitbloq.Other
 
                 await Task.Delay(3000);
                 HitbloqUserID userID = await userIDSource.GetUserIDAsync();
-                IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/update_user/{userID.id}").ConfigureAwait(false);
+                IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/update_user/{userID.ID}").ConfigureAwait(false);
                 HitbloqRefreshEntry refreshEntry = await Utilities.Utils.ParseWebResponse<HitbloqRefreshEntry>(webResponse);
 
-                if (refreshEntry != null && refreshEntry.error == null)
+                if (refreshEntry != null && refreshEntry.Error == null)
                 {
                     // Try checking action queue if our action is completed, timeout at 7 times
                     for (int i = 0; i < 7; i++)
@@ -47,7 +47,7 @@ namespace Hitbloq.Other
                         webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/actions").ConfigureAwait(false);
                         List<HitbloqActionQueueEntry> actionQueueEntries = await Utilities.Utils.ParseWebResponse<List<HitbloqActionQueueEntry>>(webResponse);
 
-                        if (actionQueueEntries == null || !actionQueueEntries.Exists(entry => entry.id == refreshEntry.id))
+                        if (actionQueueEntries == null || !actionQueueEntries.Exists(entry => entry.ID == refreshEntry.ID))
                         {
                             hitbloqPanelController.LoadingActive = false;
                             hitbloqPanelController.PromptText = "<color=green>Score refreshed!</color>";
@@ -56,9 +56,9 @@ namespace Hitbloq.Other
                     }
                     hitbloqPanelController.PromptText = "<color=red>The action queue is very busy, your score cannot be refreshed for now.</color>";
                 }
-                else if (refreshEntry != null && refreshEntry.error != null)
+                else if (refreshEntry != null && refreshEntry.Error != null)
                 {
-                    hitbloqPanelController.PromptText = $"<color=red>Error: {refreshEntry.error}</color>";
+                    hitbloqPanelController.PromptText = $"<color=red>Error: {refreshEntry.Error}</color>";
                 }
                 else
                 {
@@ -72,7 +72,7 @@ namespace Hitbloq.Other
         private async Task<bool> RefreshNeeded()
         {
             HitbloqUserID userID = await userIDSource.GetUserIDAsync();
-            if (!userID.registered)
+            if (!userID.Registered)
             {
                 return false;
             }
