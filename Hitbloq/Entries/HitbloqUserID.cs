@@ -4,10 +4,10 @@ namespace Hitbloq.Entries
 {
     internal class HitbloqUserID
     {
-        [JsonProperty("user", NullValueHandling = NullValueHandling.Ignore)]
-        public int id = -1;
+        [JsonProperty("user")] 
+        public int ID { get; private set; } = -1;
 
         [JsonProperty("registered")]
-        public bool registered;
+        public bool Registered { get; private set; }
     }
 }

@@ -13,26 +13,22 @@ namespace Hitbloq.Utilities
     {
         public static string DifficultyBeatmapToString(IDifficultyBeatmap difficultyBeatmap)
         {
-            string hash = difficultyBeatmap.level.levelID.Replace(CustomLevelLoader.kCustomLevelPrefixId, "");
-            string difficulty = difficultyBeatmap.difficulty.ToString();
-            string characteristic = difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic.serializedName;
+            var hash = difficultyBeatmap.level.levelID.Replace(CustomLevelLoader.kCustomLevelPrefixId, "");
+            var difficulty = difficultyBeatmap.difficulty.ToString();
+            var characteristic = difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic.serializedName;
             return $"{hash}%7C_{difficulty}_Solo{characteristic}";
         }
 
-        public static async Task<T> ParseWebResponse<T>(IHttpResponse webResponse)
+        public static async Task<T?> ParseWebResponse<T>(IHttpResponse webResponse)
         {
             if (webResponse.Successful && (await webResponse.ReadAsByteArrayAsync()).Length > 3)
             {
-                using (StreamReader streamReader = new StreamReader(await webResponse.ReadAsStreamAsync()))
-                {
-                    using (JsonTextReader jsonTextReader = new JsonTextReader(streamReader))
-                    {
-                        JsonSerializer jsonSerializer = new JsonSerializer();
-                        return jsonSerializer.Deserialize<T>(jsonTextReader);
-                    }
-                }
+                using var streamReader = new StreamReader(await webResponse.ReadAsStreamAsync());
+                using var jsonTextReader = new JsonTextReader(streamReader);
+                var jsonSerializer = new JsonSerializer();
+                return jsonSerializer.Deserialize<T>(jsonTextReader);
             }
-            return default(T);
+            return default;
         }
 
         // Yoinked from SiraUtil
@@ -41,21 +37,21 @@ namespace Hitbloq.Utilities
             return (U)Upgrade(monoBehaviour, typeof(U));
         }
 
-        public static Component Upgrade(this Component monoBehaviour, Type upgradingType)
+        private static Component Upgrade(this Component monoBehaviour, Type upgradingType)
         {
             var originalType = monoBehaviour.GetType();
 
             var gameObject = monoBehaviour.gameObject;
             var upgradedDummyComponent = Activator.CreateInstance(upgradingType);
-            foreach (FieldInfo info in originalType.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic))
+            foreach (var info in originalType.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic))
             {
                 info.SetValue(upgradedDummyComponent, info.GetValue(monoBehaviour));
             }
             UnityEngine.Object.DestroyImmediate(monoBehaviour);
-            bool goState = gameObject.activeSelf;
+            var goState = gameObject.activeSelf;
             gameObject.SetActive(false);
             var upgradedMonoBehaviour = gameObject.AddComponent(upgradingType);
-            foreach (FieldInfo info in upgradingType.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic))
+            foreach (var info in upgradingType.GetFields(BindingFlags.Public | BindingFlags.Instance | BindingFlags.NonPublic))
             {
                 info.SetValue(upgradedMonoBehaviour, info.GetValue(upgradedDummyComponent));
             }
@@ -65,8 +61,8 @@ namespace Hitbloq.Utilities
 
         public static bool DoesNotHaveAlphaNumericCharacters(this string str)
         {
-            StringBuilder sb = new StringBuilder();
-            foreach (char c in str)
+            var sb = new StringBuilder();
+            foreach (var c in str)
             {
                 if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
                 {
@@ -78,8 +74,8 @@ namespace Hitbloq.Utilities
 
         public static string RemoveSpecialCharacters(this string str)
         {
-            StringBuilder sb = new StringBuilder();
-            foreach (char c in str)
+            var sb = new StringBuilder();
+            foreach (var c in str)
             {
                 if (c <= 255)
                 {

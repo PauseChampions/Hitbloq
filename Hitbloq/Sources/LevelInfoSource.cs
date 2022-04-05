@@ -4,32 +4,32 @@ using SiraUtil.Web;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Hitbloq.Configuration;
 
 namespace Hitbloq.Sources
 {
     internal class LevelInfoSource
     {
         private readonly IHttpService siraHttpService;
-        private readonly Dictionary<IDifficultyBeatmap, HitbloqLevelInfo> cache;
+        private readonly Dictionary<IDifficultyBeatmap, HitbloqLevelInfo?> cache = new();
 
         public LevelInfoSource(IHttpService siraHttpService)
         {
             this.siraHttpService = siraHttpService;
-            cache = new Dictionary<IDifficultyBeatmap, HitbloqLevelInfo>();
         }
 
-        public async Task<HitbloqLevelInfo> GetLevelInfoAsync(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null)
+        public async Task<HitbloqLevelInfo?> GetLevelInfoAsync(IDifficultyBeatmap difficultyBeatmap, CancellationToken cancellationToken = default)
         {
-            if (cache.TryGetValue(difficultyBeatmap, out HitbloqLevelInfo cachedValue))
+            if (cache.TryGetValue(difficultyBeatmap, out var cachedValue))
             {
                 return cachedValue;
             }
 
             try
             {
-                IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/info", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                HitbloqLevelInfo levelInfo = await Utils.ParseWebResponse<HitbloqLevelInfo>(webResponse);
-
+                var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/info", cancellationToken: cancellationToken).ConfigureAwait(false);
+                var levelInfo = await Utils.ParseWebResponse<HitbloqLevelInfo>(webResponse);
+                
                 cache[difficultyBeatmap] = levelInfo;
                 return levelInfo;
             }

@@ -38,7 +38,7 @@ namespace Hitbloq.Installers
             Container.Bind<SpriteLoader>().AsSingle();
             Container.Bind<LeaderboardRefresher>().AsSingle();
 
-            PluginMetadata playlistManager = PluginManager.GetPluginFromId("PlaylistManager");
+            var playlistManager = PluginManager.GetPluginFromId("PlaylistManager");
             if (playlistManager != null && playlistManager.Assembly.GetName().Version >= new Version("1.5.0"))
             {
                 Container.BindInterfacesAndSelfTo<PlaylistManagerIHardlyKnowHer>().AsSingle();

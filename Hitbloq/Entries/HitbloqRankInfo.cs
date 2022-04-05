@@ -7,26 +7,26 @@ namespace Hitbloq.Entries
     internal class HitbloqRankInfo
     {
         [JsonProperty("rank")]
-        public int rank;
+        public int Rank { get; private set; }
 
         [JsonProperty("cr")]
-        public float cr;
+        public float CR { get; private set; }
 
         [JsonProperty("ranked_score_count")]
-        public int scoreCount;
+        public int ScoreCount { get; private set; }
 
         [JsonProperty("tier")]
-        private string tier;
+        private string Tier { get; set; } = null!;
 
         [JsonProperty("username")]
-        public string username;
+        public string Username { get; private set; } = null!;
 
-        public string TierURL => $"https://hitbloq.com/static/ranks/{tier}.png";
+        public string TierURL => $"https://hitbloq.com/static/ranks/{Tier}.png";
 
         [OnDeserialized]
         private void OnDeserialized(StreamingContext context)
         {
-            username = Regex.Replace(username, "<[^>]*(>|$)", "");
+            Username = Regex.Replace(Username, "<[^>]*(>|$)", "");
         }
     }
 }

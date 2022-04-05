@@ -14,7 +14,7 @@ namespace Hitbloq.Sources
         private readonly IHttpService siraHttpService;
         private readonly IPlatformUserModel platformUserModel;
 
-        private HashSet<int> hitbloqPlatformFriendIds;
+        private HashSet<int>? hitbloqPlatformFriendIds;
 
         public FriendIDSource(IHttpService siraHttpService, IPlatformUserModel platformUserModel)
         {
@@ -22,18 +22,17 @@ namespace Hitbloq.Sources
             this.platformUserModel = platformUserModel;
         }
 
-        public async Task<List<int>> GetFriendIDsAsync(CancellationToken? cancellationToken = null)
+        public async Task<List<int>> GetFriendIDsAsync(CancellationToken cancellationToken = default)
         {
             await GetPlatformFriendIDsAsync(cancellationToken);
-            return hitbloqPlatformFriendIds.Union(PluginConfig.Instance.Friends).ToList();
+            return hitbloqPlatformFriendIds != null ? hitbloqPlatformFriendIds.Union(PluginConfig.Instance.Friends).ToList() : PluginConfig.Instance.Friends;
         }
 
-
-        public async Task<HashSet<int>> GetPlatformFriendIDsAsync(CancellationToken? cancellationToken = null)
+        public async Task<HashSet<int>?> GetPlatformFriendIDsAsync(CancellationToken cancellationToken = default)
         {
             if (hitbloqPlatformFriendIds == null)
             {
-                IReadOnlyList<string> friendIDs = await platformUserModel.GetUserFriendsUserIds(true);
+                var friendIDs = await platformUserModel.GetUserFriendsUserIds(true);
                 if (friendIDs != null)
                 {
                     try
@@ -41,12 +40,16 @@ namespace Hitbloq.Sources
                         // the list will be in a key called "ids" and will be a list string
                         // lol what
                         var content = new Dictionary<string, string[]>
-                    {
-                        { "ids", friendIDs.ToArray<string>()}
-                    };
-                        IHttpResponse webResponse = await siraHttpService.PostAsync($"https://hitbloq.com/api/tools/mass_ss_to_hitbloq", content, cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-
-                        hitbloqPlatformFriendIds = (await Utils.ParseWebResponse<List<HitbloqFriendID>>(webResponse)).Select(x => x.id).ToHashSet();
+                        {
+                            { "ids", friendIDs.ToArray<string>()}
+                        };
+                        var webResponse = await siraHttpService.PostAsync($"{PluginConfig.Instance.HitbloqURL}api/tools/mass_ss_to_hitbloq", content, cancellationToken).ConfigureAwait(false);
+                        var hitbloqFriendIDs = await Utils.ParseWebResponse<List<HitbloqFriendID>>(webResponse);
+                        
+                        if (hitbloqFriendIDs != null)
+                        {
+                            hitbloqPlatformFriendIds = hitbloqFriendIDs.Select(x => x.ID).ToHashSet();
+                        }
                     }
                     catch (TaskCanceledException) { }
                 }

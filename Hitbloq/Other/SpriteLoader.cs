@@ -23,7 +23,7 @@ namespace Hitbloq.Other
         public async void DownloadSpriteAsync(string spriteURL, Action<Sprite> onCompletion)
         {
             // Check Cache
-            if (cachedURLSprites.TryGetValue(spriteURL, out Sprite cachedSprite))
+            if (cachedURLSprites.TryGetValue(spriteURL, out var cachedSprite))
             {
                 onCompletion?.Invoke(cachedSprite);
                 return;
@@ -31,8 +31,8 @@ namespace Hitbloq.Other
 
             try
             {
-                IHttpResponse webResponse = await siraHttpService.GetAsync(spriteURL, cancellationToken: CancellationToken.None).ConfigureAwait(false);
-                byte[] imageBytes = await webResponse.ReadAsByteArrayAsync();
+                var webResponse = await siraHttpService.GetAsync(spriteURL, cancellationToken: CancellationToken.None).ConfigureAwait(false);
+                var imageBytes = await webResponse.ReadAsByteArrayAsync();
                 QueueLoadSprite(spriteURL, cachedURLSprites, imageBytes, onCompletion);
             }
             catch (Exception)
@@ -47,7 +47,7 @@ namespace Hitbloq.Other
             {
                 try
                 {
-                    Sprite sprite = BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(imageBytes);
+                    var sprite = BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(imageBytes);
                     sprite.texture.wrapMode = TextureWrapMode.Clamp;
                     cache[key] = sprite;
                     onCompletion?.Invoke(sprite);

@@ -5,6 +5,6 @@ namespace Hitbloq.Interfaces
 {
     internal interface ILeaderboardEntriesUpdater
     {
-        public void LeaderboardEntriesUpdated(List<HitbloqLeaderboardEntry> leaderboardEntries);
+        public void LeaderboardEntriesUpdated(List<HitbloqLeaderboardEntry>? leaderboardEntries);
     }
 }

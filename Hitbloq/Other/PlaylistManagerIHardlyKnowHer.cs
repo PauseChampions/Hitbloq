@@ -18,10 +18,10 @@ namespace Hitbloq.Other
         private readonly SelectLevelCategoryViewController selectLevelCategoryViewController;
         private readonly IconSegmentedControl levelCategorySegmentedControl;
 
-        private CancellationTokenSource tokenSource;
+        private CancellationTokenSource? tokenSource;
 
-        public bool IsDownloading => tokenSource != null && !tokenSource.IsCancellationRequested;
-        public event Action<string> HitbloqPlaylistSelected;
+        public bool IsDownloading => tokenSource is {IsCancellationRequested: false};
+        public event Action<string>? HitbloqPlaylistSelected;
 
         public PlaylistManagerIHardlyKnowHer(IHttpService siraHttpService, LevelFilteringNavigationController levelFilteringNavigationController, SelectLevelCategoryViewController selectLevelCategoryViewController)
         {
@@ -41,10 +41,12 @@ namespace Hitbloq.Other
             PlaylistManager.Utilities.Events.playlistSelected -= OnPlaylistSelected;
         }
 
-        internal async void OpenPlaylist(string poolID, Action onDownloadComplete = null)
+        internal async void OpenPlaylist(string poolID, Action? onDownloadComplete = null)
         {
+            tokenSource?.Cancel();
+            tokenSource?.Dispose();
             tokenSource = new CancellationTokenSource();
-            IBeatmapLevelPack playlistToSelect = await GetPlaylist(poolID);
+            var playlistToSelect = await GetPlaylist(poolID, tokenSource.Token);
 
             if (playlistToSelect == null)
             {
@@ -61,14 +63,14 @@ namespace Hitbloq.Other
 
         internal void CancelDownload() => tokenSource?.Cancel();
 
-        private async Task<IBeatmapLevelPack> GetPlaylist(string poolID)
+        private async Task<IBeatmapLevelPack?> GetPlaylist(string poolID, CancellationToken token = default)
         {
-            string syncURL = $"https://hitbloq.com/static/hashlists/{poolID}.bplist";
+            var syncURL = $"https://hitbloq.com/static/hashlists/{poolID}.bplist";
 
-            List<BeatSaberPlaylistsLib.Types.IPlaylist> playlists = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.GetAllPlaylists(true).ToList();
+            var playlists = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.GetAllPlaylists(true).ToList();
             foreach (var playlist in playlists)
             {
-                if (playlist.TryGetCustomData("syncURL", out object url) && url is string urlString)
+                if (playlist.TryGetCustomData("syncURL", out var url) && url is string urlString)
                 {
                     if (urlString == syncURL)
                     {
@@ -79,12 +81,16 @@ namespace Hitbloq.Other
 
             try
             {
-                IHttpResponse webResponse = await siraHttpService.GetAsync(syncURL, cancellationToken: tokenSource.Token).ConfigureAwait(false);
+                var webResponse = await siraHttpService.GetAsync(syncURL, cancellationToken: token).ConfigureAwait(false);
                 Stream playlistStream = new MemoryStream(await webResponse.ReadAsByteArrayAsync());
-                BeatSaberPlaylistsLib.Types.IPlaylist newPlaylist = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler?.Deserialize(playlistStream);
+                var newPlaylist = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler?.Deserialize(playlistStream);
 
-                BeatSaberPlaylistsLib.PlaylistManager playlistManager = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.CreateChildManager("Hitbloq");
-                playlistManager.StorePlaylist(newPlaylist);
+                if (newPlaylist != null)
+                {
+                    var playlistManager = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.CreateChildManager("Hitbloq");
+                    playlistManager.StorePlaylist(newPlaylist);   
+                }
+                
                 return newPlaylist;
             }
             catch (TaskCanceledException)
@@ -95,14 +101,14 @@ namespace Hitbloq.Other
 
         private void OnPlaylistSelected(BeatSaberPlaylistsLib.Types.IPlaylist playlist, BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
-            if (playlist.TryGetCustomData("syncURL", out object url) && url is string urlString)
+            if (playlist.TryGetCustomData("syncURL", out var url) && url is string urlString)
             {
                 if (urlString.Contains("https://hitbloq.com/static/hashlists/"))
                 {
-                    string pool = urlString.Split('/').LastOrDefault().Split('.').FirstOrDefault();
+                    var pool = urlString.Split('/').LastOrDefault()?.Split('.').FirstOrDefault();
                     if (!string.IsNullOrEmpty(pool))
                     {
-                        HitbloqPlaylistSelected?.Invoke(pool);
+                        HitbloqPlaylistSelected?.Invoke(pool!);
                     }
                 }
             }

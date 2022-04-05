@@ -26,11 +26,11 @@ namespace Hitbloq.Other
         public async void Initialize()
         {
             // Check if user id exists, if it does this is not needed
-            HitbloqUserID userID = await userIDSource.GetUserIDAsync();
-            if (userID.id != -1)
+            var userID = await userIDSource.GetUserIDAsync();
+            if (userID == null || userID.ID != -1)
             {
                 // If we are in progress of registration, show it
-                if (!userID.registered)
+                if (userID is {Registered: false})
                 {
                     HandleRegistrationProgress();
                 }
@@ -38,16 +38,16 @@ namespace Hitbloq.Other
             }
 
             // If a valid platform id doesnt exist, return
-            UserInfo userInfo = await platformUserModel.GetUserInfo();
+            var userInfo = await platformUserModel.GetUserInfo();
             if (userInfo == null)
             {
                 return;
             }
 
             // If a valid scoresaber id doesnt exist, return
-            IHttpResponse webResponse = await siraHttpService.GetAsync($"https://scoresaber.com/api/player/{userInfo.platformUserId}/full").ConfigureAwait(false);
-            ScoreSaberUserInfo scoreSaberUserInfo = await Utils.ParseWebResponse<ScoreSaberUserInfo>(webResponse);
-            if (scoreSaberUserInfo?.errorMessage == "Player not found")
+            var webResponse = await siraHttpService.GetAsync($"https://scoresaber.com/api/player/{userInfo.platformUserId}/full").ConfigureAwait(false);
+            var scoreSaberUserInfo = await Utils.ParseWebResponse<ScoreSaberUserInfo>(webResponse);
+            if (scoreSaberUserInfo?.ErrorMessage == "Player not found")
             {
                 hitbloqPanelController.PromptText = "<color=red>Please submit some scores from your ScoreSaber account.</color>";
                 hitbloqPanelController.LoadingActive = false;
@@ -60,9 +60,9 @@ namespace Hitbloq.Other
             };
 
             webResponse = await siraHttpService.PostAsync("https://hitbloq.com/api/add_user", content);
-            HitbloqRegistrationEntry registrationEntry = await Utils.ParseWebResponse<HitbloqRegistrationEntry>(webResponse);
+            var registrationEntry = await Utils.ParseWebResponse<HitbloqRegistrationEntry>(webResponse);
 
-            if (registrationEntry != null && registrationEntry.status != "ratelimit")
+            if (registrationEntry != null && registrationEntry.Status != "ratelimit")
             {
                 HandleRegistrationProgress();
             }
