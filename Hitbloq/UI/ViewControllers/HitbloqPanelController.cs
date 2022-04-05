@@ -23,42 +23,50 @@ namespace Hitbloq.UI
     [ViewDefinition("Hitbloq.UI.Views.HitbloqPanel.bsml")]
     internal class HitbloqPanelController : BSMLAutomaticViewController, IInitializable, IDisposable, INotifyUserRegistered, IDifficultyBeatmapUpdater, IPoolUpdater, ILeaderboardEntriesUpdater
     {
-        private MainFlowCoordinator mainFlowCoordinator;
-        private HitbloqFlowCoordinator hitbloqFlowCoordinator;
-        private PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer;
-        private RankInfoSource rankInfoSource;
-        private PoolInfoSource poolInfoSource;
-        private EventSource eventSource;
+        [Inject]
+        private readonly MainFlowCoordinator mainFlowCoordinator = null!;
 
-        private HitbloqRankInfo rankInfo;
-        private List<string> poolNames;
-        private string selectedPool;
+        [InjectOptional]
+        private readonly PlaylistManagerIHardlyKnowHer? playlistManagerIHardlyKnowHer = null!;
+        
+        [Inject]
+        private readonly RankInfoSource rankInfoSource = null!;
+        
+        [Inject]
+        private readonly PoolInfoSource poolInfoSource = null!;
+        
+        [Inject]
+        private readonly EventSource eventSource = null!;
 
-        private bool _cuteMode;
-        private string _promptText = "";
-        private bool _loadingActive;
-        private bool _downloadingActive;
+        private HitbloqRankInfo? rankInfo;
+        private List<string>? poolNames;
+        private string? selectedPool;
 
-        private Sprite logoSprite;
-        private Sprite flushedSprite;
+        private bool cuteMode;
+        private string promptText = "";
+        private bool loadingActive;
+        private bool downloadingActive;
+
+        private Sprite? logoSprite;
+        private Sprite? flushedSprite;
         private string spriteHoverText = "";
 
-        private Color defaultHighlightColour;
-        private Color cancelHighlightColor;
+        private Color? defaultHighlightColour;
+        private readonly Color cancelHighlightColor = Color.red;
 
-        private CancellationTokenSource poolInfoTokenSource;
-        private CancellationTokenSource rankInfoTokenSource;
+        private CancellationTokenSource? poolInfoTokenSource;
+        private CancellationTokenSource? rankInfoTokenSource;
 
-        public event Action<string> PoolChangedEvent;
-        public event Action<HitbloqRankInfo, string> RankTextClickedEvent;
-        public event Action LogoClickedEvent;
+        public event Action<string>? PoolChangedEvent;
+        public event Action<HitbloqRankInfo, string>? RankTextClickedEvent;
+        public event Action? LogoClickedEvent;
 
         private bool CuteMode
         {
-            get => _cuteMode;
+            get => cuteMode;
             set
             {
-                if (_cuteMode != value)
+                if (cuteMode != value)
                 {
                     if (logo != null)
                     {
@@ -68,45 +76,33 @@ namespace Hitbloq.UI
                         hoverHint.enabled = value || !string.IsNullOrEmpty(spriteHoverText);
                     }
                 }
-                _cuteMode = value;
+                cuteMode = value;
             }
         }
 
         [UIComponent("container")]
-        private readonly Backgroundable container;
+        private readonly Backgroundable? container = null!;
 
         [UIComponent("hitbloq-logo")]
-        private ImageView logo;
+        private ImageView? logo;
 
-        [UIComponent("separator")]
-        private ImageView separator;
-
-        [UIComponent("dropdown-list")]
-        private readonly DropDownListSetting dropDownListSetting;
+        [UIComponent("separator")] 
+        private ImageView? separator;
 
         [UIComponent("dropdown-list")]
-        private readonly RectTransform dropDownListTransform;
+        private readonly DropDownListSetting? dropDownListSetting = null!;
+
+        [UIComponent("dropdown-list")]
+        private readonly RectTransform? dropDownListTransform = null!;
 
         [UIComponent("pm-image")]
-        private readonly ClickableImage playlistManagerImage;
-
-        [Inject]
-        private void Inject(MainFlowCoordinator mainFlowCoordinator, HitbloqFlowCoordinator hitbloqFlowCoordinator, [InjectOptional] PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer, 
-            RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource, EventSource eventSource)
-        {
-            this.mainFlowCoordinator = mainFlowCoordinator;
-            this.hitbloqFlowCoordinator = hitbloqFlowCoordinator;
-            this.playlistManagerIHardlyKnowHer = playlistManagerIHardlyKnowHer;
-            this.rankInfoSource = rankInfoSource;
-            this.poolInfoSource = poolInfoSource;
-            this.eventSource = eventSource;
-        }
+        private readonly ClickableImage? playlistManagerImage = null!;
 
         [UIAction("#post-parse")]
         private async void PostParse()
         {
             // Backround related stuff
-            if (container.background is ImageView background)
+            if (container!.background is ImageView background)
             {
                 background.material = BeatSaberMarkupLanguage.Utilities.ImageResources.NoGlowMat;
                 background.color0 = Color.white;
@@ -117,7 +113,7 @@ namespace Hitbloq.UI
             }
 
             // Loading up logos
-            logoSprite = logo.sprite;
+            logoSprite = logo!.sprite;
             flushedSprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.LogoFlushed.png");
             logo.sprite = CuteMode ? flushedSprite : logoSprite;
             logo.GetComponent<HoverHint>().enabled = CuteMode;
@@ -125,28 +121,27 @@ namespace Hitbloq.UI
             Accessors.SkewAccessor(ref logo) = 0.18f;
             logo.SetVerticesDirty();
 
-            Accessors.SkewAccessor(ref separator) = 0.18f;
+            Accessors.SkewAccessor(ref separator!) = 0.18f;
             separator.SetVerticesDirty();
 
             // Dropdown needs to be modified to look good
-            var dropdownText = dropDownListTransform.GetComponentInChildren<CurvedTextMeshPro>();
+            var dropdownText = dropDownListTransform!.GetComponentInChildren<CurvedTextMeshPro>();
             dropdownText.fontSize = 3.5f;
             dropdownText.transform.localPosition = new Vector3(-1.5f, 0, 0);
 
             // A bit of explanation of what is going on
             // I want to make a maximum of 2 cells visible, however I first need to parse exactly 2 cells and clean them up
             // After that I populate the current pool options
-            (dropDownListSetting.dropdown as DropdownWithTableView).SetField("_numberOfVisibleCells", 2);
+            (dropDownListSetting!.dropdown as DropdownWithTableView).SetField("_numberOfVisibleCells", 2);
             dropDownListSetting.values = new List<object>() { "1", "2" };
             dropDownListSetting.UpdateChoices();
             dropDownListSetting.values = pools.Count != 0 ? pools : new List<object> { "None" };
             dropDownListSetting.UpdateChoices();
-            var poolIndex = poolNames == null ? 0 : poolNames.IndexOf(selectedPool);
+            var poolIndex = poolNames?.IndexOf(selectedPool ?? "") ?? 0;
             dropDownListSetting.dropdown.SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
 
-            defaultHighlightColour = playlistManagerImage.HighlightColor;
-            cancelHighlightColor = Color.red;
-
+            defaultHighlightColour = playlistManagerImage!.HighlightColor;
+            
             var hitbloqEvent = await eventSource.GetAsync();
             if (hitbloqEvent != null && hitbloqEvent.ID != -1)
             {
@@ -193,28 +188,37 @@ namespace Hitbloq.UI
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
-            dropDownListSetting.dropdown.Hide(false);
+            if (dropDownListSetting != null)
+            {
+                dropDownListSetting.dropdown.Hide(false);
+            }
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
         }
 
         [UIAction("pool-changed")]
         private void PoolChanged(string formattedPool)
         {
-            PoolChangedEvent?.Invoke(poolNames[dropDownListSetting.dropdown.selectedIndex]);
+            if (dropDownListSetting != null && poolNames != null)
+            {
+                PoolChangedEvent?.Invoke(poolNames[dropDownListSetting.dropdown.selectedIndex]);
+            }
         }
 
         [UIAction("clicked-rank-text")]
         private void RankTextClicked()
         {
-            RankTextClickedEvent?.Invoke(rankInfo, poolNames[dropDownListSetting.dropdown.selectedIndex]);
+            if (dropDownListSetting != null && rankInfo != null  && poolNames != null)
+            {
+                RankTextClickedEvent?.Invoke(rankInfo, poolNames[dropDownListSetting.dropdown.selectedIndex]);
+            }
         }
 
         [UIAction("pm-click")]
         private void PlaylistManagerClicked()
         {
-            if (PlaylistManagerActive)
+            if (PlaylistManagerActive && selectedPool != null)
             {
-                DownloadingActive = playlistManagerIHardlyKnowHer.IsDownloading;
+                DownloadingActive = playlistManagerIHardlyKnowHer!.IsDownloading;
                 if (DownloadingActive)
                 {
                     playlistManagerIHardlyKnowHer.CancelDownload();
@@ -237,9 +241,10 @@ namespace Hitbloq.UI
             LoadingActive = false;
         }
 
-        public async void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo levelInfoEntry)
+        public async void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo? levelInfoEntry)
         {
             poolInfoTokenSource?.Cancel();
+            poolInfoTokenSource?.Dispose();
             poolInfoTokenSource = new CancellationTokenSource();
 
             pools = new List<object>();
@@ -251,10 +256,10 @@ namespace Hitbloq.UI
                 {
                     var poolInfo = await poolInfoSource.GetPoolInfoAsync(pool.Key, poolInfoTokenSource.Token);
 
-                    var poolName = poolInfo.ShownName.RemoveSpecialCharacters();
+                    var poolName = poolInfo?.ShownName.RemoveSpecialCharacters() ?? pool.Key;
                     if (poolName.DoesNotHaveAlphaNumericCharacters())
                     {
-                        poolName = poolInfo.ID;
+                        poolName = pool.Key;
                     }
                     if (poolName.Length > 18)
                     {
@@ -270,7 +275,7 @@ namespace Hitbloq.UI
                 poolNames = new List<string> { "None" };
             }
 
-            var poolIndex = poolNames.IndexOf(selectedPool);
+            var poolIndex = poolNames.IndexOf(selectedPool ?? "");
             PoolChangedEvent?.Invoke(poolNames[poolIndex == -1 ? 0 : poolIndex]);
 
             if (dropDownListSetting != null)
@@ -289,13 +294,14 @@ namespace Hitbloq.UI
         public async void PoolUpdated(string pool)
         {
             rankInfoTokenSource?.Cancel();
+            rankInfoTokenSource?.Dispose();
             rankInfoTokenSource = new CancellationTokenSource();
             selectedPool = pool;
             rankInfo = await rankInfoSource.GetRankInfoForSelfAsync(pool, rankInfoTokenSource.Token);
             NotifyPropertyChanged(nameof(PoolRankingText));
         }
 
-        public void LeaderboardEntriesUpdated(List<HitbloqLeaderboardEntry> leaderboardEntries)
+        public void LeaderboardEntriesUpdated(List<HitbloqLeaderboardEntry>? leaderboardEntries)
         {
             CuteMode = leaderboardEntries != null && leaderboardEntries.Exists(u => u.UserID == 726);
         }
@@ -303,10 +309,10 @@ namespace Hitbloq.UI
         [UIValue("prompt-text")]
         public string PromptText
         {
-            get => _promptText;
+            get => promptText;
             set
             {
-                _promptText = value;
+                promptText = value;
                 NotifyPropertyChanged(nameof(PromptText));
             }
         }
@@ -314,10 +320,10 @@ namespace Hitbloq.UI
         [UIValue("loading-active")]
         public bool LoadingActive
         {
-            get => _loadingActive;
+            get => loadingActive;
             set
             {
-                _loadingActive = value;
+                loadingActive = value;
                 NotifyPropertyChanged(nameof(LoadingActive));
             }
         }
@@ -325,11 +331,16 @@ namespace Hitbloq.UI
         [UIValue("downloading-active")]
         private bool DownloadingActive
         {
-            get => _downloadingActive;
+            get => downloadingActive;
             set
             {
-                _downloadingActive = value;
-                playlistManagerImage.HighlightColor = value ? cancelHighlightColor : defaultHighlightColour;
+                downloadingActive = value;
+
+                if (playlistManagerImage != null && defaultHighlightColour != null)
+                {
+                    playlistManagerImage.HighlightColor = value ? cancelHighlightColor : defaultHighlightColour.Value;
+                }
+                
                 NotifyPropertyChanged(nameof(DownloadingActive));
                 NotifyPropertyChanged(nameof(PlaylistManagerHoverHint));
             }
@@ -339,7 +350,7 @@ namespace Hitbloq.UI
         private string PoolRankingText => $"<b>Pool Ranking:</b> #{rankInfo?.Rank} <size=75%>(<color=#aa6eff>{rankInfo?.CR.ToString("F2")}cr</color>)";
 
         [UIValue("pools")]
-        private List<object> pools = new List<object> { "None" };
+        private List<object> pools = new() { "None" };
 
         [UIValue("pm-active")]
         private bool PlaylistManagerActive => playlistManagerIHardlyKnowHer != null && mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf() is SinglePlayerLevelSelectionFlowCoordinator;
