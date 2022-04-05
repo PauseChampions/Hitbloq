@@ -1,4 +1,5 @@
-﻿using BeatSaberMarkupLanguage;
+﻿using System;
+using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Parser;
@@ -12,6 +13,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
@@ -27,6 +29,9 @@ namespace Hitbloq.UI
         private readonly RankInfoSource rankInfoSource;
         private readonly PoolInfoSource poolInfoSource;
         private readonly SpriteLoader spriteLoader;
+
+        private readonly SemaphoreSlim modalSemaphore = new SemaphoreSlim(1, 1);
+        private CancellationTokenSource? modalTokenSource;
 
         private bool isFriend;
         private bool isLoading;
@@ -112,9 +117,9 @@ namespace Hitbloq.UI
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CR)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ScoreCount)));
 
-                if (modalBadge != null && rankInfo != null)
+                if (modalBadge != null && rankInfo != null && modalTokenSource != null)
                 {
-                    _ = spriteLoader.DownloadSpriteAsync(rankInfo.TierURL, sprite => modalBadge.sprite = sprite);
+                    _ = spriteLoader.DownloadSpriteAsync(rankInfo.TierURL, sprite => modalBadge.sprite = sprite, modalTokenSource.Token);
                 }
             }
         }
@@ -138,23 +143,23 @@ namespace Hitbloq.UI
 
                 if (hitbloqProfile != null)
                 {
-                    if (hitbloqProfile.ProfilePictureURL != null && modalProfilePic != null)
+                    if (hitbloqProfile.ProfilePictureURL != null && modalProfilePic != null && modalTokenSource != null)
                     {
-                        _ = spriteLoader.DownloadSpriteAsync(hitbloqProfile.ProfilePictureURL, sprite => modalProfilePic.sprite = sprite);
+                        _ = spriteLoader.DownloadSpriteAsync(hitbloqProfile.ProfilePictureURL, sprite => modalProfilePic.sprite = sprite, modalTokenSource.Token);
                     }
                     else
                     {
                         // TODO: Show a default profile pic
                     }
 
-                    if (hitbloqProfile.ProfileBackgroundURL != null && modalBackground != null)
+                    if (hitbloqProfile.ProfileBackgroundURL != null && modalBackground != null && modalTokenSource != null)
                     {
                         _ = spriteLoader.DownloadSpriteAsync(hitbloqProfile.ProfileBackgroundURL, sprite =>
                         {
                             modalBackground.sprite = sprite;
                             modalBackground.color = customModalColour;
                             modalBackground.material = noGlowRoundEdge;
-                        });
+                        }, modalTokenSource.Token);
                     }
                 }
             }
@@ -219,32 +224,63 @@ namespace Hitbloq.UI
         internal void ShowModalForSelf(Transform parentTransform, HitbloqRankInfo rankInfo, string pool)
         {
             Parse(parentTransform);
-            _ = ShowModalForSelfAsync(rankInfo, pool);
+            modalTokenSource?.Cancel();
+            modalTokenSource?.Dispose();
+            modalTokenSource = new CancellationTokenSource();
+            _ = ShowModalForSelfAsync(modalTokenSource.Token, rankInfo, pool);
         }
 
-        private async Task ShowModalForSelfAsync(HitbloqRankInfo rankInfo, string pool)
+        private async Task ShowModalForSelfAsync(CancellationToken cancellationToken, HitbloqRankInfo rankInfo, string pool)
         {
-            var userID = await userIDSource.GetUserIDAsync();
-
-            if (userID == null || userID.ID == -1)
+            await modalSemaphore.WaitAsync(cancellationToken);
+            if (cancellationToken.IsCancellationRequested)
             {
                 return;
             }
 
-            await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+            try
             {
-                parserParams?.EmitEvent("close-modal");
-                parserParams?.EmitEvent("open-modal");
-            });
+                var userID = await userIDSource.GetUserIDAsync();
 
-            IsLoading = true;
+                if (userID == null || userID.ID == -1)
+                {
+                    return;
+                }
 
-            RankInfo = rankInfo;
-            PoolInfo = await poolInfoSource.GetPoolInfoAsync(pool);
-            HitbloqProfile = await profileSource.GetProfileAsync(userID.ID);
-            addFriendButton!.gameObject.SetActive(false);
+                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+                {
+                    parserParams?.EmitEvent("close-modal");
+                    parserParams?.EmitEvent("open-modal");
+                });
 
-            IsLoading = false;
+                IsLoading = true;
+
+                RankInfo = rankInfo;
+                PoolInfo = await poolInfoSource.GetPoolInfoAsync(pool, cancellationToken);
+                
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                
+                HitbloqProfile = await profileSource.GetProfileAsync(userID.ID, cancellationToken);
+                
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                
+                addFriendButton!.gameObject.SetActive(false);
+            }
+            catch
+            {
+                // ignored
+            }
+            finally
+            {
+                IsLoading = false;
+                modalSemaphore.Release();
+            }
         }
 
         internal void ShowModalForUser(Transform parentTransform, int userID, string pool)
@@ -255,33 +291,76 @@ namespace Hitbloq.UI
             parserParams?.EmitEvent("open-modal");
 
             IsLoading = true;
+            
+            modalTokenSource?.Cancel();
+            modalTokenSource?.Dispose();
+            modalTokenSource = new CancellationTokenSource();
 
-            _ = ShowModalForUserAsync(userID, pool);
+            _ = ShowModalForUserAsync(modalTokenSource.Token, userID, pool);
         }
 
-        private async Task ShowModalForUserAsync(int userID, string pool)
+        private async Task ShowModalForUserAsync(CancellationToken cancellationToken, int userID, string pool)
         {
-            RankInfo = await rankInfoSource.GetRankInfoAsync(pool, userID);
-            PoolInfo = await poolInfoSource.GetPoolInfoAsync(pool);
-            HitbloqProfile = await profileSource.GetProfileAsync(userID);
-
-            var selfID = await userIDSource.GetUserIDAsync();
-            addFriendButton!.gameObject.SetActive(selfID?.ID != userID);
-            var platformFriends = await friendIDSource.GetPlatformFriendIDsAsync();
-            if (platformFriends != null && platformFriends.Contains(userID))
+            await modalSemaphore.WaitAsync(cancellationToken);
+            if (cancellationToken.IsCancellationRequested)
             {
-                addFriendButton.image.sprite = friendAdded;
-                AddFriendInteractable = false;
-                AddFriendHoverHint = kAlreadyFriendPrompt + (await platformUserModel.GetUserInfo()).platform;
-            }
-            else
-            {
-                this.userID = userID;
-                AddFriendInteractable = true;
-                IsFriend = PluginConfig.Instance.Friends.Contains(userID);
+                return;
             }
 
-            IsLoading = false;
+            try
+            {
+                RankInfo = await rankInfoSource.GetRankInfoAsync(pool, userID, cancellationToken);
+                
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                
+                PoolInfo = await poolInfoSource.GetPoolInfoAsync(pool, cancellationToken);
+                
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                
+                HitbloqProfile = await profileSource.GetProfileAsync(userID, cancellationToken);
+                
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                var selfID = await userIDSource.GetUserIDAsync();
+                addFriendButton!.gameObject.SetActive(selfID?.ID != userID);
+                var platformFriends = await friendIDSource.GetPlatformFriendIDsAsync(cancellationToken);
+                
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                
+                if (platformFriends != null && platformFriends.Contains(userID))
+                {
+                    addFriendButton.image.sprite = friendAdded;
+                    AddFriendInteractable = false;
+                    AddFriendHoverHint = kAlreadyFriendPrompt + (await platformUserModel.GetUserInfo()).platform;
+                }
+                else
+                {
+                    this.userID = userID;
+                    AddFriendInteractable = true;
+                    IsFriend = PluginConfig.Instance.Friends.Contains(userID);
+                }
+            }
+            catch
+            {
+                // ignored
+            }
+            finally
+            {
+                IsLoading = false;
+                modalSemaphore.Release();
+            }
         }
 
         [UIAction("add-friend-click")]
