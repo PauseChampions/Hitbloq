@@ -113,7 +113,7 @@ namespace Hitbloq.UI
 
                 if (modalBadge != null && rankInfo != null)
                 {
-                    spriteLoader.DownloadSpriteAsync(rankInfo.TierURL, sprite => modalBadge.sprite = sprite);
+                    _ = spriteLoader.DownloadSpriteAsync(rankInfo.TierURL, sprite => modalBadge.sprite = sprite);
                 }
             }
         }
@@ -139,7 +139,7 @@ namespace Hitbloq.UI
                 {
                     if (hitbloqProfile.ProfilePictureURL != null && modalProfilePic != null)
                     {
-                        spriteLoader.DownloadSpriteAsync(hitbloqProfile.ProfilePictureURL, sprite => modalProfilePic.sprite = sprite);
+                        _ = spriteLoader.DownloadSpriteAsync(hitbloqProfile.ProfilePictureURL, sprite => modalProfilePic.sprite = sprite);
                     }
                     else
                     {
@@ -148,7 +148,7 @@ namespace Hitbloq.UI
 
                     if (hitbloqProfile.ProfileBackgroundURL != null && modalBackground != null)
                     {
-                        spriteLoader.DownloadSpriteAsync(hitbloqProfile.ProfileBackgroundURL, sprite =>
+                        _ = spriteLoader.DownloadSpriteAsync(hitbloqProfile.ProfileBackgroundURL, sprite =>
                         {
                             modalBackground.sprite = sprite;
                             modalBackground.color = customModalColour;

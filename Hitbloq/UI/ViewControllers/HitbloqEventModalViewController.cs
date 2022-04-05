@@ -107,7 +107,7 @@ namespace Hitbloq.UI
 
             if (currentEvent?.Image != null)
             {
-                spriteLoader.DownloadSpriteAsync(currentEvent.Image, sprite => eventImage!.sprite = sprite);
+                _ = spriteLoader.DownloadSpriteAsync(currentEvent.Image, sprite => eventImage!.sprite = sprite);
             }
 
             NotifyPropertyChanged(nameof(EventTitle));
