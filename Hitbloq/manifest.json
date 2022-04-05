@@ -14,7 +14,8 @@
         "BSIPA": "^4.2.1",
         "BeatSaberMarkupLanguage": "^1.6.0",
         "SiraUtil": "^3.0.0",
-        "LeaderboardCore": "^1.1.0"
+        "LeaderboardCore": "^1.1.0",
+        "SongCore": "^3.9.5"
     },
     "links": {
         "project-home": "https://hitbloq.com/",

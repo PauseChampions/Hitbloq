@@ -41,9 +41,15 @@ namespace Hitbloq.Sources
         {
             if (cachedEntries.Count < page + 1)
             {
+                var beatmapString = Utils.DifficultyBeatmapToString(difficultyBeatmap);
+                if (beatmapString == null)
+                {
+                    return null;
+                }
+                
                 try
                 {
-                    var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/scores_extended/{page}", cancellationToken: cancellationToken).ConfigureAwait(false);
+                    var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}api/leaderboard/{beatmapString}/scores_extended/{page}", cancellationToken: cancellationToken).ConfigureAwait(false);
                     var scores = await Utils.ParseWebResponse<List<HitbloqLeaderboardEntry>>(webResponse);
                     if (scores != null)
                     {

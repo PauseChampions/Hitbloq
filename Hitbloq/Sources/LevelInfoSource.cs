@@ -24,10 +24,16 @@ namespace Hitbloq.Sources
             {
                 return cachedValue;
             }
+            
+            var beatmapString = Utils.DifficultyBeatmapToString(difficultyBeatmap);
+            if (beatmapString == null)
+            {
+                return null;
+            }
 
             try
             {
-                var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/info", cancellationToken: cancellationToken).ConfigureAwait(false);
+                var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}api/leaderboard/{beatmapString}/info", cancellationToken: cancellationToken).ConfigureAwait(false);
                 var levelInfo = await Utils.ParseWebResponse<HitbloqLevelInfo>(webResponse);
                 
                 cache[difficultyBeatmap] = levelInfo;

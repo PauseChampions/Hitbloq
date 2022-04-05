@@ -11,12 +11,17 @@ namespace Hitbloq.Utilities
 {
     internal static class Utils
     {
-        public static string DifficultyBeatmapToString(IDifficultyBeatmap difficultyBeatmap)
+        public static string? DifficultyBeatmapToString(IDifficultyBeatmap difficultyBeatmap)
         {
-            var hash = difficultyBeatmap.level.levelID.Replace(CustomLevelLoader.kCustomLevelPrefixId, "");
-            var difficulty = difficultyBeatmap.difficulty.ToString();
-            var characteristic = difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic.serializedName;
-            return $"{hash}%7C_{difficulty}_Solo{characteristic}";
+            if (difficultyBeatmap.level is CustomPreviewBeatmapLevel customLevel)
+            {
+                var hash = SongCore.Utilities.Hashing.GetCustomLevelHash(customLevel);
+                var difficulty = difficultyBeatmap.difficulty.ToString();
+                var characteristic = difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic.serializedName;
+                return $"{hash}%7C_{difficulty}_Solo{characteristic}";   
+            }
+
+            return null;
         }
 
         public static async Task<T?> ParseWebResponse<T>(IHttpResponse webResponse)

@@ -43,6 +43,12 @@ namespace Hitbloq.Sources
         {
             if (cachedEntries == null)
             {
+                var beatmapString = Utils.DifficultyBeatmapToString(difficultyBeatmap);
+                if (beatmapString == null)
+                {
+                    return null;
+                }
+                
                 var userID = await userIDSource.GetUserIDAsync(cancellationToken);
                 if (userID == null || userID.ID == -1)
                 {
@@ -52,7 +58,7 @@ namespace Hitbloq.Sources
 
                 try
                 {
-                    var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/nearby_scores/{id}", cancellationToken: cancellationToken).ConfigureAwait(false);
+                    var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}api/leaderboard/{beatmapString}/nearby_scores/{id}", cancellationToken: cancellationToken).ConfigureAwait(false);
                     cachedEntries = await Utils.ParseWebResponse<List<HitbloqLeaderboardEntry>>(webResponse);
                 }
                 catch (TaskCanceledException) { }
