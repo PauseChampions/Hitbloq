@@ -1,7 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using BeatSaberMarkupLanguage.Animations;
 using BeatSaberMarkupLanguage.Attributes;
 using Hitbloq.Entries;
 using Hitbloq.Other;
@@ -23,9 +22,15 @@ namespace Hitbloq.UI
         
         [UIComponent("banner-image")]
         private readonly ImageView bannerImage = null!;
-        
+
         [UIComponent("pool-name-text")]
         private readonly TextMeshProUGUI poolNameText = null!;
+        
+        [UIComponent("popularity-text")]
+        private readonly TextMeshProUGUI popularityText = null!;
+                
+        [UIComponent("player-count-text")]
+        private readonly TextMeshProUGUI playerCountText = null!;
         
         [UIAction("#post-parse")]
         private void PostParse()
@@ -107,7 +112,8 @@ namespace Hitbloq.UI
 
         #region Highlight and Selection
 
-        private readonly Color highlightedColor = new(0.25f, 0.25f, 0.25f, 1);
+        private readonly Color selectedColor = new(0.25f, 0.25f, 0.25f, 1);
+        private readonly Color textSelectedColor = new(0, 0.7529412f, 1, 1);
         
         protected override void SelectionDidChange(TransitionType transitionType) => RefreshBackground();
 
@@ -119,7 +125,9 @@ namespace Hitbloq.UI
             if (selected)
             {
                 poolNameText.alpha = 1;
-                bannerImage.color = Color.gray;
+                bannerImage.color = selectedColor;
+                popularityText.color = textSelectedColor;
+                playerCountText.color = textSelectedColor;
             }
             else if (highlighted)
             {
@@ -132,7 +140,7 @@ namespace Hitbloq.UI
                 
                 var tween = new FloatTween(0, 1, val =>
                 {
-                    bannerImage.color = Color.Lerp(currentColor, highlightedColor, val);
+                    bannerImage.color = Color.Lerp(currentColor, Color.gray, val);
                     if (poolListEntry?.BannerTitleHide ?? false)
                     {
                         poolNameText.alpha = val;
@@ -140,10 +148,14 @@ namespace Hitbloq.UI
                 }, 0.25f, EaseType.Linear);
                 
                 uwuTweenyManager.AddTween(tween, this);
+                popularityText.color = Color.white;
+                playerCountText.color = Color.white;
             }
             else
             {
-                bannerImage.color = Color.white;
+                bannerImage.color = Color.white;                
+                popularityText.color = Color.white;
+                playerCountText.color = Color.white;
             }
             NotifyPropertyChanged(nameof(ShowBannerTitle));
         }

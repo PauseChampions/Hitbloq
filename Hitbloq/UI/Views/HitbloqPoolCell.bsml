@@ -4,8 +4,8 @@
             <text id="pool-name-text" text="~pool-name" font-size="6" active="~show-banner-title" size-delta-x="60" size-delta-y="12" overflow-mode="Ellipsis" align="Midline" />
         </img>
         <horizontal bg="round-rect-panel" horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width="60" pref-height="8" child-align="MiddleCenter">
-            <text text="~popularity" align="Midline" hover-hint="Popularity" raycast="true" />
-            <text text="~player-count" align="Midline" hover-hint="Player Count" raycast="true" />
+            <text id="popularity-text" text="~popularity" align="Midline" hover-hint="Popularity" raycast="true" />
+            <text id="player-count-text" text="~player-count" align="Midline" hover-hint="Player Count" raycast="true" />
         </horizontal>
     </vertical>
 </bg>
