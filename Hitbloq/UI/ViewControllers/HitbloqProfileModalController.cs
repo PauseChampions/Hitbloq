@@ -29,6 +29,7 @@ namespace Hitbloq.UI
         private readonly RankInfoSource rankInfoSource;
         private readonly PoolInfoSource poolInfoSource;
         private readonly SpriteLoader spriteLoader;
+        private readonly MaterialGrabber materialGrabber;
 
         private readonly SemaphoreSlim modalSemaphore = new SemaphoreSlim(1, 1);
         private CancellationTokenSource? modalTokenSource;
@@ -44,7 +45,6 @@ namespace Hitbloq.UI
         private bool parsed;
 
         private Material? fogBG;
-        private Material? noGlowRoundEdge;
         private Sprite? roundRectSmall;
 
         private Color? originalModalColour;
@@ -158,7 +158,7 @@ namespace Hitbloq.UI
                         {
                             modalBackground.sprite = sprite;
                             modalBackground.color = customModalColour;
-                            modalBackground.material = noGlowRoundEdge;
+                            modalBackground.material = materialGrabber.NoGlowRoundEdge;
                         }, modalTokenSource.Token);
                     }
                 }
@@ -166,7 +166,7 @@ namespace Hitbloq.UI
         }
 
         public HitbloqProfileModalController(IPlatformUserModel platformUserModel, UserIDSource userIDSource, ProfileSource profileSource, FriendIDSource friendIDSource,
-            FriendsLeaderboardSource friendsLeaderboardSource, RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource, SpriteLoader spriteLoader)
+            FriendsLeaderboardSource friendsLeaderboardSource, RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource, SpriteLoader spriteLoader, MaterialGrabber materialGrabber)
         {
             this.platformUserModel = platformUserModel;
             this.userIDSource = userIDSource;
@@ -176,6 +176,7 @@ namespace Hitbloq.UI
             this.rankInfoSource = rankInfoSource;
             this.poolInfoSource = poolInfoSource;
             this.spriteLoader = spriteLoader;
+            this.materialGrabber = materialGrabber;
         }
 
         [UIAction("#post-parse")]
@@ -189,8 +190,7 @@ namespace Hitbloq.UI
             roundRectSmall = modalBackground.sprite;
             originalModalColour = modalBackground.color;
             
-            noGlowRoundEdge = Resources.FindObjectsOfTypeAll<Material>().First(m => m.name == "UINoGlowRoundEdge");
-            modalProfilePic!.material = noGlowRoundEdge;
+            modalProfilePic!.material = materialGrabber.NoGlowRoundEdge;
 
             addFriendButton!.transform.localScale = new Vector3(0.3f, 0.3f, 1f);
             addFriend = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.AddFriend.png");

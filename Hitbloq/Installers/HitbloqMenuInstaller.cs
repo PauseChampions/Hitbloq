@@ -15,7 +15,7 @@ namespace Hitbloq.Installers
         {
             Container.BindInterfacesAndSelfTo<HitbloqLeaderboardViewController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<HitbloqPanelController>().FromNewComponentAsViewController().AsSingle();
-            Container.BindInterfacesAndSelfTo<HitbloqMainViewController>().FromNewComponentAsViewController().AsSingle();
+            Container.BindInterfacesAndSelfTo<HitbloqPoolListViewController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<HitbloqProfileModalController>().AsSingle();
             Container.BindInterfacesAndSelfTo<HitbloqEventModalViewController>().AsSingle();
 
@@ -31,12 +31,14 @@ namespace Hitbloq.Installers
             Container.Bind<RankInfoSource>().AsSingle();
             Container.Bind<LevelInfoSource>().AsSingle();
             Container.Bind<PoolInfoSource>().AsSingle();
+            Container.Bind<PoolListSource>().AsSingle();
             Container.Bind<EventSource>().AsSingle();
             Container.BindInterfacesTo<GlobalLeaderboardSource>().AsSingle();
             Container.BindInterfacesTo<AroundMeLeaderboardSource>().AsSingle();
             Container.BindInterfacesAndSelfTo<FriendsLeaderboardSource>().AsSingle();
 
             Container.Bind<SpriteLoader>().AsSingle();
+            Container.Bind<MaterialGrabber>().AsSingle();
             Container.Bind<LeaderboardRefresher>().AsSingle();
 
             var playlistManager = PluginManager.GetPluginFromId("PlaylistManager");

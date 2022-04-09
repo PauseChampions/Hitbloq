@@ -12,7 +12,7 @@ namespace Hitbloq.UI
         private FlowCoordinator? parentFlowCoordinator;
         
         [Inject]
-        private readonly HitbloqMainViewController hitbloqMainViewController = null!;
+        private readonly HitbloqPoolListViewController hitbloqMainViewController = null!;
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {

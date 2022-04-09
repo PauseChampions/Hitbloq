@@ -6,7 +6,7 @@ using SiraUtil.Web;
 
 namespace Hitbloq.Sources
 {
-    public abstract class Source<T>
+    internal abstract class Source<T>
     {
         private IHttpService SiraHttpService { get; }
         protected abstract string EndpointURL { get; }
