@@ -15,6 +15,7 @@ namespace Hitbloq.UI
     internal class HitbloqPoolCellController : TableCell, INotifyPropertyChanged
     {
         private HitbloqPoolListEntry? poolListEntry;
+        private bool spriteDownloaded;
 
         private SpriteLoader spriteLoader = null!;
         private MaterialGrabber materialGrabber = null!;
@@ -45,7 +46,6 @@ namespace Hitbloq.UI
             _ = FetchBanner();
             
             NotifyPropertyChanged(nameof(PoolName));
-            NotifyPropertyChanged(nameof(ShowBannerTitle));
             NotifyPropertyChanged(nameof(Popularity));
             NotifyPropertyChanged(nameof(PlayerCount));
             
@@ -55,31 +55,40 @@ namespace Hitbloq.UI
 
         private async Task FetchBanner()
         {
+            uwuTweenyManager.KillAllTweens(this);
+            spriteDownloaded = false;
+            NotifyPropertyChanged(nameof(ShowBannerTitle));
+            var currentEntry = poolListEntry;
+            
+            await spriteLoader.FetchSpriteFromResourcesAsync("Hitbloq.Images.DefaultPoolBanner.png", sprite =>
+            {
+                if (poolListEntry == currentEntry)
+                {
+                    bannerImage.sprite = sprite;
+                }
+            });
+            
             if (poolListEntry is not {BannerImageURL:{}})
             {
                 return;
             }
-
-            AnimationStateUpdater? stateUpdater = null;
-            
-            await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
-            {
-                stateUpdater = bannerImage.GetComponent<AnimationStateUpdater>() ?? bannerImage.gameObject.AddComponent<AnimationStateUpdater>();
-                stateUpdater.image = bannerImage;
-                stateUpdater.controllerData = AnimationController.instance.loadingAnimation;
-            });
-
-            var currentEntry = poolListEntry;
             
             await spriteLoader.DownloadSpriteAsync(poolListEntry.BannerImageURL, sprite =>
             {
                 if (poolListEntry == currentEntry)
                 {
-                    if (stateUpdater != null)
-                    {
-                        DestroyImmediate(stateUpdater);
-                    }
+                    bannerImage.color = new Color(1, 1, 1, 0);
+
                     bannerImage.sprite = sprite;   
+                    spriteDownloaded = true;
+                    NotifyPropertyChanged(nameof(ShowBannerTitle));
+
+                    var tween = new FloatTween(0, 1, val =>
+                    {
+                        bannerImage.color = new Color(1, 1, 1, val);
+                    }, 0.5f, EaseType.Linear);
+                
+                    uwuTweenyManager.AddTween(tween, this);
                 }
             });
         }
@@ -88,7 +97,7 @@ namespace Hitbloq.UI
         private string PoolName => $"{poolListEntry?.Title}";
 
         [UIValue("show-banner-title")] 
-        private bool ShowBannerTitle => (!poolListEntry?.BannerTitleHide ?? true) || highlighted || selected;
+        private bool ShowBannerTitle => (!poolListEntry?.BannerTitleHide ?? true) || !spriteDownloaded || highlighted || selected;
         
         [UIValue("popularity")] 
         private string Popularity => $"📈 {poolListEntry?.Popularity}";

@@ -1,6 +1,7 @@
 ﻿using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using BeatSaberMarkupLanguage.Attributes;
+using Hitbloq.Configuration;
 using Newtonsoft.Json;
 
 namespace Hitbloq.Entries
@@ -25,9 +26,9 @@ namespace Hitbloq.Entries
         [OnDeserialized]
         private void OnDeserialized(StreamingContext context)
         {
-            if (BannerImageURL == null || BannerImageURL.StartsWith("/"))
+            if (BannerImageURL != null && BannerImageURL.StartsWith("/"))
             {
-                BannerImageURL = "https://hitbloq.com/static/default_pool_cover.png";
+                BannerImageURL = PluginConfig.Instance.HitbloqURL + BannerImageURL;
             }
         }
     }
