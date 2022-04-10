@@ -1,4 +1,8 @@
 ﻿<vertical xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
     <loading-indicator active='~is-loading' preserve-aspect='true' pref-width='20' pref-height='20' />
-    <list id='list' active='~has-loaded' show-scrollbar='true' stick-scrolling='true' select-cell='list-select' />
+    <list id='list' active='~has-loaded' show-scrollbar='true' stick-scrolling='true' select-cell='list-select' vertical-fit='PreferredSize' pref-height="70" />
+    <horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-height="8" spacing="3">
+        <dropdown-list-setting text='Sort' italics='true' pref-width='45' options='sort-options' on-change='sort-selected' />
+        <clickable-text text='~sort-direction' on-click='toggle-sort-direction' hover-hint='Sort direction (Ascending / Descending)'/>
+    </horizontal>
 </vertical>

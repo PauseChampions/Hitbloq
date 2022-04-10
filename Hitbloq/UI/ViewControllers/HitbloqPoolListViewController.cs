@@ -38,6 +38,7 @@ namespace Hitbloq.UI
         private readonly List<HitbloqPoolListEntry> pools = new();
         private readonly SemaphoreSlim poolLoadSemaphore = new(1, 1);
         private CancellationTokenSource? poolCancellationTokenSource;
+        private CancellationTokenSource? sortCancellationTokenSource;
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
@@ -51,7 +52,7 @@ namespace Hitbloq.UI
             }
         }
 
-        private async Task FetchPools(CancellationToken cancellationToken)
+        private async Task FetchPools(CancellationToken cancellationToken = default)
         {
             if (customListTableData == null)
             {
@@ -81,11 +82,32 @@ namespace Hitbloq.UI
 
                 var fetchedPools = await poolListSource.GetAsync(cancellationToken);
 
-                if (fetchedPools == null)
+                if (fetchedPools == null || cancellationToken.IsCancellationRequested)
                 {
                     return;
                 }
-                
+
+                if (sortOption != null)
+                {
+                    switch (sortOption)
+                    {
+                        case "Alphabetical":
+                            fetchedPools.Sort(HitbloqPoolListEntry.NameComparer);
+                            break;
+                        case "Popularity":
+                            fetchedPools.Sort(HitbloqPoolListEntry.PopularityComparer);
+                            break;
+                        case "Player Count":
+                            fetchedPools.Sort(HitbloqPoolListEntry.PlayerCountComparer);
+                            break;
+                    }
+                }
+
+                if (sortDescending)
+                {
+                    fetchedPools.Reverse();
+                }
+
                 pools.Clear();
                 pools.AddRange(fetchedPools);
             }
@@ -114,6 +136,41 @@ namespace Hitbloq.UI
         private void OnListSelect(TableView _, int index)
         {
         }
+
+        #region Sorting
+
+        private string? sortOption;
+        private bool sortDescending;
+        
+        [UIAction("sort-selected")]
+        private void SortSelected(string sortOption)
+        {
+            sortCancellationTokenSource?.Cancel();
+            sortCancellationTokenSource?.Dispose();
+            sortCancellationTokenSource = new CancellationTokenSource();
+            this.sortOption = sortOption;
+            _ = FetchPools(sortCancellationTokenSource.Token);
+        }
+
+        [UIAction("toggle-sort-direction")]
+        private void ToggleSortDirection()
+        {
+            sortDescending = !sortDescending;
+            NotifyPropertyChanged(nameof(SortDirection));
+            
+            sortCancellationTokenSource?.Cancel();
+            sortCancellationTokenSource?.Dispose();
+            sortCancellationTokenSource = new CancellationTokenSource();
+            _ = FetchPools(sortCancellationTokenSource.Token);
+        }
+        
+        [UIValue("sort-options")]
+        private List<object> sortOptions = new() { "Default", "Alphabetical", "Popularity", "Player Count" };
+
+        [UIValue("sort-direction")] 
+        private string SortDirection => sortDescending ? "▼" : "▲";
+
+        #endregion
 
         #region Loading
 

@@ -1,4 +1,6 @@
-﻿using System.Runtime.Serialization;
+﻿using System;
+using System.Collections.Generic;
+using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 using BeatSaberMarkupLanguage.Attributes;
 using Hitbloq.Configuration;
@@ -6,7 +8,7 @@ using Newtonsoft.Json;
 
 namespace Hitbloq.Entries
 {
-    public class HitbloqPoolListEntry
+    internal class HitbloqPoolListEntry
     {
         [JsonProperty("title")] 
         public string Title { get; private set; } = "";
@@ -30,6 +32,52 @@ namespace Hitbloq.Entries
             {
                 BannerImageURL = PluginConfig.Instance.HitbloqURL + BannerImageURL;
             }
+        }
+
+        #region Comparers
+
+        private static NameComparer? nameComparer;
+        public static NameComparer NameComparer => nameComparer ??= new NameComparer();
+        
+        private static PlayerCountComparer? playerCountComparer;
+        public static PlayerCountComparer PlayerCountComparer => playerCountComparer ??= new PlayerCountComparer();
+        
+        private static PopularityComparer? popularityComparer;
+        public static PopularityComparer PopularityComparer => popularityComparer ??= new PopularityComparer();
+
+        #endregion
+    }
+    
+    internal class NameComparer : IComparer<HitbloqPoolListEntry>
+    {
+        public int Compare(HitbloqPoolListEntry? x, HitbloqPoolListEntry? y)
+        {
+            if (ReferenceEquals(x, y)) return 0;
+            if (ReferenceEquals(null, y)) return 1;
+            if (ReferenceEquals(null, x)) return -1;
+            return string.Compare(x.Title, y.Title, StringComparison.Ordinal);
+        }
+    }
+        
+    internal class PlayerCountComparer : IComparer<HitbloqPoolListEntry>
+    {
+        public int Compare(HitbloqPoolListEntry? x, HitbloqPoolListEntry? y)
+        {
+            if (ReferenceEquals(x, y)) return 0;
+            if (ReferenceEquals(null, y)) return 1;
+            if (ReferenceEquals(null, x)) return -1;
+            return x.PlayerCount.CompareTo(y.PlayerCount);
+        }
+    }
+        
+    internal class PopularityComparer : IComparer<HitbloqPoolListEntry>
+    {
+        public int Compare(HitbloqPoolListEntry? x, HitbloqPoolListEntry? y)
+        {
+            if (ReferenceEquals(x, y)) return 0;
+            if (ReferenceEquals(null, y)) return 1;
+            if (ReferenceEquals(null, x)) return -1;
+            return x.Popularity.CompareTo(y.Popularity);
         }
     }
 }
