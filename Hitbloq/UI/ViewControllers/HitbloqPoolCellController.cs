@@ -26,6 +26,9 @@ namespace Hitbloq.UI
         [UIComponent("pool-name-text")]
         private readonly TextMeshProUGUI poolNameText = null!;
         
+        [UIComponent("description-text")]
+        private readonly TextMeshProUGUI descriptionText = null!;
+        
         [UIComponent("popularity-text")]
         private readonly TextMeshProUGUI popularityText = null!;
                 
@@ -51,6 +54,7 @@ namespace Hitbloq.UI
             _ = FetchBanner();
             
             NotifyPropertyChanged(nameof(PoolName));
+            NotifyPropertyChanged(nameof(Description));
             NotifyPropertyChanged(nameof(Popularity));
             NotifyPropertyChanged(nameof(PlayerCount));
             
@@ -104,6 +108,9 @@ namespace Hitbloq.UI
         [UIValue("show-banner-title")] 
         private bool ShowBannerTitle => (!poolListEntry?.BannerTitleHide ?? true) || !spriteDownloaded || highlighted || selected;
         
+        [UIValue("description")] 
+        private string Description => $"{poolListEntry?.ShortDescription}";
+        
         [UIValue("popularity")] 
         private string Popularity => $"📈 {poolListEntry?.Popularity}";
         
@@ -114,6 +121,7 @@ namespace Hitbloq.UI
 
         private readonly Color selectedColor = new(0.25f, 0.25f, 0.25f, 1);
         private readonly Color textSelectedColor = new(0, 0.7529412f, 1, 1);
+        private readonly Color textColor = new Color(1, 1, 1, 0.7490196f);
         
         protected override void SelectionDidChange(TransitionType transitionType) => RefreshBackground();
 
@@ -126,6 +134,7 @@ namespace Hitbloq.UI
             {
                 poolNameText.alpha = 1;
                 bannerImage.color = selectedColor;
+                descriptionText.color = textSelectedColor;
                 popularityText.color = textSelectedColor;
                 playerCountText.color = textSelectedColor;
             }
@@ -148,14 +157,16 @@ namespace Hitbloq.UI
                 }, 0.25f, EaseType.Linear);
                 
                 uwuTweenyManager.AddTween(tween, this);
+                descriptionText.color = Color.white;
                 popularityText.color = Color.white;
                 playerCountText.color = Color.white;
             }
             else
             {
-                bannerImage.color = Color.white;                
-                popularityText.color = Color.white;
-                playerCountText.color = Color.white;
+                bannerImage.color = Color.white;     
+                descriptionText.color = textColor;
+                popularityText.color = textColor;
+                playerCountText.color = textColor;
             }
             NotifyPropertyChanged(nameof(ShowBannerTitle));
         }

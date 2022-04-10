@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Runtime.Serialization;
-using System.Text.RegularExpressions;
-using BeatSaberMarkupLanguage.Attributes;
 using Hitbloq.Configuration;
 using Newtonsoft.Json;
 
@@ -12,6 +10,15 @@ namespace Hitbloq.Entries
     {
         [JsonProperty("title")] 
         public string Title { get; private set; } = "";
+
+        [JsonProperty("author")] 
+        public string Author { get; private set; } = "Hitbloq";
+        
+        [JsonProperty("description")]
+        public string? Description { get; private set; }
+        
+        [JsonProperty("short_description")]
+        public string? ShortDescription { get; private set; }
         
         [JsonProperty("banner_image")] 
         public string? BannerImageURL { get; private set; }
