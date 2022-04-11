@@ -1,0 +1,6 @@
+﻿<vertical id="root" horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='75'>
+    <horizontal id="pool-cell" vertical-fit='PreferredSize' pref-height="23" />
+    <horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='75' pref-height='40' spacing='2'>
+        <text-page id='text-page' text='~description' />
+    </horizontal>
+</vertical>

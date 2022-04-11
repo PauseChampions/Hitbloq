@@ -15,7 +15,7 @@ namespace Hitbloq.UI
     {
         private HitbloqPoolListEntry? poolListEntry;
         private bool spriteDownloaded;
-
+        
         private SpriteLoader spriteLoader = null!;
         private MaterialGrabber materialGrabber = null!;
         private TweeningManager uwuTweenyManager = null!;
@@ -106,7 +106,7 @@ namespace Hitbloq.UI
         private string PoolName => $"{poolListEntry?.Title}";
 
         [UIValue("show-banner-title")] 
-        private bool ShowBannerTitle => (!poolListEntry?.BannerTitleHide ?? true) || !spriteDownloaded || highlighted || selected;
+        private bool ShowBannerTitle => (!poolListEntry?.BannerTitleHide ?? true) || !spriteDownloaded || (interactable && (highlighted || selected));
         
         [UIValue("description")] 
         private string Description => $"{poolListEntry?.ShortDescription}";
@@ -121,7 +121,7 @@ namespace Hitbloq.UI
 
         private readonly Color selectedColor = new(0.25f, 0.25f, 0.25f, 1);
         private readonly Color textSelectedColor = new(0, 0.7529412f, 1, 1);
-        private readonly Color textColor = new Color(1, 1, 1, 0.7490196f);
+        private readonly Color textColor = new(1, 1, 1, 0.7490196f);
         
         protected override void SelectionDidChange(TransitionType transitionType) => RefreshBackground();
 
@@ -129,6 +129,11 @@ namespace Hitbloq.UI
 
         private void RefreshBackground()
         {
+            if (!interactable)
+            {
+                return;
+            }
+            
             uwuTweenyManager.KillAllTweens(this);
             if (selected)
             {

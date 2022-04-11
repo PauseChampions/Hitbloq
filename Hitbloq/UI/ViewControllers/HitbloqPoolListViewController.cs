@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -39,6 +40,9 @@ namespace Hitbloq.UI
         private readonly SemaphoreSlim poolLoadSemaphore = new(1, 1);
         private CancellationTokenSource? poolCancellationTokenSource;
         private CancellationTokenSource? sortCancellationTokenSource;
+
+        public event Action<HitbloqPoolListEntry>? PoolSelectedEvent;
+        public event Action? DetailDismissRequested;
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
@@ -87,20 +91,17 @@ namespace Hitbloq.UI
                     return;
                 }
 
-                if (sortOption != null)
+                switch (sortOption)
                 {
-                    switch (sortOption)
-                    {
-                        case "Alphabetical":
-                            fetchedPools.Sort(HitbloqPoolListEntry.NameComparer);
-                            break;
-                        case "Popularity":
-                            fetchedPools.Sort(HitbloqPoolListEntry.PopularityComparer);
-                            break;
-                        case "Player Count":
-                            fetchedPools.Sort(HitbloqPoolListEntry.PlayerCountComparer);
-                            break;
-                    }
+                    case "Popularity":
+                        fetchedPools.Sort(HitbloqPoolListEntry.PopularityComparer);
+                        break;
+                    case "Player Count":
+                        fetchedPools.Sort(HitbloqPoolListEntry.PlayerCountComparer);
+                        break;
+                    case "Alphabetical":
+                        fetchedPools.Sort(HitbloqPoolListEntry.NameComparer);
+                        break;
                 }
 
                 if (sortDescending)
@@ -119,6 +120,7 @@ namespace Hitbloq.UI
                 {
                     customListTableData.tableView.ReloadData();
                 });
+                DetailDismissRequested?.Invoke();
                 poolLoadSemaphore.Release();
             }
         }
@@ -126,21 +128,21 @@ namespace Hitbloq.UI
         [UIAction("#post-parse")]
         private void PostParse()
         {
+            rectTransform.anchorMin = new Vector2(0.5f, 0);
+            rectTransform.localPosition = Vector3.zero;
             if (customListTableData != null)
             {
                 customListTableData.tableView.SetDataSource(this, true);
             }
         }
-        
+
         [UIAction("list-select")]
-        private void OnListSelect(TableView _, int index)
-        {
-        }
+        private void OnListSelect(TableView _, int index) => PoolSelectedEvent?.Invoke(pools[index]);
 
         #region Sorting
 
-        private string? sortOption;
-        private bool sortDescending;
+        private string sortOption = "Popularity";
+        private bool sortDescending = true;
         
         [UIAction("sort-selected")]
         private void SortSelected(string sortOption)
@@ -165,7 +167,7 @@ namespace Hitbloq.UI
         }
         
         [UIValue("sort-options")]
-        private List<object> sortOptions = new() { "Default", "Alphabetical", "Popularity", "Player Count" };
+        private List<object> sortOptions = new() { "Popularity", "Player Count", "Alphabetical" };
 
         [UIValue("sort-direction")] 
         private string SortDirection => sortDescending ? "▼" : "▲";
@@ -215,7 +217,7 @@ namespace Hitbloq.UI
             return (HitbloqPoolCellController) tableCell;
         }
 
-        public float CellSize() => 20;
+        public float CellSize() => 23;
 
         public int NumberOfCells() => pools.Count;
 

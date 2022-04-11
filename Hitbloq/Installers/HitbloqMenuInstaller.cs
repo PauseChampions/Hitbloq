@@ -6,6 +6,7 @@ using Hitbloq.Sources;
 using Hitbloq.Other;
 using IPA.Loader;
 using System;
+using MorePlaylists.UI;
 
 namespace Hitbloq.Installers
 {
@@ -15,12 +16,14 @@ namespace Hitbloq.Installers
         {
             Container.BindInterfacesAndSelfTo<HitbloqLeaderboardViewController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<HitbloqPanelController>().FromNewComponentAsViewController().AsSingle();
-            Container.BindInterfacesAndSelfTo<HitbloqPoolListViewController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<HitbloqProfileModalController>().AsSingle();
             Container.BindInterfacesAndSelfTo<HitbloqEventModalViewController>().AsSingle();
 
             Container.BindInterfacesTo<MenuButtonUI>().AsSingle();
-            Container.BindInterfacesAndSelfTo<HitbloqFlowCoordinator>().FromNewComponentOnRoot().AsSingle();
+            Container.BindInterfacesAndSelfTo<HitbloqFlowCoordinator>().FromNewComponentOnNewGameObject().AsSingle();
+            Container.BindInterfacesAndSelfTo<HitbloqNavigationController>().FromNewComponentAsViewController().AsSingle();
+            Container.BindInterfacesAndSelfTo<HitbloqPoolListViewController>().FromNewComponentAsViewController().AsSingle();
+            Container.BindInterfacesAndSelfTo<HitbloqPoolDetailViewController>().FromNewComponentAsViewController().AsSingle();
 
             Container.BindInterfacesTo<HitbloqCustomLeaderboard>().AsSingle();
             Container.BindInterfacesTo<HitbloqManager>().AsSingle();
