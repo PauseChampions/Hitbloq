@@ -228,7 +228,7 @@ namespace Hitbloq.UI
                 }
                 else
                 {
-                    playlistManagerIHardlyKnowHer.OpenPlaylist(selectedPool, () => DownloadingActive = false);
+                    playlistManagerIHardlyKnowHer.DownloadOrOpenPlaylist(selectedPool, () => DownloadingActive = false);
                 }
                 DownloadingActive = playlistManagerIHardlyKnowHer.IsDownloading;
             }

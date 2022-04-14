@@ -1,4 +1,7 @@
-﻿using System.Reflection;
+﻿using System;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
@@ -24,9 +27,16 @@ namespace MorePlaylists.UI
         
         [Inject]
         private readonly TimeTweeningManager uwuTweenyManager = null!;
+        
+        [InjectOptional]
+        private readonly PlaylistManagerIHardlyKnowHer? playlistManagerIHardlyKnowHer = null!;
 
         private HitbloqPoolCellController? hitbloqPoolCell;
         private HitbloqPoolListEntry? hitbloqPoolListEntry;
+        private IBeatmapLevelPack? localPlaylist;
+        private CancellationTokenSource? playlistSearchTokenSource;
+
+        public event Action? FlowDismissRequested;
 
         [UIComponent("pool-cell")] 
         private readonly RectTransform? poolCellParentTransform = null!;
@@ -48,15 +58,78 @@ namespace MorePlaylists.UI
             BSMLParser.instance.Parse(Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqPoolCell.bsml"), hitbloqPoolCell.gameObject, hitbloqPoolCell);
         }
 
+        [UIAction("download-click")]
+        private void DownloadPressed() => _ = DownloadPoolAsync();
+
+        private async Task DownloadPoolAsync()
+        {
+            var pool = hitbloqPoolListEntry;
+            if (pool != null && playlistManagerIHardlyKnowHer != null)
+            {
+                pool.DownloadBlocked = true;
+                NotifyPropertyChanged(nameof(DownloadInteractable));
+                
+                var localPlaylist = await playlistManagerIHardlyKnowHer.DownloadPlaylistFromPoolID(pool.ID);
+                if (hitbloqPoolListEntry == pool)
+                {
+                    this.localPlaylist = localPlaylist;
+                }
+                
+                pool.DownloadBlocked = false;
+                NotifyPropertyChanged(nameof(DownloadInteractable));
+                NotifyPropertyChanged(nameof(DownloadActive));
+                NotifyPropertyChanged(nameof(GoToActive));
+            }
+        }
+        
+        [UIAction("go-to-playlist")]
+        private void GoToPlaylist()
+        {
+            if (playlistManagerIHardlyKnowHer != null && localPlaylist != null)
+            {
+                FlowDismissRequested?.Invoke();
+                playlistManagerIHardlyKnowHer.OpenPlaylist(localPlaylist);
+            }
+        }
+
         public void SetPool(HitbloqPoolListEntry hitbloqPoolListEntry)
         {
             this.hitbloqPoolListEntry = hitbloqPoolListEntry;
+            localPlaylist = null;
+            
             if (hitbloqPoolCell != null)
             {
                 hitbloqPoolCell.PopulateCell(hitbloqPoolListEntry);
             }
+            
             NotifyPropertyChanged(nameof(Description));
+            NotifyPropertyChanged(nameof(DownloadInteractable));
+            NotifyPropertyChanged(nameof(DownloadActive));
+            NotifyPropertyChanged(nameof(GoToActive));
+            
             descriptionTextPage.ScrollTo(0, true);
+            
+            playlistSearchTokenSource?.Cancel();
+            playlistSearchTokenSource?.Dispose();
+            playlistSearchTokenSource = new CancellationTokenSource();
+            _ = FetchPlaylistAsync(hitbloqPoolListEntry.ID, playlistSearchTokenSource.Token);
+        }
+
+        private async Task FetchPlaylistAsync(string poolID, CancellationToken token)
+        {
+            if (playlistManagerIHardlyKnowHer == null)
+            {
+                return;
+            }
+
+            var localPlaylist = await playlistManagerIHardlyKnowHer.FindLocalPlaylistFromPoolID(poolID, token);
+
+            if (localPlaylist != null)
+            {
+                this.localPlaylist = localPlaylist;
+                NotifyPropertyChanged(nameof(DownloadActive));
+                NotifyPropertyChanged(nameof(GoToActive));
+            }
         }
 
         #endregion
@@ -65,6 +138,15 @@ namespace MorePlaylists.UI
 
         [UIValue("description")]
         private string Description => $"Owners: {hitbloqPoolListEntry?.Author}\n\n" + (string.IsNullOrWhiteSpace(hitbloqPoolListEntry?.Description) ? "No Description available for this pool." : hitbloqPoolListEntry?.Description ?? "");
+        
+        [UIValue("download-interactable")]
+        public bool DownloadInteractable => hitbloqPoolListEntry is {DownloadBlocked: false};
+
+        [UIValue("download-active")]
+        public bool DownloadActive => playlistManagerIHardlyKnowHer != null && hitbloqPoolListEntry != null && localPlaylist == null;
+
+        [UIValue("go-to-active")]
+        public bool GoToActive => playlistManagerIHardlyKnowHer != null && localPlaylist != null;
 
         #endregion
     }

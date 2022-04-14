@@ -29,14 +29,16 @@ namespace Hitbloq.UI
             SetViewControllersToNavigationController(hitbloqNavigationController, hitbloqPoolListViewController);
             ProvideInitialViewControllers(hitbloqNavigationController);
             hitbloqPoolListViewController.PoolSelectedEvent += OnPoolSelected;
-            hitbloqPoolListViewController.DetailDismissRequested += DismissDetailView;
+            hitbloqPoolListViewController.DetailDismissRequested += OnDetailDismissRequested;
+            hitbloqPoolDetailViewController.FlowDismissRequested += OnFlowDismissRequested;
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
         {
             base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
             hitbloqPoolListViewController.PoolSelectedEvent -= OnPoolSelected;
-            hitbloqPoolListViewController.DetailDismissRequested -= DismissDetailView;
+            hitbloqPoolListViewController.DetailDismissRequested -= OnDetailDismissRequested;
+            hitbloqPoolDetailViewController.FlowDismissRequested -= OnFlowDismissRequested;
         }
 
         private void OnPoolSelected(HitbloqPoolListEntry pool)
@@ -49,12 +51,17 @@ namespace Hitbloq.UI
             hitbloqPoolDetailViewController.SetPool(pool);
         }
         
-        private void DismissDetailView()
+        private void OnDetailDismissRequested()
         {
             if (hitbloqPoolDetailViewController.isInViewControllerHierarchy)
             {
                 PopViewControllerFromNavigationController(hitbloqNavigationController, immediately: true);
             }
+        }
+        
+        private void OnFlowDismissRequested()
+        {
+            parentFlowCoordinator.DismissFlowCoordinator(this, immediately: true);
         }
 
         protected override void BackButtonWasPressed(ViewController topViewController)

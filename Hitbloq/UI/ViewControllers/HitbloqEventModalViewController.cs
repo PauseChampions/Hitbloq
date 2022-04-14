@@ -133,7 +133,7 @@ namespace Hitbloq.UI
                 }
                 else
                 {
-                    playlistManagerIHardlyKnowHer.OpenPlaylist(currentEvent!.Pool!, () => DownloadingActive = false);
+                    playlistManagerIHardlyKnowHer.DownloadOrOpenPlaylist(currentEvent!.Pool!, () => DownloadingActive = false);
                 }
                 DownloadingActive = playlistManagerIHardlyKnowHer.IsDownloading;
             }

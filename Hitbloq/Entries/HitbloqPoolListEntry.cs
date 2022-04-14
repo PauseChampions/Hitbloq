@@ -8,6 +8,9 @@ namespace Hitbloq.Entries
 {
     internal class HitbloqPoolListEntry
     {
+        [JsonProperty("id")] 
+        public string ID { get; private set; } = "";
+        
         [JsonProperty("title")] 
         public string Title { get; private set; } = "";
 
@@ -31,6 +34,8 @@ namespace Hitbloq.Entries
         
         [JsonProperty("popularity")]
         public int Popularity { get; private set; }
+
+        public bool DownloadBlocked { get; set; }
         
         [OnDeserialized]
         private void OnDeserialized(StreamingContext context)

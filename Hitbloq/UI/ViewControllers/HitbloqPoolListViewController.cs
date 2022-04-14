@@ -47,6 +47,12 @@ namespace Hitbloq.UI
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
+            
+            if (customListTableData != null)
+            {
+                customListTableData.tableView.ClearSelection();
+            }
+            
             if (pools.Count == 0)
             {
                 poolCancellationTokenSource?.Cancel();
