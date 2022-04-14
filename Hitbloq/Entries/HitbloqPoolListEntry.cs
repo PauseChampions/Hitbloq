@@ -39,6 +39,9 @@ namespace Hitbloq.Entries
             {
                 BannerImageURL = PluginConfig.Instance.HitbloqURL + BannerImageURL;
             }
+
+            Description = Description?.Replace("&emsp;", " ");
+            Description = Description?.Replace("&thinsp;", " ");
         }
 
         #region Comparers
