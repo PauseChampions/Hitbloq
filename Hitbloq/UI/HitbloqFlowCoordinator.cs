@@ -21,6 +21,9 @@ namespace Hitbloq.UI
         
         [Inject]
         private readonly HitbloqPoolDetailViewController hitbloqPoolDetailViewController = null!;
+        
+        [Inject]
+        private readonly HitbloqRankedListViewController hitbloqRankedListViewController = null!;
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
@@ -48,7 +51,13 @@ namespace Hitbloq.UI
                 PushViewControllerToNavigationController(hitbloqNavigationController, hitbloqPoolDetailViewController);
             }
             
+            if (!hitbloqRankedListViewController.isInViewControllerHierarchy)
+            {
+                SetLeftScreenViewController(hitbloqRankedListViewController, ViewController.AnimationType.In);
+            }
+            
             hitbloqPoolDetailViewController.SetPool(pool);
+            hitbloqRankedListViewController.SetPool(pool.ID);
         }
         
         private void OnDetailDismissRequested()
