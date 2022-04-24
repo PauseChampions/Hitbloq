@@ -9,7 +9,7 @@ using UnityEngine;
 
 namespace Hitbloq.Sources
 {
-    internal class FriendsLeaderboardSource : ILeaderboardSource
+    internal class FriendsLeaderboardSource : IMapLeaderboardSource
     {
         private readonly IHttpService siraHttpService;
         private Sprite? icon;
@@ -17,7 +17,7 @@ namespace Hitbloq.Sources
         private readonly UserIDSource userIDSource;
         private readonly FriendIDSource friendIDSource;
 
-        private List<List<HitbloqLeaderboardEntry>>? cachedEntries;
+        private List<List<HitbloqMapLeaderboardEntry>>? cachedEntries;
 
         public FriendsLeaderboardSource(IHttpService siraHttpService, UserIDSource userIDSource, FriendIDSource friendIDSource)
         {
@@ -42,7 +42,7 @@ namespace Hitbloq.Sources
 
         public bool Scrollable => true;
 
-        public async Task<List<HitbloqLeaderboardEntry>?> GetScoresAsync(IDifficultyBeatmap difficultyBeatmap, CancellationToken cancellationToken = default, int page = 0)
+        public async Task<List<HitbloqMapLeaderboardEntry>?> GetScoresAsync(IDifficultyBeatmap difficultyBeatmap, CancellationToken cancellationToken = default, int page = 0)
         {
             if (cachedEntries == null)
             {
@@ -71,19 +71,19 @@ namespace Hitbloq.Sources
                     var webResponse = await siraHttpService.PostAsync($"{PluginConfig.Instance.HitbloqURL}api/leaderboard/{beatmapString}/friends_extended", content, cancellationToken).ConfigureAwait(false);
                     // like an hour of debugging and we had to remove the slash from the end of the url. that was it. not pog.
 
-                    var leaderboardEntries = await Utils.ParseWebResponse<List<HitbloqLeaderboardEntry>>(webResponse);
-                    cachedEntries = new List<List<HitbloqLeaderboardEntry>>();
+                    var leaderboardEntries = await Utils.ParseWebResponse<List<HitbloqMapLeaderboardEntry>>(webResponse);
+                    cachedEntries = new List<List<HitbloqMapLeaderboardEntry>>();
 
                     if (leaderboardEntries != null)
                     {
                         // Splitting entries into lists of 10
                         var p = 0;
-                        cachedEntries.Add(new List<HitbloqLeaderboardEntry>());
+                        cachedEntries.Add(new List<HitbloqMapLeaderboardEntry>());
                         for (var i = 0; i < leaderboardEntries.Count; i++)
                         {
                             if (cachedEntries[p].Count == 10)
                             {
-                                cachedEntries.Add(new List<HitbloqLeaderboardEntry>());
+                                cachedEntries.Add(new List<HitbloqMapLeaderboardEntry>());
                                 p++;
                             }
                             cachedEntries[p].Add(leaderboardEntries[i]);

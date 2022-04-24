@@ -22,9 +22,6 @@ namespace Hitbloq.UI
         [Inject]
         private readonly SpriteLoader spriteLoader = null!;
 
-        [UIComponent("list")]
-        private readonly CustomListTableData? customListTableData = null!;
-        
         private RankedListDetailedPage? currentPage;
         private CancellationTokenSource? cancellationTokenSource;
         
@@ -32,6 +29,9 @@ namespace Hitbloq.UI
         private float? currentScrollPosition;
         
         private readonly SemaphoreSlim songLoadSemaphore = new(1, 1);
+        
+        [UIComponent("list")]
+        private readonly CustomListTableData? customListTableData = null!;
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
@@ -168,6 +168,12 @@ namespace Hitbloq.UI
                     customListTableData.tableView.ReloadDataKeepingPosition();
                 });
                 songLoadSemaphore.Release();
+                
+                if (firstPage)
+                {
+                    // Request another page if on first
+                    _ = InitSongList("", cancellationToken, false);
+                }
             }
         }
         

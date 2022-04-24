@@ -1,6 +1,7 @@
 ﻿using HMUI;
 using BeatSaberMarkupLanguage;
 using Hitbloq.Entries;
+using Hitbloq.UI.ViewControllers;
 using MorePlaylists.UI;
 using Zenject;
 
@@ -24,6 +25,9 @@ namespace Hitbloq.UI
         
         [Inject]
         private readonly HitbloqRankedListViewController hitbloqRankedListViewController = null!;
+        
+        [Inject]
+        private readonly HitbloqPoolLeaderboardViewController hitbloqPoolLeaderboardViewController = null!;
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
@@ -56,8 +60,14 @@ namespace Hitbloq.UI
                 SetLeftScreenViewController(hitbloqRankedListViewController, ViewController.AnimationType.In);
             }
             
+            if (!hitbloqPoolLeaderboardViewController.isInViewControllerHierarchy)
+            {
+                SetRightScreenViewController(hitbloqPoolLeaderboardViewController, ViewController.AnimationType.In);
+            }
+            
             hitbloqPoolDetailViewController.SetPool(pool);
             hitbloqRankedListViewController.SetPool(pool.ID);
+            hitbloqPoolLeaderboardViewController.SetPool(pool.ID);
         }
         
         private void OnDetailDismissRequested()

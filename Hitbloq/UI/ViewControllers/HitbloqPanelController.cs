@@ -313,7 +313,7 @@ namespace Hitbloq.UI
             NotifyPropertyChanged(nameof(PoolRankingText));
         }
 
-        public void LeaderboardEntriesUpdated(List<HitbloqLeaderboardEntry>? leaderboardEntries)
+        public void LeaderboardEntriesUpdated(List<HitbloqMapLeaderboardEntry>? leaderboardEntries)
         {
             CuteMode = leaderboardEntries != null && leaderboardEntries.Exists(u => u.UserID == 726);
         }

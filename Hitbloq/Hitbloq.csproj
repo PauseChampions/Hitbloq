@@ -106,6 +106,9 @@
 		<EmbeddedResource Include="manifest.json" />
 		<EmbeddedResource Include="Images\*.png" />
 		<EmbeddedResource Include="UI\Views\*.bsml" />
+		<EmbeddedResource Update="UI\Views\HitbloqPoolLeaderboardView.bsml">
+		  <SubType>Code</SubType>
+		</EmbeddedResource>
 	</ItemGroup>
 	
 	<ItemGroup>

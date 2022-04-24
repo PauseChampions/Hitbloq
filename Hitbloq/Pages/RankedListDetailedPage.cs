@@ -10,7 +10,7 @@ namespace Hitbloq.Pages
     {
         private readonly string poolID;
         private readonly int page;
-        public bool ExhaustedPages { get; private set; }
+        public override bool ExhaustedPages { get; protected set; }
         protected override RankedListDetailedSource Source { get; }
         public override IReadOnlyList<HitbloqRankedListDetailedEntry> Entries { get; }
 

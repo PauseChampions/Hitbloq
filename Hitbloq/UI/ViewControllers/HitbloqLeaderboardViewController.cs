@@ -25,19 +25,17 @@ namespace Hitbloq.UI
         private readonly UserIDSource userIDSource = null!;
         
         [Inject]
-        private readonly List<ILeaderboardSource> leaderboardSources = null!;
+        private readonly List<IMapLeaderboardSource> leaderboardSources = null!;
 
-        public event Action<IDifficultyBeatmap, ILeaderboardSource, int>? PageRequested;
-
-        private int pageNumber;
-        private int selectedCellIndex;
-
+        public event Action<IDifficultyBeatmap, IMapLeaderboardSource, int>? PageRequested;
+        
         private IDifficultyBeatmap? difficultyBeatmap;
-        private List<HitbloqLeaderboardEntry>? leaderboardEntries;
+        private List<HitbloqMapLeaderboardEntry>? leaderboardEntries;
         private string? selectedPool;
 
         private List<Button>? infoButtons;
 
+        private int pageNumber;
         private int PageNumber
         {
             get => pageNumber;
@@ -51,16 +49,6 @@ namespace Hitbloq.UI
                     loadingControl.SetActive(true);
                     PageRequested?.Invoke(difficultyBeatmap, leaderboardSources[SelectedCellIndex], value);
                 }
-            }
-        }
-
-        private int SelectedCellIndex
-        {
-            get => selectedCellIndex;
-            set
-            {
-                selectedCellIndex = value;
-                PageNumber = 0;
             }
         }
 
@@ -116,7 +104,7 @@ namespace Hitbloq.UI
             PageNumber = 0;
         }
 
-        private async Task SetScores(List<HitbloqLeaderboardEntry>? leaderboardEntries)
+        private async Task SetScores(List<HitbloqMapLeaderboardEntry>? leaderboardEntries)
         {
             var scores = new List<LeaderboardTableView.ScoreData>();
             var myScorePos = -1;
@@ -228,12 +216,6 @@ namespace Hitbloq.UI
             ChangeButtonScale(button10!, 0.425f);
         }
 
-        [UIAction("cell-selected")]
-        private void OnCellSelected(SegmentedControl _, int index)
-        {
-            SelectedCellIndex = index;
-        }
-
         [UIAction("up-clicked")]
         private void UpClicked()
         {
@@ -302,7 +284,7 @@ namespace Hitbloq.UI
             }
         }
 
-        public void LeaderboardEntriesUpdated(List<HitbloqLeaderboardEntry>? leaderboardEntries)
+        public void LeaderboardEntriesUpdated(List<HitbloqMapLeaderboardEntry>? leaderboardEntries)
         {
             this.leaderboardEntries = leaderboardEntries;
             NotifyPropertyChanged(nameof(DownEnabled));
@@ -318,6 +300,25 @@ namespace Hitbloq.UI
             }
         }
 
+        #region Segmented Control
+
+        private int selectedCellIndex;
+        private int SelectedCellIndex
+        {
+            get => selectedCellIndex;
+            set
+            {
+                selectedCellIndex = value;
+                PageNumber = 0;
+            }
+        }
+        
+        [UIAction("cell-selected")]
+        private void OnCellSelected(SegmentedControl _, int index)
+        {
+            SelectedCellIndex = index;
+        }
+        
         [UIValue("cell-data")]
         private List<IconSegmentedControl.DataItem> CellData
         {
@@ -331,6 +332,8 @@ namespace Hitbloq.UI
                 return list;
             }
         }
+
+        #endregion
 
         [UIValue("up-enabled")]
         private bool UpEnabled => PageNumber != 0 && leaderboardSources[SelectedCellIndex].Scrollable;

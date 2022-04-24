@@ -1,17 +1,10 @@
-﻿using Hitbloq.Entries;
-using System.Collections.Generic;
-using System.Threading;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿using UnityEngine;
 
 namespace Hitbloq.Sources
 {
-    internal interface ILeaderboardSource
+    public interface ILeaderboardSource
     {
         public string HoverHint { get; }
         public Sprite Icon { get; }
-        public Task<List<HitbloqLeaderboardEntry>?> GetScoresAsync(IDifficultyBeatmap difficultyBeatmap, CancellationToken cancellationToken = default, int page = 0);
-        public bool Scrollable { get; }
-        public void ClearCache();
     }
 }

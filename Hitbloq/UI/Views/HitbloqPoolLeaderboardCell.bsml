@@ -1,22 +1,19 @@
-﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
-  <vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='135' pref-height='80'>
-    <vertical pref-width='135' pref-height='10' pad-left='47'>
-      <dropdown-list-setting id='dropdown-list' text='Map Pool' bold='true' italics='true' options='pools' size-delta-x='41' anchor-pos-x='-16'/>
+﻿<horizontal bg='round-rect-panel' horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width="80" pref-height="7" pad-left="2" pad-right="2">
+  <horizontal vertical-fit='PreferredSize' pref-height="7" child-align="MiddleLeft">
+    <vertical child-control-width="false" child-control-height="false" child-align="MiddleLeft">
+      <image id="profile-picture" preserve-aspect='true' size-delta-x="5" size-delta-y="5" />
     </vertical>
-    <vertical bg='round-rect-panel' pref-height='70' pref-width='125' pad-bottom='2' pad-top='2'>
-      <horizontal pref-height='5.5' pref-width='100'>
-        <vertical pad-left='20'>
-          <image src='Hitbloq.Images.LogoFlushed.png' preserve-aspect='true'/>
-        </vertical>
-        <vertical pad-right='50'>
-          <text text='Username' align='MidlineLeft'/>
-          <text text='cr' color='#b987ff' align='MidlineLeft'/>
-        </vertical>
-        <vertical pad-right='20'>
-          <text text='for rnak' align='MidlineRight'/>
-        </vertical>
-      </horizontal>
-      
-    </vertical>
-  </vertical>
-</bg>
+    
+    <horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width="60" pref-height="7" child-align="MiddleLeft" spacing="2">
+      <text text="~rank" align="MidlineRight" font-size="3.5" />
+      <vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width="52" pref-height="7" child-align="MiddleLeft">
+        <text text='~username' font-size="3" align='MidlineLeft' />
+        <text text='~cr' font-size="3" color='#B987FF' align='MidlineLeft' />
+      </vertical>
+    </horizontal>
+  </horizontal>
+  
+  <horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width="5" pref-height="7">
+    <text text='~rank-change' font-size="3.5" align='MidlineRight' />
+  </horizontal>
+</horizontal>

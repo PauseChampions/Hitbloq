@@ -6,5 +6,6 @@ namespace Hitbloq.Pages
     {
         protected abstract T Source { get; }
         public abstract IReadOnlyList<TU> Entries { get; }
+        public abstract bool ExhaustedPages { get; protected set; }
     }
 }

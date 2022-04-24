@@ -136,10 +136,10 @@ namespace Hitbloq.Managers
             }
         }
 
-        private void OnPageRequested(IDifficultyBeatmap difficultyBeatmap, ILeaderboardSource leaderboardSource, int page) =>
+        private void OnPageRequested(IDifficultyBeatmap difficultyBeatmap, IMapLeaderboardSource leaderboardSource, int page) =>
             _ = OnPageRequestedAsync(difficultyBeatmap, leaderboardSource, page);
 
-        private async Task OnPageRequestedAsync(IDifficultyBeatmap difficultyBeatmap, ILeaderboardSource leaderboardSource, int page)
+        private async Task OnPageRequestedAsync(IDifficultyBeatmap difficultyBeatmap, IMapLeaderboardSource leaderboardSource, int page)
         {
             leaderboardTokenSource?.Cancel();
             leaderboardTokenSource?.Dispose();

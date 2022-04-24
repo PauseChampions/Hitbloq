@@ -6,6 +6,7 @@ using Hitbloq.Sources;
 using Hitbloq.Other;
 using IPA.Loader;
 using System;
+using Hitbloq.UI.ViewControllers;
 using MorePlaylists.UI;
 
 namespace Hitbloq.Installers
@@ -25,6 +26,7 @@ namespace Hitbloq.Installers
             Container.BindInterfacesAndSelfTo<HitbloqPoolListViewController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<HitbloqPoolDetailViewController>().FromNewComponentAsViewController().AsSingle();
             Container.BindInterfacesAndSelfTo<HitbloqRankedListViewController>().FromNewComponentAsViewController().AsSingle();
+            Container.BindInterfacesAndSelfTo<HitbloqPoolLeaderboardViewController>().FromNewComponentAsViewController().AsSingle();
 
             Container.BindInterfacesTo<HitbloqCustomLeaderboard>().AsSingle();
             Container.BindInterfacesTo<HitbloqManager>().AsSingle();
@@ -41,6 +43,7 @@ namespace Hitbloq.Installers
             Container.BindInterfacesTo<GlobalLeaderboardSource>().AsSingle();
             Container.BindInterfacesTo<AroundMeLeaderboardSource>().AsSingle();
             Container.BindInterfacesAndSelfTo<FriendsLeaderboardSource>().AsSingle();
+            Container.BindInterfacesTo<GlobalPoolLeaderboardSource>().AsSingle();
 
             Container.Bind<SpriteLoader>().AsSingle();
             Container.Bind<MaterialGrabber>().AsSingle();
