@@ -2,7 +2,7 @@
 
 namespace Hitbloq.Entries
 {
-    public class HitbloqPoolLeaderboardEntry
+    internal class HitbloqPoolLeaderboardEntry
     {
         [JsonProperty("username")]
         public string Username { get; private set; } = null!;

@@ -4,7 +4,7 @@ using Newtonsoft.Json;
 
 namespace Hitbloq.Pages
 {
-    public class SerializablePoolLeaderboardPage
+    internal class SerializablePoolLeaderboardPage
     {
         [JsonProperty("ladder")] 
         public ReadOnlyCollection<HitbloqPoolLeaderboardEntry>? Ladder { get; private set; }
