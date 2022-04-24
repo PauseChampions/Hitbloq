@@ -143,7 +143,7 @@ namespace MorePlaylists.UI
         public bool DownloadInteractable => hitbloqPoolListEntry is {DownloadBlocked: false};
 
         [UIValue("download-active")]
-        public bool DownloadActive => playlistManagerIHardlyKnowHer != null && hitbloqPoolListEntry != null && localPlaylist == null;
+        public bool DownloadActive => playlistManagerIHardlyKnowHer is {CanOpenPlaylist: true} && hitbloqPoolListEntry != null && localPlaylist == null;
 
         [UIValue("go-to-active")]
         public bool GoToActive => playlistManagerIHardlyKnowHer != null && localPlaylist != null;

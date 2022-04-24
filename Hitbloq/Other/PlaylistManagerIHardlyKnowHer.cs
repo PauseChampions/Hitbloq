@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Hitbloq.Utilities;
 using Zenject;
 using Utils = Hitbloq.Utilities.Utils;
 
@@ -24,6 +25,16 @@ namespace Hitbloq.Other
         private CancellationTokenSource? tokenSource;
 
         public bool IsDownloading => tokenSource is {IsCancellationRequested: false};
+
+        public bool CanOpenPlaylist
+        {
+            get
+            {
+                var currentFlow = mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
+                var parentFlow = Accessors.ParentFlowAccessor(ref currentFlow);
+                return parentFlow is LevelSelectionFlowCoordinator || parentFlow is MainFlowCoordinator;
+            }
+        } 
         public event Action<string>? HitbloqPlaylistSelected;
 
         public PlaylistManagerIHardlyKnowHer(IHttpService siraHttpService, MainFlowCoordinator mainFlowCoordinator, MainMenuViewController mainMenuViewController, SoloFreePlayFlowCoordinator soloFreePlayFlowCoordinator, LevelFilteringNavigationController levelFilteringNavigationController, SelectLevelCategoryViewController selectLevelCategoryViewController)

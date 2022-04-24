@@ -14,5 +14,6 @@ namespace Hitbloq.Utilities
             FieldAccessor<LevelSelectionFlowCoordinator.State, SelectLevelCategoryViewController.LevelCategory?>.GetAccessor("levelCategory");
         public static readonly FieldAccessor<TableView, ScrollView>.Accessor ScrollViewAccessor = FieldAccessor<TableView, ScrollView>.GetAccessor("_scrollView");
         public static readonly FieldAccessor<ScrollView, Button>.Accessor PageDownAccessor = FieldAccessor<ScrollView, Button>.GetAccessor("_pageDownButton");
+        public static readonly FieldAccessor<FlowCoordinator, FlowCoordinator>.Accessor ParentFlowAccessor = FieldAccessor<FlowCoordinator, FlowCoordinator>.GetAccessor("_parentFlowCoordinator");
     }
 }
