@@ -1,4 +1,4 @@
-﻿<horizontal bg='round-rect-panel' horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width="80" pref-height="7" pad-left="2" pad-right="2">
+﻿<horizontal id="background" bg='round-rect-panel' horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width="80" pref-height="7" pad-left="2" pad-right="2">
   <horizontal vertical-fit='PreferredSize' pref-height="7" child-align="MiddleLeft">
     <vertical child-control-width="false" child-control-height="false" child-align="MiddleLeft">
       <image id="profile-picture" preserve-aspect='true' size-delta-x="5" size-delta-y="5" />
