@@ -143,13 +143,16 @@ namespace Hitbloq.UI
 
                 if (hitbloqProfile != null)
                 {
-                    if (hitbloqProfile.ProfilePictureURL != null && modalProfilePic != null && modalTokenSource != null)
+                    if (modalProfilePic != null && modalTokenSource != null)
                     {
-                        _ = spriteLoader.DownloadSpriteAsync(hitbloqProfile.ProfilePictureURL, sprite => modalProfilePic.sprite = sprite, modalTokenSource.Token);
-                    }
-                    else
-                    {
-                        // TODO: Show a default profile pic
+                        if (hitbloqProfile.ProfilePictureURL != null)
+                        {
+                            _ = spriteLoader.DownloadSpriteAsync(hitbloqProfile.ProfilePictureURL, sprite => modalProfilePic.sprite = sprite, modalTokenSource.Token);
+                        }
+                        else
+                        {
+                            _ = spriteLoader.FetchSpriteFromResourcesAsync("Hitbloq.Images.Logo.png", sprite => modalProfilePic.sprite = sprite, modalTokenSource.Token);
+                        }   
                     }
 
                     if (hitbloqProfile.ProfileBackgroundURL != null && modalBackground != null && modalTokenSource != null)
@@ -219,6 +222,7 @@ namespace Hitbloq.UI
             modalBackground.material = fogBG;
 
             Accessors.AnimateCanvasAccessor(ref modalView!) = true;
+            Accessors.ViewValidAccessor(ref modalView!) = false;
         }
 
         internal void ShowModalForSelf(Transform parentTransform, HitbloqRankInfo rankInfo, string pool)

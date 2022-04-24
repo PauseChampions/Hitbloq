@@ -5,7 +5,7 @@
 		</vertical>
 		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='80' pref-height='70'>
 			<list id='list' active='~has-loaded' show-scrollbar='true' stick-scrolling='true' select-cell='list-select' vertical-fit='PreferredSize' />
-			<loading-indicator active='~is-loading' preserve-aspect='true' pref-width='20' pref-height='20' />
+			<loading-indicator active='~is-loading' preserve-aspect='true' ignore-layout="true" pref-height="20" pref-width="20" />
 		</vertical>
 	</horizontal>
 </bg>

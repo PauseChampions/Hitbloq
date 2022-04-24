@@ -23,6 +23,9 @@ namespace Hitbloq.UI.ViewControllers
     internal class HitbloqPoolLeaderboardViewController : BSMLAutomaticViewController, TableView.IDataSource
     {
         [Inject]
+        private readonly HitbloqProfileModalController profileModalController = null!;
+        
+        [Inject]
         private readonly List<IPoolLeaderboardSource> leaderboardSources = null!;
         
         [Inject]
@@ -104,6 +107,16 @@ namespace Hitbloq.UI.ViewControllers
             {
                 customListTableData.tableView.SetDataSource(this, true);
                 scrollView = Accessors.ScrollViewAccessor(ref customListTableData.tableView);
+            }
+        }
+
+        [UIAction("list-select")]
+        private void Select(TableView tableView, int idx)
+        { 
+            tableView.ClearSelection();
+            if (currentPage != null)
+            {
+                profileModalController.ShowModalForUser(transform, leaderboardEntries[idx].UserID, currentPage.poolID);
             }
         }
         
