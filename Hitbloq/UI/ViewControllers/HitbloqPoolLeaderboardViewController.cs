@@ -29,6 +29,9 @@ namespace Hitbloq.UI.ViewControllers
         private readonly List<IPoolLeaderboardSource> leaderboardSources = null!;
         
         [Inject]
+        private readonly UserIDSource userIDSource = null!;
+        
+        [Inject]
         private readonly SpriteLoader spriteLoader = null!;
         
         [Inject]
@@ -263,7 +266,7 @@ namespace Hitbloq.UI.ViewControllers
             if (tableCell == null)
             {
                 var hitbloqPoolLeaderboardCell = new GameObject(nameof(HitbloqPoolLeaderboardCellController), typeof(Touchable)).AddComponent<HitbloqPoolLeaderboardCellController>();
-                hitbloqPoolLeaderboardCell.SetRequiredUtils(spriteLoader, materialGrabber, uwuTweenyManager);
+                hitbloqPoolLeaderboardCell.SetRequiredUtils(userIDSource, spriteLoader, materialGrabber, uwuTweenyManager);
                 tableCell = hitbloqPoolLeaderboardCell;
                 tableCell.interactable = true;
 

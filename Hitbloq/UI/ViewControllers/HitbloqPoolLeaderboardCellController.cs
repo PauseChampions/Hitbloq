@@ -5,6 +5,7 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using Hitbloq.Entries;
 using Hitbloq.Other;
+using Hitbloq.Sources;
 using Hitbloq.Utilities;
 using HMUI;
 using TMPro;
@@ -16,11 +17,13 @@ namespace Hitbloq.UI.ViewControllers
     internal class HitbloqPoolLeaderboardCellController : TableCell, INotifyPropertyChanged
     {
         private HitbloqPoolLeaderboardEntry? poolLeaderboardEntry;
+        private bool isSelf;
 
+        private UserIDSource userIDSource = null!;
         private SpriteLoader spriteLoader = null!;
         private MaterialGrabber materialGrabber = null!;
         private TweeningManager uwuTweenyManager = null!;
-
+        
         [UIComponent("profile-picture")]
         private readonly ImageView profilePicture = null!;
         
@@ -46,8 +49,9 @@ namespace Hitbloq.UI.ViewControllers
             originalBackgroundColour = background.background.color;
         }
 
-        public void SetRequiredUtils(SpriteLoader spriteLoader, MaterialGrabber materialGrabber, TweeningManager uwuTweenyManager)
+        public void SetRequiredUtils(UserIDSource userIDSource, SpriteLoader spriteLoader, MaterialGrabber materialGrabber, TweeningManager uwuTweenyManager)
         {
+            this.userIDSource = userIDSource;
             this.spriteLoader = spriteLoader;
             this.materialGrabber = materialGrabber;
             this.uwuTweenyManager = uwuTweenyManager;
@@ -61,6 +65,7 @@ namespace Hitbloq.UI.ViewControllers
             }
             
             this.poolLeaderboardEntry = poolLeaderboardEntry;
+            _ = CheckIfSelf();
             _ = FetchProfilePicture();
             _ = FetchBackground();
 
@@ -70,6 +75,18 @@ namespace Hitbloq.UI.ViewControllers
             NotifyPropertyChanged(nameof(RankChange));
             
             return this;
+        }
+
+        private async Task CheckIfSelf()
+        {
+            isSelf = false;
+            
+            var userID = await userIDSource.GetUserIDAsync();
+            if (userID != null && userID.ID == poolLeaderboardEntry!.UserID)
+            {
+                isSelf = true;
+                RefreshBackground();
+            }
         }
         
         private async Task FetchProfilePicture()
@@ -150,6 +167,8 @@ namespace Hitbloq.UI.ViewControllers
         
         private readonly Color backgroundHighlightedColor = new(0.5f, 0.5f, 0.5f, 1f);
         private readonly Color textColor = new(1, 1, 1, 0.7490196f);
+        private readonly Color selfTextColor = new(0, 0.7529412f, 1, 0.7490196f);
+        private readonly Color selfTextHighlightedColor = new(0, 0.7529412f, 1, 1);
         private readonly Color crColor = new(0.7254902f, 0.5294118f, 1, 0.7490196f);
         private readonly Color crHighlightedColor = new(0.7254902f, 0.5294118f, 1, 1f);
 
@@ -177,10 +196,10 @@ namespace Hitbloq.UI.ViewControllers
                 
                 uwuTweenyManager.AddTween(tween, this);
                 
-                rankText.color = Color.white;
-                usernameText.color = Color.white;
+                rankText.color = isSelf ? selfTextHighlightedColor : Color.white;
+                usernameText.color = isSelf ? selfTextHighlightedColor : Color.white;
                 crText.color = crHighlightedColor;
-                rankChangeText.color = Color.white;
+                rankChangeText.color = isSelf ? selfTextHighlightedColor : Color.white;
             }
             else
             {
@@ -193,10 +212,10 @@ namespace Hitbloq.UI.ViewControllers
                     background.background.color = originalBackgroundColour!.Value;
                 }
                 
-                rankText.color = textColor;
-                usernameText.color = textColor;
+                rankText.color = isSelf ? selfTextColor : textColor;
+                usernameText.color = isSelf ? selfTextColor : textColor;
                 crText.color = crColor;
-                rankChangeText.color = textColor;
+                rankChangeText.color = isSelf ? selfTextColor : textColor;
             }
         }
 
