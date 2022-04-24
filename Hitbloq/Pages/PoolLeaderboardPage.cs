@@ -6,7 +6,7 @@ using Hitbloq.Sources;
 
 namespace Hitbloq.Pages
 {
-    internal class PoolLeaderboardPage : Page<IPoolLeaderboardSource, HitbloqPoolLeaderboardEntry>
+    internal sealed class PoolLeaderboardPage : Page<IPoolLeaderboardSource, HitbloqPoolLeaderboardEntry>
     {
         public readonly string poolID;
         private readonly int page;
@@ -15,12 +15,13 @@ namespace Hitbloq.Pages
         public override IReadOnlyList<HitbloqPoolLeaderboardEntry> Entries { get; }
         public override bool ExhaustedPages { get; protected set; }
         
-        public PoolLeaderboardPage(IPoolLeaderboardSource source, IReadOnlyList<HitbloqPoolLeaderboardEntry> entries, string poolID, int page)
+        public PoolLeaderboardPage(IPoolLeaderboardSource source, IReadOnlyList<HitbloqPoolLeaderboardEntry> entries, string poolID, int page, bool exhaustedPages = false)
         {
             Source = source;
             Entries = entries;
             this.poolID = poolID;
             this.page = page;
+            ExhaustedPages = exhaustedPages;
         }
         
         public Task<PoolLeaderboardPage?> Previous(CancellationToken cancellationToken = default) => Source.GetScoresAsync(poolID, cancellationToken, page - 1);

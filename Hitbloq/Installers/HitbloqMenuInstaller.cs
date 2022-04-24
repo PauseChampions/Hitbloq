@@ -44,6 +44,7 @@ namespace Hitbloq.Installers
             Container.BindInterfacesTo<AroundMeLeaderboardSource>().AsSingle();
             Container.BindInterfacesAndSelfTo<FriendsLeaderboardSource>().AsSingle();
             Container.BindInterfacesTo<GlobalPoolLeaderboardSource>().AsSingle();
+            Container.BindInterfacesTo<AroundMePoolLeaderboardSource>().AsSingle();
 
             Container.Bind<SpriteLoader>().AsSingle();
             Container.Bind<MaterialGrabber>().AsSingle();

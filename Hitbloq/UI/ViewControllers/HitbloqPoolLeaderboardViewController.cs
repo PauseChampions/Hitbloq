@@ -169,7 +169,7 @@ namespace Hitbloq.UI.ViewControllers
                 });
                 leaderboardLoadSemaphore.Release();
 
-                if (firstPage)
+                if (firstPage && currentPage is {ExhaustedPages: false})
                 {
                     // Request another page if on first
                     _ = InitLeaderboard("", cancellationToken, false);
