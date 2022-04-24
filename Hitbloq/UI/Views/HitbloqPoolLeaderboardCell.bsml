@@ -5,15 +5,15 @@
     </vertical>
     
     <horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width="60" pref-height="7" child-align="MiddleLeft" spacing="2">
-      <text text="~rank" align="MidlineRight" font-size="3.5" />
+      <text id="rank-text" text="~rank" align="MidlineRight" font-size="3.5" />
       <vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width="52" pref-height="7" child-align="MiddleLeft">
-        <text text='~username' font-size="3" align='MidlineLeft' />
-        <text text='~cr' font-size="3" color='#B987FF' align='MidlineLeft' />
+        <text id="username-text" text='~username' font-size="3" align='MidlineLeft' />
+        <text id="cr-text" text='~cr' font-size="3" color='#B987FF' align='MidlineLeft' />
       </vertical>
     </horizontal>
   </horizontal>
   
   <horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width="5" pref-height="7">
-    <text text='~rank-change' font-size="3.5" align='MidlineRight' />
+    <text id="rank-change-text" text='~rank-change' font-size="3.5" align='MidlineRight' />
   </horizontal>
 </horizontal>

@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using BeatSaberMarkupLanguage.Attributes;
@@ -8,6 +7,7 @@ using Hitbloq.Entries;
 using Hitbloq.Other;
 using Hitbloq.Utilities;
 using HMUI;
+using TMPro;
 using Tweening;
 using UnityEngine;
 
@@ -16,13 +16,25 @@ namespace Hitbloq.UI.ViewControllers
     internal class HitbloqPoolLeaderboardCellController : TableCell, INotifyPropertyChanged
     {
         private HitbloqPoolLeaderboardEntry? poolLeaderboardEntry;
-        
+
         private SpriteLoader spriteLoader = null!;
         private MaterialGrabber materialGrabber = null!;
         private TweeningManager uwuTweenyManager = null!;
 
         [UIComponent("profile-picture")]
         private readonly ImageView profilePicture = null!;
+        
+        [UIComponent("rank-text")]
+        private readonly TextMeshProUGUI rankText = null!;
+        
+        [UIComponent("username-text")]
+        private readonly TextMeshProUGUI usernameText = null!;
+        
+        [UIComponent("cr-text")]
+        private readonly TextMeshProUGUI crText = null!;
+                
+        [UIComponent("rank-change-text")]
+        private readonly TextMeshProUGUI rankChangeText = null!;
 
         [UIAction("#post-parse")]
         private void PostParse()
@@ -92,7 +104,7 @@ namespace Hitbloq.UI.ViewControllers
         private Material? fogBG;
         
         private Color? originalBackgroundColour;
-        private readonly Color customBackgroundColour = new(0.5f, 0.5f, 0.5f, 1f);
+        private readonly Color customBackgroundColour = new(0.75f, 0.75f, 0.75f, 1f);
         
         [UIComponent("background")]
         private readonly Backgroundable background = null!;
@@ -133,6 +145,63 @@ namespace Hitbloq.UI.ViewControllers
         }
 
         #endregion
+        
+        #region Highlight and Selection
+        
+        private readonly Color backgroundHighlightedColor = new(0.5f, 0.5f, 0.5f, 1f);
+        private readonly Color textColor = new(1, 1, 1, 0.7490196f);
+        private readonly Color crColor = new(0.7254902f, 0.5294118f, 1, 0.7490196f);
+        private readonly Color crHighlightedColor = new(0.7254902f, 0.5294118f, 1, 1f);
+
+        protected override void SelectionDidChange(TransitionType transitionType) => RefreshBackground();
+
+        protected override void HighlightDidChange(TransitionType transitionType) => RefreshBackground();
+
+        private void RefreshBackground()
+        {
+            if (!interactable)
+            {
+                return;
+            }
+            
+            uwuTweenyManager.KillAllTweens(this);
+            
+            if (highlighted)
+            {
+                var currentColor = background.background.color;
+
+                var tween = new FloatTween(0, 1, val =>
+                {
+                    background.background.color = Color.Lerp(currentColor, backgroundHighlightedColor, val);
+                }, 0.25f, EaseType.Linear);
+                
+                uwuTweenyManager.AddTween(tween, this);
+                
+                rankText.color = Color.white;
+                usernameText.color = Color.white;
+                crText.color = crHighlightedColor;
+                rankChangeText.color = Color.white;
+            }
+            else
+            {
+                if (poolLeaderboardEntry is {BannerImageURL: { }})
+                {
+                    background.background.color = customBackgroundColour;
+                }
+                else
+                {
+                    background.background.color = originalBackgroundColour!.Value;
+                }
+                
+                rankText.color = textColor;
+                usernameText.color = textColor;
+                crText.color = crColor;
+                rankChangeText.color = textColor;
+            }
+        }
+
+        #endregion
+        
 
         [UIValue("rank")] 
         private string Rank => poolLeaderboardEntry?.Rank.ToString() ?? "";
@@ -141,7 +210,7 @@ namespace Hitbloq.UI.ViewControllers
         private string Username => poolLeaderboardEntry?.Username ?? "";
         
         [UIValue("cr")] 
-        private string CR => poolLeaderboardEntry?.CR.ToString(CultureInfo.InvariantCulture) ?? "";
+        private string CR => $"{poolLeaderboardEntry?.CR}cr";
         
         [UIValue("rank-change")] 
         private string RankChange => poolLeaderboardEntry?.RankChange.ToString() ?? "";
