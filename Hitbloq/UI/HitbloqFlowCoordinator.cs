@@ -76,6 +76,16 @@ namespace Hitbloq.UI
             {
                 PopViewControllerFromNavigationController(hitbloqNavigationController, immediately: true);
             }
+            
+            if (hitbloqRankedListViewController.isInViewControllerHierarchy)
+            {
+                SetLeftScreenViewController(null, ViewController.AnimationType.Out);
+            }
+
+            if (hitbloqPoolLeaderboardViewController.isInViewControllerHierarchy)
+            {
+                SetRightScreenViewController(null, ViewController.AnimationType.Out);
+            }
         }
         
         private void OnFlowDismissRequested()
