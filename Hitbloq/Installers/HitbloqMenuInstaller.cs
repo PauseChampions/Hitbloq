@@ -1,5 +1,4 @@
 ﻿using Zenject;
-using SiraUtil;
 using Hitbloq.UI;
 using Hitbloq.Managers;
 using Hitbloq.Sources;
@@ -39,14 +38,18 @@ namespace Hitbloq.Installers
             Container.Bind<PoolInfoSource>().AsSingle();
             Container.Bind<PoolListSource>().AsSingle();
             Container.Bind<RankedListDetailedSource>().AsSingle();
-            Container.Bind<EventSource>().AsSingle();
             Container.BindInterfacesTo<GlobalLeaderboardSource>().AsSingle();
             Container.BindInterfacesTo<AroundMeLeaderboardSource>().AsSingle();
             Container.BindInterfacesAndSelfTo<FriendsLeaderboardSource>().AsSingle();
             Container.BindInterfacesTo<GlobalPoolLeaderboardSource>().AsSingle();
             Container.BindInterfacesTo<AroundMePoolLeaderboardSource>().AsSingle();
             Container.BindInterfacesTo<FriendsPoolLeaderboardSource>().AsSingle();
-
+            
+#if DEBUG
+            Container.BindInterfacesTo<DebugEventSource>().AsSingle();
+#else
+            Container.BindInterfacesTo<EventSource>().AsSingle();
+#endif
             Container.Bind<SpriteLoader>().AsSingle();
             Container.Bind<MaterialGrabber>().AsSingle();
             Container.Bind<LeaderboardRefresher>().AsSingle();

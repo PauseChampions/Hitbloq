@@ -1,16 +1,15 @@
 ﻿using Hitbloq.Entries;
-using Hitbloq.Utilities;
 using SiraUtil.Web;
-using System.Threading;
-using System.Threading.Tasks;
-using JetBrains.Annotations;
+using Hitbloq.Interfaces;
 
 namespace Hitbloq.Sources
 {
-    internal class EventSource : Source<HitbloqEvent>
+    internal class EventSource : Source<HitbloqEvent>, IEventSource
     {
         protected override string EndpointURL => "api/event";
-        
-        public EventSource(IHttpService siraHttpService) : base(siraHttpService) { }
+
+        public EventSource(IHttpService siraHttpService) : base(siraHttpService)
+        {
+        }
     }
 }

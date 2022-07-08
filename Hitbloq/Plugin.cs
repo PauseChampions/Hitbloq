@@ -4,7 +4,6 @@ using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
 using SiraUtil.Zenject;
-using Zenject;
 using IPALogger = IPA.Logging.Logger;
 
 namespace Hitbloq

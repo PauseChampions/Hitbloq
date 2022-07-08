@@ -5,11 +5,8 @@ using Hitbloq.Configuration;
 using Hitbloq.Entries;
 using Hitbloq.Interfaces;
 using Hitbloq.Other;
-using Hitbloq.Sources;
 using Hitbloq.Utilities;
 using HMUI;
-using IPA.Utilities;
-using System.ComponentModel;
 using System.Reflection;
 using System.Threading.Tasks;
 using BeatSaberMarkupLanguage.Components;
@@ -20,7 +17,7 @@ namespace Hitbloq.UI
 {
     internal class HitbloqEventModalViewController : NotifiableBase, INotifyViewActivated
     {
-        private readonly EventSource eventSource;
+        private readonly IEventSource eventSource;
         private readonly SpriteLoader spriteLoader;
         private readonly PlaylistManagerIHardlyKnowHer? playlistManagerIHardlyKnowHer;
 
@@ -55,7 +52,7 @@ namespace Hitbloq.UI
         [UIParams]
         private readonly BSMLParserParams? parserParams = null!;
 
-        public HitbloqEventModalViewController(EventSource eventSource, SpriteLoader spriteLoader, [InjectOptional] PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer)
+        public HitbloqEventModalViewController(IEventSource eventSource, SpriteLoader spriteLoader, [InjectOptional] PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer)
         {
             this.eventSource = eventSource;
             this.spriteLoader = spriteLoader;

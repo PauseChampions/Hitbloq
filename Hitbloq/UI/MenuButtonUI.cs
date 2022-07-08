@@ -1,5 +1,4 @@
 ﻿using System;
-using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.MenuButtons;
 using Zenject;
 
