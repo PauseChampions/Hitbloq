@@ -5,7 +5,7 @@
 		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' preferred-width='65' preferred-height='20'>
 			<text-page id='text-page' italics='true' text='~event-description' rich-text='true' />
 		</vertical>
-		<action-button text='~pool-text' pref-width='40' pref-height='9' active='~pool-exists' on-click='pool-click' />
+		<action-button text='Open Pool!' pref-width='40' pref-height='9' active='~pool-exists' on-click='pool-click' />
 		<button text='Dismiss' pref-width='40' pref-height='9' click-event='close-modal' />
 	</vertical>
 </modal>

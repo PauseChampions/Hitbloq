@@ -11,7 +11,6 @@ using System.Reflection;
 using System.Threading.Tasks;
 using BeatSaberMarkupLanguage.Components;
 using UnityEngine;
-using Zenject;
 
 namespace Hitbloq.UI
 {
@@ -19,26 +18,15 @@ namespace Hitbloq.UI
     {
         private readonly IEventSource eventSource;
         private readonly SpriteLoader spriteLoader;
-        private readonly PlaylistManagerIHardlyKnowHer? playlistManagerIHardlyKnowHer;
-
+        private readonly HitbloqFlowCoordinator hitbloqFlowCoordinator;
+        
         private HitbloqEvent? currentEvent;
         private bool parsed;
-        private bool downloadingActive;
         
-        private Vector3? modalPosition;
-
-        private bool DownloadingActive
-        {
-            get => downloadingActive;
-            set
-            {
-                downloadingActive = value;
-                NotifyPropertyChanged(nameof(PoolText));
-            }
-        }
-
         [UIComponent("modal")]
         private ModalView? modalView;
+        
+        private Vector3? modalPosition;
 
         [UIComponent("modal")]
         private readonly RectTransform? modalTransform = null!;
@@ -52,11 +40,11 @@ namespace Hitbloq.UI
         [UIParams]
         private readonly BSMLParserParams? parserParams = null!;
 
-        public HitbloqEventModalViewController(IEventSource eventSource, SpriteLoader spriteLoader, [InjectOptional] PlaylistManagerIHardlyKnowHer playlistManagerIHardlyKnowHer)
+        public HitbloqEventModalViewController(IEventSource eventSource, SpriteLoader spriteLoader, HitbloqFlowCoordinator hitbloqFlowCoordinator)
         {
             this.eventSource = eventSource;
             this.spriteLoader = spriteLoader;
-            this.playlistManagerIHardlyKnowHer = playlistManagerIHardlyKnowHer;
+            this.hitbloqFlowCoordinator = hitbloqFlowCoordinator;
         }
 
         public void ViewActivated(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) =>
@@ -123,16 +111,7 @@ namespace Hitbloq.UI
         {
             if (PoolExists)
             {
-                DownloadingActive = playlistManagerIHardlyKnowHer!.IsDownloading;
-                if (DownloadingActive)
-                {
-                    playlistManagerIHardlyKnowHer.CancelDownload();
-                }
-                else
-                {
-                    playlistManagerIHardlyKnowHer.DownloadOrOpenPlaylist(currentEvent!.Pool!, () => DownloadingActive = false);
-                }
-                DownloadingActive = playlistManagerIHardlyKnowHer.IsDownloading;
+                hitbloqFlowCoordinator.ShowAndOpenPoolWithID(currentEvent!.Pool);
             }
         }
 
@@ -141,11 +120,8 @@ namespace Hitbloq.UI
 
         [UIValue("event-description")]
         private string EventDescription => $"{currentEvent?.Description}";
-
-        [UIValue("pool-text")]
-        private string PoolText => DownloadingActive ? "Cancel Download" : "Open Pool!";
-
+        
         [UIValue("pool-exists")]
-        private bool PoolExists => playlistManagerIHardlyKnowHer != null && currentEvent != null && currentEvent.Pool != null;
+        private bool PoolExists => currentEvent is {Pool: { }};
     }
 }
