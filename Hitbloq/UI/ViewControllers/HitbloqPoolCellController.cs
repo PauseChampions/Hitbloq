@@ -92,12 +92,19 @@ namespace Hitbloq.UI
                     spriteDownloaded = true;
                     NotifyPropertyChanged(nameof(ShowBannerTitle));
 
-                    var tween = new FloatTween(0, 1, val =>
+                    if (!selected && !highlighted)
                     {
-                        bannerImage.color = new Color(1, 1, 1, val);
-                    }, 0.5f, EaseType.Linear);
+                        var tween = new FloatTween(0, 1, val =>
+                        {
+                            bannerImage.color = new Color(1, 1, 1, val);
+                        }, 0.5f, EaseType.Linear);
                 
-                    uwuTweenyManager.AddTween(tween, this);
+                        uwuTweenyManager.AddTween(tween, this);   
+                    }
+                    else
+                    {
+                        RefreshBackground();
+                    }
                 }
             });
         }
