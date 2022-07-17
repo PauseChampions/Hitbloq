@@ -32,7 +32,7 @@ namespace Hitbloq.Other
             {
                 var currentFlow = mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
                 var parentFlow = Accessors.ParentFlowAccessor(ref currentFlow);
-                return parentFlow is LevelSelectionFlowCoordinator || parentFlow is MainFlowCoordinator;
+                return parentFlow is LevelSelectionFlowCoordinator or MainFlowCoordinator;
             }
         } 
         public event Action<string>? HitbloqPlaylistSelected;

@@ -52,8 +52,7 @@ namespace Hitbloq.UI
 
         private Sprite? logoSprite;
         private Sprite? flushedSprite;
-        private string spriteHoverText = "";
-
+        
         private Color? defaultHighlightColour;
         private readonly Color cancelHighlightColor = Color.red;
 
@@ -76,8 +75,7 @@ namespace Hitbloq.UI
                     {
                         logo.sprite = value ? flushedSprite : logoSprite;
                         var hoverHint = logo.GetComponent<HoverHint>();
-                        hoverHint.text = value ? "Pink Cute!" : spriteHoverText;
-                        hoverHint.enabled = value || !string.IsNullOrEmpty(spriteHoverText);
+                        hoverHint.text = value ? "Pink Cute!" : "Open Hitbloq Menu";
                     }
                 }
 
@@ -124,8 +122,7 @@ namespace Hitbloq.UI
             logoSprite = logo!.sprite;
             flushedSprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.LogoFlushed.png");
             logo.sprite = CuteMode ? flushedSprite : logoSprite;
-            logo.GetComponent<HoverHint>().enabled = CuteMode;
-
+            
             Accessors.SkewAccessor(ref logo) = 0.18f;
             logo.SetVerticesDirty();
 
@@ -232,11 +229,12 @@ namespace Hitbloq.UI
             }
         }
         
+        [UIAction("logo-click")]
+        private void LogoClicked() => LogoClickedEvent?.Invoke();
+
         [UIAction("event-click")]
         private void EventClicked() => EventClickedEvent?.Invoke();
-
-        private void LogoClicked(PointerEventData pointerEventData) => LogoClickedEvent?.Invoke();
-
+        
         private void OnPlaylistSelected(string pool) => selectedPool = pool;
 
         public void UserRegistered()

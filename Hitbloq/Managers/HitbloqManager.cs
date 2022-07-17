@@ -18,6 +18,7 @@ namespace Hitbloq.Managers
         private readonly HitbloqPanelController hitbloqPanelController;
         private readonly HitbloqProfileModalController hitbloqProfileModalController;
         private readonly HitbloqEventModalViewController hitbloqEventModalViewController;
+        private readonly HitbloqFlowCoordinator hitbloqFlowCoordinator;
 
         private readonly UserIDSource userIDSource;
         private readonly LevelInfoSource levelInfoSource;
@@ -34,7 +35,7 @@ namespace Hitbloq.Managers
         private CancellationTokenSource? leaderboardTokenSource;
 
         public HitbloqManager(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, HitbloqPanelController hitbloqPanelController, HitbloqProfileModalController hitbloqProfileModalController,
-            HitbloqEventModalViewController hitbloqEventModalViewController, UserIDSource userIDSource, LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher, List<INotifyUserRegistered> notifyUserRegistereds,
+            HitbloqEventModalViewController hitbloqEventModalViewController, HitbloqFlowCoordinator hitbloqFlowCoordinator, UserIDSource userIDSource, LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher, List<INotifyUserRegistered> notifyUserRegistereds,
             List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters, List<INotifyViewActivated> notifyViewActivateds, List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters,
             List<IPoolUpdater> poolUpdaters)
         {
@@ -42,6 +43,7 @@ namespace Hitbloq.Managers
             this.hitbloqPanelController = hitbloqPanelController;
             this.hitbloqProfileModalController = hitbloqProfileModalController;
             this.hitbloqEventModalViewController = hitbloqEventModalViewController;
+            this.hitbloqFlowCoordinator = hitbloqFlowCoordinator;
 
             this.userIDSource = userIDSource;
             this.levelInfoSource = levelInfoSource;
@@ -63,6 +65,7 @@ namespace Hitbloq.Managers
 
             hitbloqPanelController.PoolChangedEvent += OnPoolChanged;
             hitbloqPanelController.RankTextClickedEvent += OnRankTextClicked;
+            hitbloqPanelController.LogoClickedEvent += OnLogoClicked;
             hitbloqPanelController.EventClickedEvent += OnEventClicked;
         }
 
@@ -75,6 +78,7 @@ namespace Hitbloq.Managers
 
             hitbloqPanelController.PoolChangedEvent -= OnPoolChanged;
             hitbloqPanelController.RankTextClickedEvent -= OnRankTextClicked;
+            hitbloqPanelController.LogoClickedEvent -= OnLogoClicked;
             hitbloqPanelController.EventClickedEvent -= OnEventClicked;
         }
 
@@ -168,10 +172,9 @@ namespace Hitbloq.Managers
             }
         }
 
-        private void OnRankTextClicked(HitbloqRankInfo rankInfo, string pool)
-        {
-            hitbloqProfileModalController.ShowModalForSelf(hitbloqLeaderboardViewController.transform, rankInfo, pool);
-        }
+        private void OnRankTextClicked(HitbloqRankInfo rankInfo, string pool) => hitbloqProfileModalController.ShowModalForSelf(hitbloqLeaderboardViewController.transform, rankInfo, pool);
+
+        private void OnLogoClicked() => hitbloqFlowCoordinator.Show();
 
         private void OnEventClicked() => hitbloqEventModalViewController.ShowModal(hitbloqLeaderboardViewController.transform);
     }

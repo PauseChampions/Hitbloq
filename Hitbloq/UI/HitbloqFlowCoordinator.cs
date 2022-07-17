@@ -95,6 +95,8 @@ namespace Hitbloq.UI
 
         protected override void BackButtonWasPressed(ViewController topViewController)
         {
+            hitbloqRankedListViewController.gameObject.SetActive(false);
+            hitbloqPoolLeaderboardViewController.gameObject.SetActive(false);
             parentFlowCoordinator.DismissFlowCoordinator(this);
         }
 
