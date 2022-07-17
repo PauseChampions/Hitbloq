@@ -8,13 +8,13 @@
         "#![Hitbloq.Description.md]",
         "Hitbloq offers a unique competitive experience for Beat Saber through its use of map pools and the relative ranking algorithm."
     ],
-    "gameVersion": "1.19.0",
+    "gameVersion": "1.20.0",
     "icon": "Hitbloq.Images.Logo.png",
     "dependsOn": {
         "BSIPA": "^4.2.1",
-        "BeatSaberMarkupLanguage": "^1.6.0",
+        "BeatSaberMarkupLanguage": "^1.6.3",
         "SiraUtil": "^3.0.0",
-        "LeaderboardCore": "^1.1.0",
+        "LeaderboardCore": "^1.2.1",
         "SongCore": "^3.9.5",
         "ScoreSaber": "^3.1.11"
     },
