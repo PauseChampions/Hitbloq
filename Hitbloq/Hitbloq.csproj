@@ -94,7 +94,11 @@
 			<HintPath>$(BeatSaberDir)\Plugins\SiraUtil.dll</HintPath>
 			<Private>false</Private>
 		</Reference>
-	</ItemGroup>
+        <Reference Include="Hive.Versioning">
+            <HintPath>$(BeatSaberDir)\Libs\Hive.Versioning.dll</HintPath>
+            <Private>false</Private>
+        </Reference>
+    </ItemGroup>
 
 	<ItemGroup>
 		<None Include="Directory.Build.props" Condition="Exists('Directory.Build.props')" />
@@ -107,6 +111,9 @@
 		<EmbeddedResource Include="Images\*.png" />
 		<EmbeddedResource Include="UI\Views\*.bsml" />
 		<EmbeddedResource Update="UI\Views\HitbloqPoolLeaderboardView.bsml">
+		  <SubType>Code</SubType>
+		</EmbeddedResource>
+		<EmbeddedResource Update="UI\Views\HitbloqInfoView.bsml">
 		  <SubType>Code</SubType>
 		</EmbeddedResource>
 	</ItemGroup>

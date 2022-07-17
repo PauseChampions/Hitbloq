@@ -2,6 +2,7 @@
 using BeatSaberMarkupLanguage;
 using Hitbloq.Entries;
 using MorePlaylists.UI;
+using UnityEngine;
 using Zenject;
 
 namespace Hitbloq.UI
@@ -28,6 +29,12 @@ namespace Hitbloq.UI
         [Inject]
         private readonly HitbloqPoolLeaderboardViewController hitbloqPoolLeaderboardViewController = null!;
         
+        [Inject]
+        private readonly HitbloqInfoViewController hitbloqInfoViewController = null!;
+        
+        [Inject]
+        private readonly PopupModalsController popupModalsController = null!;
+
         private bool flowAnimationComplete;
         private HitbloqPoolListEntry? currentPool;
 
@@ -39,11 +46,12 @@ namespace Hitbloq.UI
             currentPool = null;
 
             SetViewControllersToNavigationController(hitbloqNavigationController, hitbloqPoolListViewController);
-            ProvideInitialViewControllers(hitbloqNavigationController);
+            ProvideInitialViewControllers(hitbloqNavigationController, bottomScreenViewController: hitbloqInfoViewController);
             
             hitbloqPoolListViewController.PoolSelectedEvent += OnPoolSelected;
             hitbloqPoolListViewController.DetailDismissRequested += OnDetailDismissRequested;
             hitbloqPoolDetailViewController.FlowDismissRequested += OnFlowDismissRequested;
+            hitbloqInfoViewController.URLOpenRequested += OnURLOpenRequested;
         }
 
         protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
@@ -52,6 +60,7 @@ namespace Hitbloq.UI
             hitbloqPoolListViewController.PoolSelectedEvent -= OnPoolSelected;
             hitbloqPoolListViewController.DetailDismissRequested -= OnDetailDismissRequested;
             hitbloqPoolDetailViewController.FlowDismissRequested -= OnFlowDismissRequested;
+            hitbloqInfoViewController.URLOpenRequested -= OnURLOpenRequested;
         }
 
         private void OnPoolSelected(HitbloqPoolListEntry pool)
@@ -92,15 +101,19 @@ namespace Hitbloq.UI
             }
         }
         
-        private void OnFlowDismissRequested()
+        private void OnFlowDismissRequested() => parentFlowCoordinator.DismissFlowCoordinator(this, immediately: true);
+
+        private void OnURLOpenRequested(string url) => popupModalsController.ShowYesNoModal
+        (hitbloqPoolListViewController.rectTransform, $"Would you like to open\n{url}", () =>
         {
-            parentFlowCoordinator.DismissFlowCoordinator(this, immediately: true);
-        }
+            Application.OpenURL(url);
+        });
 
         protected override void BackButtonWasPressed(ViewController topViewController)
         {
             hitbloqRankedListViewController.gameObject.SetActive(false);
             hitbloqPoolLeaderboardViewController.gameObject.SetActive(false);
+            hitbloqInfoViewController.gameObject.SetActive(false);
             parentFlowCoordinator.DismissFlowCoordinator(this);
         }
 
