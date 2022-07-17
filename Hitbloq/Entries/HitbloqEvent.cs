@@ -4,19 +4,19 @@ namespace Hitbloq.Entries
 {
     internal class HitbloqEvent
     {
-        [JsonProperty("id")]
-        public int id = -1;
+        [JsonProperty("id")] 
+        public int ID { get; set; } = -1;
 
-        [JsonProperty("urt_title", NullValueHandling = NullValueHandling.Ignore)]
-        public string title;
+        [JsonProperty("urt_title")]
+        public string? Title { get; set; }
 
-        [JsonProperty("image", NullValueHandling = NullValueHandling.Ignore)]
-        public string image;
+        [JsonProperty("image")]
+        public string? Image { get; set; }
 
-        [JsonProperty("urt_description", NullValueHandling = NullValueHandling.Ignore)]
-        public string description;
+        [JsonProperty("urt_description")]
+        public string? Description { get; set; }
 
-        [JsonProperty("pool", NullValueHandling = NullValueHandling.Ignore)]
-        public string pool;
+        [JsonProperty("pool")]
+        public string? Pool { get; set; }
     }
 }

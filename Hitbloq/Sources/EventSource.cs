@@ -1,39 +1,15 @@
 ﻿using Hitbloq.Entries;
-using Hitbloq.Utilities;
 using SiraUtil.Web;
-using System.Threading;
-using System.Threading.Tasks;
+using Hitbloq.Interfaces;
 
 namespace Hitbloq.Sources
 {
-    internal class EventSource
+    internal class EventSource : Source<HitbloqEvent>, IEventSource
     {
-        private readonly IHttpService siraHttpService;
-        private HitbloqEvent cachedEvent;
+        protected override string EndpointURL => "api/event";
 
-        public EventSource(IHttpService siraHttpService)
+        public EventSource(IHttpService siraHttpService) : base(siraHttpService)
         {
-            this.siraHttpService = siraHttpService;
-        }
-
-        public async Task<HitbloqEvent> GetEventAsync(CancellationToken? cancellationToken = null)
-        {
-            if (cachedEvent == null)
-            {
-                try
-                {
-                    IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/event", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                    cachedEvent = await Utils.ParseWebResponse<HitbloqEvent>(webResponse);
-                }
-                catch (TaskCanceledException) { }
-            }
-
-            if (cachedEvent == null)
-            {
-                return new HitbloqEvent();
-            }
-
-            return cachedEvent;
         }
     }
 }

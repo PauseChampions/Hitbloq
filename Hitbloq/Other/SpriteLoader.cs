@@ -2,72 +2,155 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
+using System.Threading.Tasks;
+using IPA.Loader;
+using SiraUtil.Zenject;
 using UnityEngine;
 
 namespace Hitbloq.Other
 {
     internal class SpriteLoader
     {
+        private readonly PluginMetadata pluginMetadata;
         private readonly IHttpService siraHttpService;
-        private readonly Dictionary<string, Sprite> cachedURLSprites;
-        private readonly ConcurrentQueue<Action> spriteQueue;
+        private readonly ConcurrentDictionary<string, Sprite> cachedSprites;
+        private readonly Queue<Action> spriteQueue;
+        private readonly object queueLock;
+        private bool coroutineRunning;
 
-        public SpriteLoader(IHttpService siraHttpService)
+        public SpriteLoader(UBinder<Plugin, PluginMetadata> pluginMetadata, IHttpService siraHttpService)
         {
+            this.pluginMetadata = pluginMetadata.Value;
             this.siraHttpService = siraHttpService;
-            cachedURLSprites = new Dictionary<string, Sprite>();
-            spriteQueue = new ConcurrentQueue<Action>();
+            cachedSprites = new ConcurrentDictionary<string, Sprite>();
+            spriteQueue = new Queue<Action>();
+            queueLock = new object();
         }
 
-        public async void DownloadSpriteAsync(string spriteURL, Action<Sprite> onCompletion)
+        public async Task FetchSpriteFromResourcesAsync(string spriteURL, Action<Sprite> onCompletion, CancellationToken cancellationToken = default)
         {
             // Check Cache
-            if (cachedURLSprites.TryGetValue(spriteURL, out Sprite cachedSprite))
+            if (cachedSprites.TryGetValue(spriteURL, out var cachedSprite))
             {
-                onCompletion?.Invoke(cachedSprite);
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    onCompletion?.Invoke(cachedSprite);
+                }
                 return;
             }
 
             try
             {
-                IHttpResponse webResponse = await siraHttpService.GetAsync(spriteURL, cancellationToken: CancellationToken.None).ConfigureAwait(false);
-                byte[] imageBytes = await webResponse.ReadAsByteArrayAsync();
-                QueueLoadSprite(spriteURL, cachedURLSprites, imageBytes, onCompletion);
+                using var mrs = pluginMetadata.Assembly.GetManifestResourceStream(spriteURL);
+                using var ms = new MemoryStream();
+                if (mrs != null)
+                {
+                    await mrs.CopyToAsync(ms);
+                }
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    QueueLoadSprite(spriteURL, ms.ToArray(), onCompletion, cancellationToken);
+                }
             }
             catch (Exception)
             {
-                onCompletion?.Invoke(BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    onCompletion?.Invoke(BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
+                }
+            }
+        }
+        
+        public async Task DownloadSpriteAsync(string spriteURL, Action<Sprite> onCompletion, CancellationToken cancellationToken = default)
+        {
+            // Check Cache
+            if (cachedSprites.TryGetValue(spriteURL, out var cachedSprite))
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    onCompletion?.Invoke(cachedSprite);
+                }
+                return;
+            }
+
+            try
+            {
+                var webResponse = await siraHttpService.GetAsync(spriteURL, cancellationToken: cancellationToken).ConfigureAwait(false);
+                if (webResponse.Successful)
+                {
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        var imageBytes = await webResponse.ReadAsByteArrayAsync();
+                        QueueLoadSprite(spriteURL, imageBytes, onCompletion, cancellationToken);
+                    }
+                }
+                else if (!cancellationToken.IsCancellationRequested)
+                {
+                    onCompletion?.Invoke(BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
+                }
+            }
+            catch (Exception)
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    onCompletion?.Invoke(BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
+                }
             }
         }
 
-        private void QueueLoadSprite(string key, Dictionary<string, Sprite> cache, byte[] imageBytes, Action<Sprite> onCompletion)
+        private void QueueLoadSprite(string key, byte[] imageBytes, Action<Sprite> onCompletion, CancellationToken cancellationToken)
         {
             spriteQueue.Enqueue(() =>
             {
                 try
                 {
-                    Sprite sprite = BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(imageBytes);
+                    var sprite = BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(imageBytes);
                     sprite.texture.wrapMode = TextureWrapMode.Clamp;
-                    cache[key] = sprite;
-                    onCompletion?.Invoke(sprite);
+                    cachedSprites.TryAdd(key, sprite);
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        onCompletion?.Invoke(sprite);
+                    }
                 }
                 catch (Exception)
                 {
-                    onCompletion?.Invoke(BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
+                    if (!cancellationToken.IsCancellationRequested)
+                    {
+                        onCompletion?.Invoke(BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
+                    }
                 }
             });
-            SharedCoroutineStarter.instance.StartCoroutine(SpriteLoadCoroutine());
+            if (!coroutineRunning)
+            {
+                SharedCoroutineStarter.instance.StartCoroutine(SpriteLoadCoroutine());
+            }
         }
 
-        public static YieldInstruction LoadWait = new WaitForEndOfFrame();
-
+        private static readonly YieldInstruction LoadWait = new WaitForEndOfFrame();
         private IEnumerator<YieldInstruction> SpriteLoadCoroutine()
         {
-            while (spriteQueue.TryDequeue(out var loader))
+            lock (queueLock)
+            {
+                if (coroutineRunning)
+                    yield break;
+                coroutineRunning = true;
+            }
+            while (spriteQueue.Count > 0)
             {
                 yield return LoadWait;
-                loader?.Invoke();
+                if (spriteQueue.Count == 0)
+                {
+                    break;
+                }
+                var loader = spriteQueue.Dequeue();
+                _ = IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => loader?.Invoke());
+            }
+            coroutineRunning = false;
+            if (spriteQueue.Count > 0)
+            {
+                SharedCoroutineStarter.instance.StartCoroutine(SpriteLoadCoroutine());
             }
         }
     }

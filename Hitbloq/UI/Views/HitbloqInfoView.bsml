@@ -1,0 +1,15 @@
+﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+	<vertical spacing="-65">
+        <text text="~version" align="Top" font-size="8" bold="true" />
+        <text text="DaFluffyPotato, PixelBoom &amp; Team" align="Top" />
+    </vertical>
+    <horizontal horizontal-fit='PreferredSize' pref-width="50" anchor-pos-y="20">
+        <!--<clickable-text text="Tutorial" align="Midline" on-click="tutorial-click" />
+        <text text="|" align="Midline" />-->
+        <clickable-text text="Website" align="Midline" on-click="website-click" />
+        <text text="|" align="Midline" />
+        <clickable-text text="Discord" align="Midline" on-click="discord-click" />
+        <text text="|" align="Midline" />
+        <clickable-text text="Github" align="Midline" on-click="github-click" />
+    </horizontal>
+</bg>

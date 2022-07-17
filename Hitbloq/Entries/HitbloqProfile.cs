@@ -5,9 +5,9 @@ namespace Hitbloq.Entries
     internal class HitbloqProfile
     {
         [JsonProperty("profile_pic")]
-        public string profilePictureURL;
+        public string? ProfilePictureURL { get; private set; }
 
         [JsonProperty("profile_background")]
-        public string profileBackgroundURL;
+        public string? ProfileBackgroundURL { get; private set; }
     }
 }

@@ -7,15 +7,15 @@ namespace Hitbloq.Entries
     internal class HitbloqPoolInfo
     {
         [JsonProperty("shown_name")]
-        public string shownName;
+        public string ShownName { get; private set; } = null!;
 
         [JsonProperty("_id")]
-        public string id;
+        public string ID { get; private set; } = null!;
 
         [OnDeserialized]
         private void OnDeserialized(StreamingContext context)
         {
-            shownName = Regex.Replace(shownName, "<[^>]*(>|$)", "");
+            ShownName = Regex.Replace(ShownName, "<[^>]*(>|$)", "");
         }
     }
 }

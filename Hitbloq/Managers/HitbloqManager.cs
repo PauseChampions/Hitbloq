@@ -5,6 +5,7 @@ using Hitbloq.UI;
 using System;
 using System.Collections.Generic;
 using System.Threading;
+using System.Threading.Tasks;
 using Zenject;
 using LeaderboardCore.Interfaces;
 using Hitbloq.Other;
@@ -17,6 +18,7 @@ namespace Hitbloq.Managers
         private readonly HitbloqPanelController hitbloqPanelController;
         private readonly HitbloqProfileModalController hitbloqProfileModalController;
         private readonly HitbloqEventModalViewController hitbloqEventModalViewController;
+        private readonly HitbloqFlowCoordinator hitbloqFlowCoordinator;
 
         private readonly UserIDSource userIDSource;
         private readonly LevelInfoSource levelInfoSource;
@@ -28,12 +30,14 @@ namespace Hitbloq.Managers
         private readonly List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters;
         private readonly List<IPoolUpdater> poolUpdaters;
 
-        private IDifficultyBeatmap selectedDifficultyBeatmap;
-        private CancellationTokenSource levelInfoTokenSource;
-        private CancellationTokenSource leaderboardTokenSource;
+        private IDifficultyBeatmap? selectedDifficultyBeatmap;
+        private CancellationTokenSource? levelInfoTokenSource;
+        private CancellationTokenSource? leaderboardTokenSource;
+
+        private string? currentPool;
 
         public HitbloqManager(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, HitbloqPanelController hitbloqPanelController, HitbloqProfileModalController hitbloqProfileModalController,
-            HitbloqEventModalViewController hitbloqEventModalViewController, UserIDSource userIDSource, LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher, List<INotifyUserRegistered> notifyUserRegistereds,
+            HitbloqEventModalViewController hitbloqEventModalViewController, HitbloqFlowCoordinator hitbloqFlowCoordinator, UserIDSource userIDSource, LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher, List<INotifyUserRegistered> notifyUserRegistereds,
             List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters, List<INotifyViewActivated> notifyViewActivateds, List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters,
             List<IPoolUpdater> poolUpdaters)
         {
@@ -41,6 +45,7 @@ namespace Hitbloq.Managers
             this.hitbloqPanelController = hitbloqPanelController;
             this.hitbloqProfileModalController = hitbloqProfileModalController;
             this.hitbloqEventModalViewController = hitbloqEventModalViewController;
+            this.hitbloqFlowCoordinator = hitbloqFlowCoordinator;
 
             this.userIDSource = userIDSource;
             this.levelInfoSource = levelInfoSource;
@@ -63,6 +68,7 @@ namespace Hitbloq.Managers
             hitbloqPanelController.PoolChangedEvent += OnPoolChanged;
             hitbloqPanelController.RankTextClickedEvent += OnRankTextClicked;
             hitbloqPanelController.LogoClickedEvent += OnLogoClicked;
+            hitbloqPanelController.EventClickedEvent += OnEventClicked;
         }
 
         public void Dispose()
@@ -75,37 +81,39 @@ namespace Hitbloq.Managers
             hitbloqPanelController.PoolChangedEvent -= OnPoolChanged;
             hitbloqPanelController.RankTextClickedEvent -= OnRankTextClicked;
             hitbloqPanelController.LogoClickedEvent -= OnLogoClicked;
+            hitbloqPanelController.EventClickedEvent -= OnEventClicked;
         }
 
-        public async void OnScoreUploaded()
+        public void OnScoreUploaded() => _ = OnScoreUploadAsync();
+        private async Task OnScoreUploadAsync()
         {
             if (await leaderboardRefresher.Refresh())
             {
-                OnLeaderboardSet(selectedDifficultyBeatmap);
+                await OnLeaderboardSetAsync(selectedDifficultyBeatmap);
             }
         }
 
-        public async void OnLeaderboardSet(IDifficultyBeatmap difficultyBeatmap)
+        public void OnLeaderboardSet(IDifficultyBeatmap? difficultyBeatmap) =>
+            _ = OnLeaderboardSetAsync(difficultyBeatmap);
+
+        private async Task OnLeaderboardSetAsync(IDifficultyBeatmap? difficultyBeatmap)
         {
             if (difficultyBeatmap != null)
             {
                 selectedDifficultyBeatmap = difficultyBeatmap;
                 levelInfoTokenSource?.Cancel();
-                HitbloqLevelInfo levelInfoEntry;
+                levelInfoTokenSource?.Dispose();
+                HitbloqLevelInfo? levelInfoEntry = null;
 
                 if (difficultyBeatmap.level is CustomPreviewBeatmapLevel)
                 {
                     levelInfoTokenSource = new CancellationTokenSource();
                     levelInfoEntry = await levelInfoSource.GetLevelInfoAsync(difficultyBeatmap, levelInfoTokenSource.Token);
                 }
-                else
-                {
-                    levelInfoEntry = null;
-                }
 
                 if (levelInfoEntry != null)
                 {
-                    if (levelInfoEntry.pools.Count == 0)
+                    if (levelInfoEntry.Pools.Count == 0)
                     {
                         levelInfoEntry = null;
                     }
@@ -113,7 +121,7 @@ namespace Hitbloq.Managers
 
                 foreach (var difficultyBeatmapUpdater in difficultyBeatmapUpdaters)
                 {
-                    difficultyBeatmapUpdater.DifficultyBeatmapUpdated(difficultyBeatmap, levelInfoEntry);
+                    await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => difficultyBeatmapUpdater.DifficultyBeatmapUpdated(difficultyBeatmap, levelInfoEntry));
                 }
             }
         }
@@ -134,15 +142,19 @@ namespace Hitbloq.Managers
             }
         }
 
-        private async void OnPageRequested(IDifficultyBeatmap difficultyBeatmap, ILeaderboardSource leaderboardSource, int page)
+        private void OnPageRequested(IDifficultyBeatmap difficultyBeatmap, IMapLeaderboardSource leaderboardSource, int page) =>
+            _ = OnPageRequestedAsync(difficultyBeatmap, leaderboardSource, page);
+
+        private async Task OnPageRequestedAsync(IDifficultyBeatmap difficultyBeatmap, IMapLeaderboardSource leaderboardSource, int page)
         {
             leaderboardTokenSource?.Cancel();
+            leaderboardTokenSource?.Dispose();
             leaderboardTokenSource = new CancellationTokenSource();
-            List<HitbloqLeaderboardEntry> leaderboardEntries = await leaderboardSource.GetScoresTask(difficultyBeatmap, leaderboardTokenSource.Token, page);
+            var leaderboardEntries = await leaderboardSource.GetScoresAsync(difficultyBeatmap, leaderboardTokenSource.Token, page);
 
             if (leaderboardEntries != null)
             {
-                if (leaderboardEntries.Count == 0 || leaderboardEntries[0].cr.Count == 0)
+                if (leaderboardEntries.Count == 0 || leaderboardEntries[0].CR.Count == 0)
                 {
                     leaderboardEntries = null;
                 }
@@ -150,7 +162,7 @@ namespace Hitbloq.Managers
 
             foreach(var leaderboardEntriesUpdater in leaderboardEntriesUpdaters)
             {
-                leaderboardEntriesUpdater.LeaderboardEntriesUpdated(leaderboardEntries);
+                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => leaderboardEntriesUpdater.LeaderboardEntriesUpdated(leaderboardEntries));
             }
         }
 
@@ -160,16 +172,14 @@ namespace Hitbloq.Managers
             {
                 poolUpdater.PoolUpdated(pool);
             }
+            
+            currentPool = pool;
         }
 
-        private void OnRankTextClicked(HitbloqRankInfo rankInfo, string pool)
-        {
-            hitbloqProfileModalController.ShowModalForSelf(hitbloqLeaderboardViewController.transform, rankInfo, pool);
-        }
+        private void OnRankTextClicked(HitbloqRankInfo rankInfo, string pool) => hitbloqProfileModalController.ShowModalForSelf(hitbloqLeaderboardViewController.transform, rankInfo, pool);
 
-        private void OnLogoClicked()
-        {
-            hitbloqEventModalViewController.ShowModal(hitbloqLeaderboardViewController.transform);
-        }
+        private void OnLogoClicked() => hitbloqFlowCoordinator.ShowAndOpenPoolWithID(currentPool);
+
+        private void OnEventClicked() => hitbloqEventModalViewController.ShowModal(hitbloqLeaderboardViewController.transform);
     }
 }

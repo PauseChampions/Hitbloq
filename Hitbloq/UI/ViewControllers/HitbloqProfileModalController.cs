@@ -8,10 +8,10 @@ using Hitbloq.Other;
 using Hitbloq.Sources;
 using Hitbloq.Utilities;
 using HMUI;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace Hitbloq.UI
@@ -26,126 +26,147 @@ namespace Hitbloq.UI
         private readonly RankInfoSource rankInfoSource;
         private readonly PoolInfoSource poolInfoSource;
         private readonly SpriteLoader spriteLoader;
+        private readonly MaterialGrabber materialGrabber;
 
-        private bool _isFriend;
-        private bool _isloading;
-        private bool _addFriendInteractable;
-        private string _addFriendHoverHint;
-        private HitbloqRankInfo _rankInfo;
-        private HitbloqPoolInfo _poolInfo;
-        private HitbloqProfile _hitbloqProfile;
+        private readonly SemaphoreSlim modalSemaphore = new SemaphoreSlim(1, 1);
+        private CancellationTokenSource? modalTokenSource;
+
+        private bool isFriend;
+        private bool isLoading;
+        private bool addFriendInteractable;
+        private string addFriendHoverHint = "";
+        private HitbloqRankInfo? rankInfo;
+        private HitbloqPoolInfo? poolInfo;
+        private HitbloqProfile? hitbloqProfile;
 
         private bool parsed;
 
-        private Material fogBG;
-        private Material noGlowRoundEdge;
-        private Sprite roundRectSmall;
+        private Material? fogBG;
+        private Sprite? roundRectSmall;
 
-        private Color originalModalColour;
-        private Color customModalColour;
+        private Color? originalModalColour;
+        private readonly Color customModalColour = new(0.5f, 0.5f, 0.5f, 1f);
 
         private int userID;
-        private Sprite addFriend;
-        private Sprite friendAdded;
-        private const string ADD_FRIEND_PROMPT = "Add to friends list";
-        private const string REMOVE_FRIEND_PROMPT = "Remove from friends list";
-        private const string ALREADY_PROMPT = "You are already friends on ";
+        private Sprite? addFriend;
+        private Sprite? friendAdded;
+        private const string kAddFriendPrompt = "Add to friends list";
+        private const string kRemoveFriendPrompt = "Remove from friends list";
+        private const string kAlreadyFriendPrompt = "You are already friends on ";
 
-        private Vector3 modalPosition;
-        private ImageView modalBackground;
-
-        [UIComponent("modal")]
-        private ModalView modalView;
+        private Vector3? modalPosition;
+        private ImageView? modalBackground;
 
         [UIComponent("modal")]
-        private readonly RectTransform modalTransform;
+        private ModalView? modalView;
+
+        [UIComponent("modal")]
+        private readonly RectTransform? modalTransform = null!;
 
         [UIComponent("modal-profile-pic")]
-        private readonly ImageView modalProfilePic;
+        private readonly ImageView? modalProfilePic = null!;
 
         [UIComponent("modal-badge")]
-        private readonly ImageView modalBadge;
+        private readonly ImageView? modalBadge = null!;
 
         [UIComponent("add-friend")]
-        private readonly ButtonIconImage addFriendButton;
+        private readonly ButtonIconImage? addFriendButton = null!;
 
         [UIComponent("modal-info-vertical")]
-        private readonly Backgroundable modalInfoVertical;
+        private readonly Backgroundable? modalInfoVertical = null!;
 
         [UIParams]
-        private readonly BSMLParserParams parserParams;
+        private readonly BSMLParserParams? parserParams = null!;
 
-        public event PropertyChangedEventHandler PropertyChanged;
+        public event PropertyChangedEventHandler? PropertyChanged;
         
         private bool IsFriend
         {
-            get => _isFriend;
+            get => isFriend;
             set
             {
-                _isFriend = value;
-                if (value)
+                isFriend = value;
+
+                if (addFriendButton != null)
                 {
-                    addFriendButton.image.sprite = friendAdded;
-                    AddFriendHoverHint = REMOVE_FRIEND_PROMPT;
-                }
-                else
-                {
-                    addFriendButton.image.sprite = addFriend;
-                    AddFriendHoverHint = ADD_FRIEND_PROMPT;
+                    if (value)
+                    {
+                        addFriendButton.image.sprite = friendAdded;
+                        AddFriendHoverHint = kRemoveFriendPrompt;
+                    }
+                    else
+                    {
+                        addFriendButton.image.sprite = addFriend;
+                        AddFriendHoverHint = kAddFriendPrompt;
+                    }   
                 }
             }
         }
 
-        private HitbloqRankInfo RankInfo
+        private HitbloqRankInfo? RankInfo
         {
-            get => _rankInfo;
+            get => rankInfo;
             set
             {
-                _rankInfo = value;
+                rankInfo = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Username)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Rank)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(CR)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(ScoreCount)));
-                spriteLoader.DownloadSpriteAsync(_rankInfo.TierURL, (Sprite sprite) => modalBadge.sprite = sprite);
+
+                if (modalBadge != null && rankInfo != null && modalTokenSource != null)
+                {
+                    _ = spriteLoader.DownloadSpriteAsync(rankInfo.TierURL, sprite => modalBadge.sprite = sprite, modalTokenSource.Token);
+                }
             }
         }
 
-        private HitbloqPoolInfo PoolInfo
+        private HitbloqPoolInfo? PoolInfo
         {
-            get => _poolInfo;
+            get => poolInfo;
             set
             {
-                _poolInfo = value;
+                poolInfo = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(PoolName)));
             }
         }
 
-        private HitbloqProfile HitbloqProfile
+        private HitbloqProfile? HitbloqProfile
         {
-            get => _hitbloqProfile;
+            get => hitbloqProfile;
             set
             {
-                _hitbloqProfile = value;
+                hitbloqProfile = value;
 
-                if (_hitbloqProfile != null)
+                if (hitbloqProfile != null)
                 {
-                    spriteLoader.DownloadSpriteAsync(_hitbloqProfile.profilePictureURL, (Sprite sprite) => modalProfilePic.sprite = sprite);
-
-                    if (_hitbloqProfile.profileBackgroundURL != null)
+                    if (modalProfilePic != null && modalTokenSource != null)
                     {
-                        spriteLoader.DownloadSpriteAsync(_hitbloqProfile.profileBackgroundURL, (Sprite sprite) =>
+                        if (hitbloqProfile.ProfilePictureURL != null)
+                        {
+                            _ = spriteLoader.DownloadSpriteAsync(hitbloqProfile.ProfilePictureURL, sprite => modalProfilePic.sprite = sprite, modalTokenSource.Token);
+                        }
+                        else
+                        {
+                            _ = spriteLoader.FetchSpriteFromResourcesAsync("Hitbloq.Images.Logo.png", sprite => modalProfilePic.sprite = sprite, modalTokenSource.Token);
+                        }   
+                    }
+
+                    if (hitbloqProfile.ProfileBackgroundURL != null && modalBackground != null && modalTokenSource != null)
+                    {
+                        _ = spriteLoader.DownloadSpriteAsync(hitbloqProfile.ProfileBackgroundURL, sprite =>
                         {
                             modalBackground.sprite = sprite;
                             modalBackground.color = customModalColour;
-                            modalBackground.material = noGlowRoundEdge;
-                        });
+                            modalBackground.material = materialGrabber.NoGlowRoundEdge;
+                        }, modalTokenSource.Token);
                     }
                 }
             }
         }
 
         public HitbloqProfileModalController(IPlatformUserModel platformUserModel, UserIDSource userIDSource, ProfileSource profileSource, FriendIDSource friendIDSource,
-            FriendsLeaderboardSource friendsLeaderboardSource, RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource, SpriteLoader spriteLoader)
+            FriendsLeaderboardSource friendsLeaderboardSource, RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource, SpriteLoader spriteLoader, MaterialGrabber materialGrabber)
         {
             this.platformUserModel = platformUserModel;
             this.userIDSource = userIDSource;
@@ -155,33 +176,27 @@ namespace Hitbloq.UI
             this.rankInfoSource = rankInfoSource;
             this.poolInfoSource = poolInfoSource;
             this.spriteLoader = spriteLoader;
-        }
-
-        public void Initialize()
-        {
-            parsed = false;
+            this.materialGrabber = materialGrabber;
         }
 
         [UIAction("#post-parse")]
         private void PostParse()
         {
             parsed = true;
-            modalView.gameObject.name = "HitbloqProfileModal";
+            modalView!.gameObject.name = "HitbloqProfileModal";
 
             modalBackground = modalView.transform.Find("BG").GetComponent<ImageView>();
             fogBG = modalBackground.material;
             roundRectSmall = modalBackground.sprite;
             originalModalColour = modalBackground.color;
-            customModalColour = new Color(0.5f, 0.5f, 0.5f, 1f);
+            
+            modalProfilePic!.material = materialGrabber.NoGlowRoundEdge;
 
-            noGlowRoundEdge = Resources.FindObjectsOfTypeAll<Material>().First(m => m.name == "UINoGlowRoundEdge");
-            modalProfilePic.material = noGlowRoundEdge;
-
-            addFriendButton.transform.localScale = new Vector3(0.3f, 0.3f, 1f);
+            addFriendButton!.transform.localScale = new Vector3(0.3f, 0.3f, 1f);
             addFriend = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.AddFriend.png");
             friendAdded = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.FriendAdded.png");
 
-            if (modalInfoVertical.background is ImageView verticalBackground)
+            if (modalInfoVertical!.background is ImageView verticalBackground)
             {
                 verticalBackground.color = new Color(0f, 0f, 0f, 0.75f);
             }
@@ -192,73 +207,161 @@ namespace Hitbloq.UI
             if (!parsed)
             {
                 BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqProfileModal.bsml"), parentTransform.gameObject, this);
-                modalPosition = modalTransform.localPosition;
+                modalPosition = modalTransform!.localPosition;
             }
-            modalTransform.localPosition = modalPosition;
+            modalTransform!.localPosition = modalPosition!.Value;
 
-            modalProfilePic.sprite = BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite;
-            modalBadge.sprite = BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite;
+            modalProfilePic!.sprite = BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite;
+            modalBadge!.sprite = BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite;
 
-            modalBackground.sprite = roundRectSmall;
-            modalBackground.color = originalModalColour;
+            modalBackground!.sprite = roundRectSmall;
+            modalBackground.color = originalModalColour!.Value;
             modalBackground.material = fogBG;
 
-            Accessors.AnimateCanvasAccessor(ref modalView) = true;
+            Accessors.AnimateCanvasAccessor(ref modalView!) = true;
+            Accessors.ViewValidAccessor(ref modalView!) = false;
         }
 
-        internal async void ShowModalForSelf(Transform parentTransform, HitbloqRankInfo rankInfo, string pool)
+        internal void ShowModalForSelf(Transform parentTransform, HitbloqRankInfo rankInfo, string pool)
         {
             Parse(parentTransform);
-            HitbloqUserID userID = await userIDSource.GetUserIDAsync();
+            modalTokenSource?.Cancel();
+            modalTokenSource?.Dispose();
+            modalTokenSource = new CancellationTokenSource();
+            _ = ShowModalForSelfAsync(modalTokenSource.Token, rankInfo, pool);
+        }
 
-            if (userID.id == -1)
+        private async Task ShowModalForSelfAsync(CancellationToken cancellationToken, HitbloqRankInfo rankInfo, string pool)
+        {
+            await modalSemaphore.WaitAsync(cancellationToken);
+            if (cancellationToken.IsCancellationRequested)
             {
                 return;
             }
 
-            parserParams.EmitEvent("close-modal");
-            parserParams.EmitEvent("open-modal");
+            try
+            {
+                var userID = await userIDSource.GetUserIDAsync();
 
-            IsLoading = true;
+                if (userID == null || userID.ID == -1)
+                {
+                    return;
+                }
 
-            RankInfo = rankInfo;
-            PoolInfo = await poolInfoSource.GetPoolInfoAsync(pool);
-            HitbloqProfile = await profileSource.GetProfileAsync(userID.id);
-            addFriendButton.gameObject.SetActive(false);
+                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+                {
+                    parserParams?.EmitEvent("close-modal");
+                    parserParams?.EmitEvent("open-modal");
+                });
 
-            IsLoading = false;
+                IsLoading = true;
+
+                RankInfo = rankInfo;
+                PoolInfo = await poolInfoSource.GetPoolInfoAsync(pool, cancellationToken);
+                
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                
+                HitbloqProfile = await profileSource.GetProfileAsync(userID.ID, cancellationToken);
+                
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                
+                addFriendButton!.gameObject.SetActive(false);
+            }
+            catch
+            {
+                // ignored
+            }
+            finally
+            {
+                IsLoading = false;
+                modalSemaphore.Release();
+            }
         }
 
-        internal async void ShowModalForUser(Transform parentTransform, int userID, string pool)
+        internal void ShowModalForUser(Transform parentTransform, int userID, string pool)
         {
             Parse(parentTransform);
 
-            parserParams.EmitEvent("close-modal");
-            parserParams.EmitEvent("open-modal");
+            parserParams?.EmitEvent("close-modal");
+            parserParams?.EmitEvent("open-modal");
 
             IsLoading = true;
+            
+            modalTokenSource?.Cancel();
+            modalTokenSource?.Dispose();
+            modalTokenSource = new CancellationTokenSource();
 
-            RankInfo = await rankInfoSource.GetRankInfoAsync(pool, userID);
-            PoolInfo = await poolInfoSource.GetPoolInfoAsync(pool);
-            HitbloqProfile = await profileSource.GetProfileAsync(userID);
+            _ = ShowModalForUserAsync(modalTokenSource.Token, userID, pool);
+        }
 
-            HitbloqUserID selfID = await userIDSource.GetUserIDAsync();
-            addFriendButton.gameObject.SetActive(selfID.id != userID);
-            HashSet<int> platformFriends = await friendIDSource.GetPlatformFriendIDsAsync();
-            if (platformFriends.Contains(userID))
+        private async Task ShowModalForUserAsync(CancellationToken cancellationToken, int userID, string pool)
+        {
+            await modalSemaphore.WaitAsync(cancellationToken);
+            if (cancellationToken.IsCancellationRequested)
             {
-                addFriendButton.image.sprite = friendAdded;
-                AddFriendInteractable = false;
-                AddFriendHoverHint = ALREADY_PROMPT + (await platformUserModel.GetUserInfo()).platform;
-            }
-            else
-            {
-                this.userID = userID;
-                AddFriendInteractable = true;
-                IsFriend = PluginConfig.Instance.Friends.Contains(userID);
+                return;
             }
 
-            IsLoading = false;
+            try
+            {
+                RankInfo = await rankInfoSource.GetRankInfoAsync(pool, userID, cancellationToken);
+                
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                
+                PoolInfo = await poolInfoSource.GetPoolInfoAsync(pool, cancellationToken);
+                
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                
+                HitbloqProfile = await profileSource.GetProfileAsync(userID, cancellationToken);
+                
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+
+                var selfID = await userIDSource.GetUserIDAsync();
+                addFriendButton!.gameObject.SetActive(selfID?.ID != userID);
+                var platformFriends = await friendIDSource.GetPlatformFriendIDsAsync(cancellationToken);
+                
+                if (cancellationToken.IsCancellationRequested)
+                {
+                    return;
+                }
+                
+                if (platformFriends != null && platformFriends.Contains(userID))
+                {
+                    addFriendButton.image.sprite = friendAdded;
+                    AddFriendInteractable = false;
+                    AddFriendHoverHint = kAlreadyFriendPrompt + (await platformUserModel.GetUserInfo()).platform;
+                }
+                else
+                {
+                    this.userID = userID;
+                    AddFriendInteractable = true;
+                    IsFriend = PluginConfig.Instance.Friends.Contains(userID);
+                }
+            }
+            catch
+            {
+                // ignored
+            }
+            finally
+            {
+                IsLoading = false;
+                modalSemaphore.Release();
+            }
         }
 
         [UIAction("add-friend-click")]
@@ -281,25 +384,25 @@ namespace Hitbloq.UI
         [UIValue("is-loading")]
         private bool IsLoading
         {
-            get => _isloading;
+            get => isLoading;
             set
             {
-                _isloading = value;
+                isLoading = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsLoading)));
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(IsNotLoading)));
             }
         }
 
         [UIValue("is-not-loading")]
-        private bool IsNotLoading => !_isloading;
+        private bool IsNotLoading => !isLoading;
 
         [UIValue("add-friend-interactable")]
         private bool AddFriendInteractable
         {
-            get => _addFriendInteractable;
+            get => addFriendInteractable;
             set
             {
-                _addFriendInteractable = value;
+                addFriendInteractable = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AddFriendInteractable)));
             }
         }
@@ -307,10 +410,10 @@ namespace Hitbloq.UI
         [UIValue("add-friend-hover")]
         private string AddFriendHoverHint
         {
-            get => _addFriendHoverHint;
+            get => addFriendHoverHint;
             set
             {
-                _addFriendHoverHint = value;
+                addFriendHoverHint = value;
                 PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(AddFriendHoverHint)));
             }
         }
@@ -320,7 +423,7 @@ namespace Hitbloq.UI
         {
             get
             {
-                string userName = $"{RankInfo?.username}";
+                var userName = $"{RankInfo?.Username}";
                 if (userName.Length > 16)
                 {
                     return $"{userName.Substring(0, 13)}...";
@@ -334,10 +437,10 @@ namespace Hitbloq.UI
         {
             get
             {
-                string poolName = $"{PoolInfo?.shownName}".RemoveSpecialCharacters();
+                var poolName = $"{PoolInfo?.ShownName}".RemoveSpecialCharacters();
                 if (poolName.DoesNotHaveAlphaNumericCharacters())
                 {
-                    poolName = $"{PoolInfo?.id}";
+                    poolName = $"{PoolInfo?.ID}";
                 }
                 if (poolName.Length > 16)
                 {
@@ -348,12 +451,12 @@ namespace Hitbloq.UI
         }
 
         [UIValue("rank")]
-        private string Rank => $"#{RankInfo?.rank}";
+        private string Rank => $"#{RankInfo?.Rank}";
 
         [UIValue("cr")]
-        private string CR => $"{RankInfo?.cr}";
+        private string CR => $"{RankInfo?.CR}";
 
         [UIValue("score-count")]
-        private string ScoreCount => $"{RankInfo?.scoreCount}";
+        private string ScoreCount => $"{RankInfo?.ScoreCount}";
     }
 }

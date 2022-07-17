@@ -15,11 +15,11 @@ namespace Hitbloq.Sources
             this.siraHttpService = siraHttpService;
         }
 
-        public async Task<HitbloqProfile> GetProfileAsync(int userID, CancellationToken? cancellationToken = null)
+        public async Task<HitbloqProfile?> GetProfileAsync(int userID, CancellationToken? cancellationToken = null)
         {
             try
             {
-                IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/users/{userID}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                var webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/users/{userID}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
                 return await Utils.ParseWebResponse<HitbloqProfile>(webResponse);
             }
             catch (TaskCanceledException) { }

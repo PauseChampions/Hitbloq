@@ -7,6 +7,7 @@ using HMUI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
@@ -17,118 +18,106 @@ namespace Hitbloq.UI
     [ViewDefinition("Hitbloq.UI.Views.HitbloqLeaderboardView.bsml")]
     internal class HitbloqLeaderboardViewController : BSMLAutomaticViewController, IDifficultyBeatmapUpdater, ILeaderboardEntriesUpdater, IPoolUpdater
     {
-        private HitbloqProfileModalController profileModalController;
-        private UserIDSource userIDSource;
-        private List<ILeaderboardSource> leaderboardSources;
+        [Inject]
+        private readonly HitbloqProfileModalController profileModalController = null!;
+        
+        [Inject]
+        private readonly UserIDSource userIDSource = null!;
+        
+        [Inject]
+        private readonly List<IMapLeaderboardSource> leaderboardSources = null!;
 
-        public event Action<IDifficultyBeatmap, ILeaderboardSource, int> PageRequested;
+        public event Action<IDifficultyBeatmap, IMapLeaderboardSource, int>? PageRequested;
+        
+        private IDifficultyBeatmap? difficultyBeatmap;
+        private List<HitbloqMapLeaderboardEntry>? leaderboardEntries;
+        private string? selectedPool;
 
-        private int _pageNumber;
-        private int _selectedCellIndex;
+        private List<Button>? infoButtons;
 
-        private IDifficultyBeatmap difficultyBeatmap;
-        private List<HitbloqLeaderboardEntry> leaderboardEntries;
-        private string selectedPool;
-
-        private List<Button> infoButtons;
-
+        private int pageNumber;
         private int PageNumber
         {
-            get => _pageNumber;
+            get => pageNumber;
             set
             {
-                _pageNumber = value;
+                pageNumber = value;
                 NotifyPropertyChanged(nameof(UpEnabled));
-                if (leaderboardTransform != null)
+                if (leaderboard != null && loadingControl != null && difficultyBeatmap != null)
                 {
                     leaderboard.SetScores(new List<LeaderboardTableView.ScoreData>(), 0);
                     loadingControl.SetActive(true);
+                    PageRequested?.Invoke(difficultyBeatmap, leaderboardSources[SelectedCellIndex], value);
                 }
-                PageRequested?.Invoke(difficultyBeatmap, leaderboardSources[SelectedCellIndex], value);
-            }
-        }
-
-        private int SelectedCellIndex
-        {
-            get => _selectedCellIndex;
-            set
-            {
-                _selectedCellIndex = value;
-                PageNumber = 0;
             }
         }
 
         [UIComponent("leaderboard")]
-        private readonly Transform leaderboardTransform;
+        private readonly Transform? leaderboardTransform = null!;
 
         [UIComponent("leaderboard")]
-        private readonly LeaderboardTableView leaderboard;
+        private readonly LeaderboardTableView? leaderboard = null!;
 
-        private GameObject loadingControl;
+        private GameObject? loadingControl;
 
         #region Info Buttons
 
-        [UIComponent("button1")]
-        protected Button button1;
+        [UIComponent("button1")] 
+        private readonly Button? button1 = null!;
 
         [UIComponent("button2")]
-        protected Button button2;
+        private readonly Button? button2 = null!;
 
         [UIComponent("button3")]
-        protected Button button3;
+        private readonly Button? button3 = null!;
 
         [UIComponent("button4")]
-        protected Button button4;
+        private readonly Button? button4 = null!;
 
         [UIComponent("button5")]
-        protected Button button5;
+        private readonly Button? button5 = null!;
 
         [UIComponent("button6")]
-        protected Button button6;
+        private readonly Button? button6 = null!;
 
         [UIComponent("button7")]
-        protected Button button7;
+        private readonly Button? button7 = null!;
 
         [UIComponent("button8")]
-        protected Button button8;
+        private readonly Button? button8 = null!;
 
         [UIComponent("button9")]
-        protected Button button9;
+        private readonly Button? button9 = null!;
 
         [UIComponent("button10")]
-        protected Button button10;
+        private readonly Button? button10 = null!;
 
         #endregion
-
-        [Inject]
-        private void Inject(HitbloqProfileModalController profileModalController, UserIDSource userIDSource, List<ILeaderboardSource> leaderboardSources)
-        {
-            this.profileModalController = profileModalController;
-            this.userIDSource = userIDSource;
-            this.leaderboardSources = leaderboardSources;
-        }
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             base.DidActivate(firstActivation, addedToHierarchy, screenSystemEnabling);
-            foreach (ILeaderboardSource leaderboardSource in leaderboardSources)
+            foreach (var leaderboardSource in leaderboardSources)
             {
                 leaderboardSource.ClearCache();
             }
             PageNumber = 0;
         }
 
-        public async void SetScores(List<HitbloqLeaderboardEntry> leaderboardEntries)
+        private async Task SetScores(List<HitbloqMapLeaderboardEntry>? leaderboardEntries)
         {
-            List<LeaderboardTableView.ScoreData> scores = new List<LeaderboardTableView.ScoreData>();
-            int myScorePos = -1;
+            var scores = new List<LeaderboardTableView.ScoreData>();
+            var myScorePos = -1;
 
             if (infoButtons != null)
             {
-                foreach (var button in infoButtons)
+                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
                 {
-                    button.gameObject.SetActive(false);
-                }
+                    foreach (var button in infoButtons)
+                    {
+                        button.gameObject.SetActive(false);
+                    }
+                });
             }
 
             if (leaderboardEntries == null || leaderboardEntries.Count == 0)
@@ -137,93 +126,94 @@ namespace Hitbloq.UI
             }
             else
             {
-                if (!leaderboardEntries.First().cr.ContainsKey(selectedPool))
+                if (selectedPool == null || !leaderboardEntries.First().CR.ContainsKey(selectedPool))
                 {
                     return;
                 }
 
-                HitbloqUserID userID = await userIDSource.GetUserIDAsync();
-                int id = userID.id;
+                var userID = await userIDSource.GetUserIDAsync();
+                var id = userID?.ID ?? -1;
 
-                for(int i = 0; i < (leaderboardEntries.Count > 10 ? 10: leaderboardEntries.Count); i++)
+                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
                 {
-                    scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].score, $"<size=85%>{leaderboardEntries[i].username} - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#aa6eff>{leaderboardEntries[i].cr[selectedPool].ToString("F2")}<size=55%>cr</size></color>)</size>", 
-                        leaderboardEntries[i].rank, false));
-
-                    if (infoButtons != null)
+                    for (var i = 0; i < (leaderboardEntries.Count > 10 ? 10 : leaderboardEntries.Count); i++)
                     {
-                        infoButtons[i].gameObject.SetActive(true);
-                        HoverHint hoverHint = infoButtons[i].GetComponent<HoverHint>();
-                        hoverHint.text = $"Score Set: {leaderboardEntries[i].dateSet}";
-                    }
+                        scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].Score,
+                            $"<color={leaderboardEntries[i].CustomColor ?? "#ffffff"}><size=85%>{leaderboardEntries[i].Username}</color> - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].Accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#aa6eff>{leaderboardEntries[i].CR[selectedPool].ToString("F2")}<size=55%>cr</size></color>)</size>",
+                            leaderboardEntries[i].Rank, false));
 
-                    if (leaderboardEntries[i].userID == id)
-                    {
-                        myScorePos = i;
+                        if (infoButtons != null)
+                        {
+                            infoButtons[i].gameObject.SetActive(true);
+                            var hoverHint = infoButtons[i].GetComponent<HoverHint>();
+                            hoverHint.text = $"Score Set: {leaderboardEntries[i].DateSet}";
+                        }
+
+                        if (leaderboardEntries[i].UserID == id)
+                        {
+                            myScorePos = i;
+                        }
                     }
-                }
+                });
             }
 
-            if (leaderboardTransform != null)
+            if (loadingControl != null && leaderboard != null)
             {
-                loadingControl.SetActive(false);
-                leaderboard.SetScores(scores, myScorePos);
+                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+                {
+                    loadingControl.SetActive(false);
+                    leaderboard.SetScores(scores, myScorePos);
+                });
             }
         }
 
         private void ChangeButtonScale(Button button, float scale)
         {
-            Transform transform = button.transform;
-            Vector3 localScale = transform.localScale;
+            var transform = button.transform;
+            var localScale = transform.localScale;
             transform.localScale = localScale * scale;
-            infoButtons.Add(button);
+            infoButtons?.Add(button);
         }
 
         public void InfoButtonClicked(int index)
         {
-            if (index < leaderboardEntries.Count)
+            if (leaderboardEntries != null && index < leaderboardEntries.Count && selectedPool != null)
             {
-                profileModalController.ShowModalForUser(transform, leaderboardEntries[index].userID, selectedPool);
+                profileModalController.ShowModalForUser(transform, leaderboardEntries[index].UserID, selectedPool);
             }
         }
 
         [UIAction("#post-parse")]
         private void PostParse()
         {
-            List<LeaderboardTableView.ScoreData> placeholder = new List<LeaderboardTableView.ScoreData>();
-            for (int i = 0; i < 10; i++)
-            {
-                placeholder.Add(new LeaderboardTableView.ScoreData(0, "", 0, false));
-            }
-
-            // To set rich text, I have to make 10 empty cells, set each cell to allow rich text and next time they will have it
-            LeaderboardTableCell[] leaderboardTableCells = leaderboardTransform.GetComponentsInChildren<LeaderboardTableCell>(true);
+            // To set rich text, I have to iterate through all cells, set each cell to allow rich text and next time they will have it
+            var leaderboardTableCells = leaderboardTransform!.GetComponentsInChildren<LeaderboardTableCell>(true);
             foreach (var leaderboardTableCell in leaderboardTableCells)
             {
                 leaderboardTableCell.transform.Find("PlayerName").GetComponent<CurvedTextMeshPro>().richText = true;
             }
-            Destroy(leaderboardTransform.Find("LoadingControl").Find("LoadingContainer").Find("Text").gameObject);
+            
             loadingControl = leaderboardTransform.Find("LoadingControl").gameObject;
+
+            var loadingContainer = loadingControl.transform.Find("LoadingContainer");
+            loadingContainer.gameObject.SetActive(true);
+            Destroy(loadingContainer.Find("Text").gameObject);
+            Destroy(loadingControl.transform.Find("RefreshContainer").gameObject);
+            Destroy(loadingControl.transform.Find("DownloadingContainer").gameObject);
 
             infoButtons = new List<Button>();
 
             // Change info button scales
-            ChangeButtonScale(button1, 0.425f);
-            ChangeButtonScale(button2, 0.425f);
-            ChangeButtonScale(button3, 0.425f);
-            ChangeButtonScale(button4, 0.425f);
-            ChangeButtonScale(button5, 0.425f);
-            ChangeButtonScale(button6, 0.425f);
-            ChangeButtonScale(button7, 0.425f);
-            ChangeButtonScale(button8, 0.425f);
-            ChangeButtonScale(button9, 0.425f);
-            ChangeButtonScale(button10, 0.425f);
-        }
-
-        [UIAction("cell-selected")]
-        private void OnCellSelected(SegmentedControl _, int index)
-        {
-            SelectedCellIndex = index;
+            ChangeButtonScale(button1!, 0.425f);
+            ChangeButtonScale(button2!, 0.425f);
+            ChangeButtonScale(button3!, 0.425f);
+            ChangeButtonScale(button4!, 0.425f);
+            ChangeButtonScale(button5!, 0.425f);
+            ChangeButtonScale(button6!, 0.425f);
+            ChangeButtonScale(button7!, 0.425f);
+            ChangeButtonScale(button8!, 0.425f);
+            ChangeButtonScale(button9!, 0.425f);
+            ChangeButtonScale(button10!, 0.425f);
         }
 
         [UIAction("up-clicked")]
@@ -278,14 +268,14 @@ namespace Hitbloq.UI
 
         #endregion
 
-        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo levelInfoEntry)
+        public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo? levelInfoEntry)
         {
             if (levelInfoEntry != null)
             {
                 this.difficultyBeatmap = difficultyBeatmap;
                 if (isActiveAndEnabled)
                 {
-                    foreach (ILeaderboardSource leaderboardSource in leaderboardSources)
+                    foreach (var leaderboardSource in leaderboardSources)
                     {
                         leaderboardSource.ClearCache();
                     }
@@ -294,11 +284,11 @@ namespace Hitbloq.UI
             }
         }
 
-        public void LeaderboardEntriesUpdated(List<HitbloqLeaderboardEntry> leaderboardEntries)
+        public void LeaderboardEntriesUpdated(List<HitbloqMapLeaderboardEntry>? leaderboardEntries)
         {
             this.leaderboardEntries = leaderboardEntries;
             NotifyPropertyChanged(nameof(DownEnabled));
-            SetScores(leaderboardEntries);
+            _ = SetScores(leaderboardEntries);
         }
 
         public void PoolUpdated(string pool)
@@ -306,16 +296,35 @@ namespace Hitbloq.UI
             this.selectedPool = pool;
             if (isActiveAndEnabled)
             {
-                SetScores(leaderboardEntries);
+                _ = SetScores(leaderboardEntries);
             }
         }
 
+        #region Segmented Control
+
+        private int selectedCellIndex;
+        private int SelectedCellIndex
+        {
+            get => selectedCellIndex;
+            set
+            {
+                selectedCellIndex = value;
+                PageNumber = 0;
+            }
+        }
+        
+        [UIAction("cell-selected")]
+        private void OnCellSelected(SegmentedControl _, int index)
+        {
+            SelectedCellIndex = index;
+        }
+        
         [UIValue("cell-data")]
-        private List<IconSegmentedControl.DataItem> cellData
+        private List<IconSegmentedControl.DataItem> CellData
         {
             get
             {
-                List<IconSegmentedControl.DataItem> list = new List<IconSegmentedControl.DataItem>();
+                var list = new List<IconSegmentedControl.DataItem>();
                 foreach (var leaderboardSource in leaderboardSources)
                 {
                     list.Add(new IconSegmentedControl.DataItem(leaderboardSource.Icon, leaderboardSource.HoverHint));
@@ -324,10 +333,12 @@ namespace Hitbloq.UI
             }
         }
 
+        #endregion
+
         [UIValue("up-enabled")]
         private bool UpEnabled => PageNumber != 0 && leaderboardSources[SelectedCellIndex].Scrollable;
 
         [UIValue("down-enabled")]
-        private bool DownEnabled => leaderboardEntries != null && leaderboardEntries.Count == 10 && leaderboardSources[SelectedCellIndex].Scrollable;
+        private bool DownEnabled => leaderboardEntries is {Count: 10} && leaderboardSources[SelectedCellIndex].Scrollable;
     }
 }

@@ -3,7 +3,7 @@
     "id": "Hitbloq",
     "name": "Hitbloq",
     "author": "PauseChampions & DaFluffyPotato",
-    "version": "1.2.1",
+    "version": "1.3.0",
     "description": [
         "#![Hitbloq.Description.md]",
         "Hitbloq offers a unique competitive experience for Beat Saber through its use of map pools and the relative ranking algorithm."
@@ -14,7 +14,9 @@
         "BSIPA": "^4.2.1",
         "BeatSaberMarkupLanguage": "^1.6.0",
         "SiraUtil": "^3.0.0",
-        "LeaderboardCore": "^1.1.0"
+        "LeaderboardCore": "^1.1.0",
+        "SongCore": "^3.9.5",
+        "ScoreSaber": "^3.1.11"
     },
     "links": {
         "project-home": "https://hitbloq.com/",

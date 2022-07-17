@@ -4,16 +4,17 @@ using SiraUtil.Web;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Hitbloq.Configuration;
 using UnityEngine;
 
 namespace Hitbloq.Sources
 {
-    internal class GlobalLeaderboardSource : ILeaderboardSource
+    internal class GlobalLeaderboardSource : IMapLeaderboardSource
     {
         private readonly IHttpService siraHttpService;
-        private Sprite _icon;
+        private Sprite? icon;
 
-        private List<List<HitbloqLeaderboardEntry>> cachedEntries;
+        private readonly List<List<HitbloqMapLeaderboardEntry>> cachedEntries = new();
 
         public GlobalLeaderboardSource(IHttpService siraHttpService)
         {
@@ -26,30 +27,40 @@ namespace Hitbloq.Sources
         {
             get
             {
-                if (_icon == null)
+                if (icon == null)
                 {
-                    _icon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.GlobalIcon.png");
+                    icon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.GlobalIcon.png");
                 }
-                return _icon;
+                return icon;
             }
         }
 
         public bool Scrollable => true;
 
-        public async Task<List<HitbloqLeaderboardEntry>> GetScoresTask(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null, int page = 0)
+        public async Task<List<HitbloqMapLeaderboardEntry>?> GetScoresAsync(IDifficultyBeatmap difficultyBeatmap, CancellationToken cancellationToken = default, int page = 0)
         {
             if (cachedEntries.Count < page + 1)
             {
+                var beatmapString = Utils.DifficultyBeatmapToString(difficultyBeatmap);
+                if (beatmapString == null)
+                {
+                    return null;
+                }
+                
                 try
                 {
-                    IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/scores_extended/{page}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                    cachedEntries.Add(await Utils.ParseWebResponse<List<HitbloqLeaderboardEntry>>(webResponse));
+                    var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}/api/leaderboard/{beatmapString}/scores_extended/{page}", cancellationToken: cancellationToken).ConfigureAwait(false);
+                    var scores = await Utils.ParseWebResponse<List<HitbloqMapLeaderboardEntry>>(webResponse);
+                    if (scores != null)
+                    {
+                        cachedEntries.Add(scores);
+                    }
                 }
                 catch (TaskCanceledException) { }
             }
             return page < cachedEntries.Count ? cachedEntries[page] : null;
         }
 
-        public void ClearCache() => cachedEntries = new List<List<HitbloqLeaderboardEntry>>();
+        public void ClearCache() => cachedEntries.Clear();
     }
 }

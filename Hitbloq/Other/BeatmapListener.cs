@@ -2,6 +2,6 @@
 {
     internal class BeatmapListener
     {
-        public IDifficultyBeatmap lastPlayedDifficultyBeatmap;
+        public IDifficultyBeatmap? LastPlayedDifficultyBeatmap { get; set; }
     }
 }

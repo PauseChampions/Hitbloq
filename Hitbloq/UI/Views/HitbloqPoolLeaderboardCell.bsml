@@ -1,0 +1,19 @@
+﻿<horizontal id="background" bg='round-rect-panel' horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width="80" pref-height="7" pad-left="2" pad-right="2">
+  <horizontal vertical-fit='PreferredSize' pref-height="7" child-align="MiddleLeft">
+    <vertical child-control-width="false" child-control-height="false" child-align="MiddleLeft">
+      <image id="profile-picture" preserve-aspect='true' size-delta-x="5" size-delta-y="5" />
+    </vertical>
+    
+    <horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width="60" pref-height="7" child-align="MiddleLeft" spacing="2">
+      <text id="rank-text" text="~rank" align="MidlineRight" font-size="3.5" />
+      <vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width="52" pref-height="7" child-align="MiddleLeft">
+        <text id="username-text" text='~username' font-size="3" align='MidlineLeft' />
+        <text id="cr-text" text='~cr' font-size="3" color='#B987FF' align='MidlineLeft' />
+      </vertical>
+    </horizontal>
+  </horizontal>
+  
+  <horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width="5" pref-height="7">
+    <text id="rank-change-text" text='~rank-change' font-size="3.5" align='MidlineRight' />
+  </horizontal>
+</horizontal>

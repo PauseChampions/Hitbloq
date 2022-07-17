@@ -4,17 +4,18 @@ using SiraUtil.Web;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using Hitbloq.Configuration;
 using UnityEngine;
 
 namespace Hitbloq.Sources
 {
-    internal class AroundMeLeaderboardSource : ILeaderboardSource
+    internal class AroundMeLeaderboardSource : IMapLeaderboardSource
     {
         private readonly IHttpService siraHttpService;
         private readonly UserIDSource userIDSource;
-        private Sprite _icon;
+        private Sprite? icon;
 
-        private List<HitbloqLeaderboardEntry> cachedEntries;
+        private List<HitbloqMapLeaderboardEntry>? cachedEntries;
 
         public AroundMeLeaderboardSource(IHttpService siraHttpService, UserIDSource userIDSource)
         {
@@ -28,31 +29,37 @@ namespace Hitbloq.Sources
         {
             get
             {
-                if (_icon == null)
+                if (icon == null)
                 {
-                    _icon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.PlayerIcon.png");
+                    icon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.PlayerIcon.png");
                 }
-                return _icon;
+                return icon;
             }
         }
 
         public bool Scrollable => false;
 
-        public async Task<List<HitbloqLeaderboardEntry>> GetScoresTask(IDifficultyBeatmap difficultyBeatmap, CancellationToken? cancellationToken = null, int page = 0)
+        public async Task<List<HitbloqMapLeaderboardEntry>?> GetScoresAsync(IDifficultyBeatmap difficultyBeatmap, CancellationToken cancellationToken = default, int page = 0)
         {
             if (cachedEntries == null)
             {
-                HitbloqUserID userID = await userIDSource.GetUserIDAsync(cancellationToken);
-                if (userID.id == -1)
+                var beatmapString = Utils.DifficultyBeatmapToString(difficultyBeatmap);
+                if (beatmapString == null)
                 {
                     return null;
                 }
-                int id = userID.id;
+                
+                var userID = await userIDSource.GetUserIDAsync(cancellationToken);
+                if (userID == null || userID.ID == -1)
+                {
+                    return null;
+                }
+                var id = userID.ID;
 
                 try
                 {
-                    IHttpResponse webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/leaderboard/{Utils.DifficultyBeatmapToString(difficultyBeatmap)}/nearby_scores/{id}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                    cachedEntries = await Utils.ParseWebResponse<List<HitbloqLeaderboardEntry>>(webResponse);
+                    var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}/api/leaderboard/{beatmapString}/nearby_scores_extended/{id}", cancellationToken: cancellationToken).ConfigureAwait(false);
+                    cachedEntries = await Utils.ParseWebResponse<List<HitbloqMapLeaderboardEntry>>(webResponse);
                 }
                 catch (TaskCanceledException) { }
             }
