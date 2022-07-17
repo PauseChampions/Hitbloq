@@ -73,6 +73,19 @@ namespace Hitbloq.UI
             NotifyPropertyChanged(nameof(Username));
             NotifyPropertyChanged(nameof(CR));
             NotifyPropertyChanged(nameof(RankChange));
+
+            if (poolLeaderboardEntry.RankChange > 0)
+            {
+                rankChangeText.color = Color.green;
+            }
+            else if (poolLeaderboardEntry.RankChange < 0)
+            {
+                rankChangeText.color = Color.red;
+            }
+            else
+            {
+                rankChangeText.color = Color.white;
+            }
             
             return this;
         }
@@ -199,7 +212,6 @@ namespace Hitbloq.UI
                 rankText.color = isSelf ? selfTextHighlightedColor : Color.white;
                 usernameText.color = isSelf ? selfTextHighlightedColor : Color.white;
                 crText.color = crHighlightedColor;
-                rankChangeText.color = isSelf ? selfTextHighlightedColor : Color.white;
             }
             else
             {
@@ -215,7 +227,6 @@ namespace Hitbloq.UI
                 rankText.color = isSelf ? selfTextColor : textColor;
                 usernameText.color = isSelf ? selfTextColor : textColor;
                 crText.color = crColor;
-                rankChangeText.color = isSelf ? selfTextColor : textColor;
             }
         }
 
