@@ -14,9 +14,9 @@ An ingame leaderboard for Hitbloq. To learn more about Hitbloq, visit [https://h
 Trailer: https://youtu.be/wG4_4I9-4yA
 
 ## Download
-Download the latest version of the mod (v1.2.1) [here](https://github.com/PauseChampions/Hitbloq/releases/tag/1.2.1 "here").
+Download the latest version of the mod (v1.3.0) [here](https://github.com/PauseChampions/Hitbloq/releases/tag/1.3.0 "here").
 
-**ScoreSaber**, **BeatSaberMarkupLanguage (BSML)** and **SiraUtil** are required for this mod, so please download the latest version from ModAssistant.
+**ScoreSaber**, **BeatSaberMarkupLanguage (BSML)**, **SiraUtil** and **ScoreSaber** are required for this mod, so please download the latest version from ModAssistant.
 **LeaderboardCore** (bundled in zip) is also required so make sure you extract the zip properly.
 
 **Note**: The leaderboard will only appear for hitbloq ranked maps. Select a hitbloq map and click the arrow to the right of ScoreSaber to use it.
