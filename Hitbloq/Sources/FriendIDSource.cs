@@ -43,7 +43,7 @@ namespace Hitbloq.Sources
                         {
                             { "ids", friendIDs.ToArray<string>()}
                         };
-                        var webResponse = await siraHttpService.PostAsync($"{PluginConfig.Instance.HitbloqURL}api/tools/mass_ss_to_hitbloq", content, cancellationToken).ConfigureAwait(false);
+                        var webResponse = await siraHttpService.PostAsync($"{PluginConfig.Instance.HitbloqURL}/api/tools/mass_ss_to_hitbloq", content, cancellationToken).ConfigureAwait(false);
                         var hitbloqFriendIDs = await Utils.ParseWebResponse<List<HitbloqFriendID>>(webResponse);
                         
                         if (hitbloqFriendIDs != null)

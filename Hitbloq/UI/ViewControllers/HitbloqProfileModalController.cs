@@ -1,5 +1,4 @@
-﻿using System;
-using BeatSaberMarkupLanguage;
+﻿using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Parser;
@@ -9,9 +8,7 @@ using Hitbloq.Other;
 using Hitbloq.Sources;
 using Hitbloq.Utilities;
 using HMUI;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
@@ -29,6 +26,7 @@ namespace Hitbloq.UI
         private readonly RankInfoSource rankInfoSource;
         private readonly PoolInfoSource poolInfoSource;
         private readonly SpriteLoader spriteLoader;
+        private readonly MaterialGrabber materialGrabber;
 
         private readonly SemaphoreSlim modalSemaphore = new SemaphoreSlim(1, 1);
         private CancellationTokenSource? modalTokenSource;
@@ -44,7 +42,6 @@ namespace Hitbloq.UI
         private bool parsed;
 
         private Material? fogBG;
-        private Material? noGlowRoundEdge;
         private Sprite? roundRectSmall;
 
         private Color? originalModalColour;
@@ -143,13 +140,16 @@ namespace Hitbloq.UI
 
                 if (hitbloqProfile != null)
                 {
-                    if (hitbloqProfile.ProfilePictureURL != null && modalProfilePic != null && modalTokenSource != null)
+                    if (modalProfilePic != null && modalTokenSource != null)
                     {
-                        _ = spriteLoader.DownloadSpriteAsync(hitbloqProfile.ProfilePictureURL, sprite => modalProfilePic.sprite = sprite, modalTokenSource.Token);
-                    }
-                    else
-                    {
-                        // TODO: Show a default profile pic
+                        if (hitbloqProfile.ProfilePictureURL != null)
+                        {
+                            _ = spriteLoader.DownloadSpriteAsync(hitbloqProfile.ProfilePictureURL, sprite => modalProfilePic.sprite = sprite, modalTokenSource.Token);
+                        }
+                        else
+                        {
+                            _ = spriteLoader.FetchSpriteFromResourcesAsync("Hitbloq.Images.Logo.png", sprite => modalProfilePic.sprite = sprite, modalTokenSource.Token);
+                        }   
                     }
 
                     if (hitbloqProfile.ProfileBackgroundURL != null && modalBackground != null && modalTokenSource != null)
@@ -158,7 +158,7 @@ namespace Hitbloq.UI
                         {
                             modalBackground.sprite = sprite;
                             modalBackground.color = customModalColour;
-                            modalBackground.material = noGlowRoundEdge;
+                            modalBackground.material = materialGrabber.NoGlowRoundEdge;
                         }, modalTokenSource.Token);
                     }
                 }
@@ -166,7 +166,7 @@ namespace Hitbloq.UI
         }
 
         public HitbloqProfileModalController(IPlatformUserModel platformUserModel, UserIDSource userIDSource, ProfileSource profileSource, FriendIDSource friendIDSource,
-            FriendsLeaderboardSource friendsLeaderboardSource, RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource, SpriteLoader spriteLoader)
+            FriendsLeaderboardSource friendsLeaderboardSource, RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource, SpriteLoader spriteLoader, MaterialGrabber materialGrabber)
         {
             this.platformUserModel = platformUserModel;
             this.userIDSource = userIDSource;
@@ -176,6 +176,7 @@ namespace Hitbloq.UI
             this.rankInfoSource = rankInfoSource;
             this.poolInfoSource = poolInfoSource;
             this.spriteLoader = spriteLoader;
+            this.materialGrabber = materialGrabber;
         }
 
         [UIAction("#post-parse")]
@@ -189,8 +190,7 @@ namespace Hitbloq.UI
             roundRectSmall = modalBackground.sprite;
             originalModalColour = modalBackground.color;
             
-            noGlowRoundEdge = Resources.FindObjectsOfTypeAll<Material>().First(m => m.name == "UINoGlowRoundEdge");
-            modalProfilePic!.material = noGlowRoundEdge;
+            modalProfilePic!.material = materialGrabber.NoGlowRoundEdge;
 
             addFriendButton!.transform.localScale = new Vector3(0.3f, 0.3f, 1f);
             addFriend = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.AddFriend.png");
@@ -219,6 +219,7 @@ namespace Hitbloq.UI
             modalBackground.material = fogBG;
 
             Accessors.AnimateCanvasAccessor(ref modalView!) = true;
+            Accessors.ViewValidAccessor(ref modalView!) = false;
         }
 
         internal void ShowModalForSelf(Transform parentTransform, HitbloqRankInfo rankInfo, string pool)

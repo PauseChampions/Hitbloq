@@ -27,7 +27,7 @@ namespace Hitbloq.Sources
 
             try
             {
-                var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}api/ranked_list/{poolID}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+                var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}/api/ranked_list/{poolID}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
                 var poolInfo = await Utils.ParseWebResponse<HitbloqPoolInfo>(webResponse);
 
                 if (poolInfo != null)

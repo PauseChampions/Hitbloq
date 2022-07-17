@@ -1,0 +1,14 @@
+﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+    <vertical child-control-width="false" child-control-height="false" child-align="MiddleCenter">
+        <img id="banner-image" preserve-aspect="false" size-delta-x="60" size-delta-y="12">
+            <text id="pool-name-text" text="~pool-name" font-size="6" active="~show-banner-title" size-delta-x="60" size-delta-y="12" overflow-mode="Ellipsis" align="Midline" />
+        </img>
+        <vertical bg="round-rect-panel" horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width="60" pref-height="11" child-align="MiddleCenter">
+            <text id="description-text" text="~description" align="Midline" overflow-mode="Ellipsis" font-size="3" />
+            <horizontal child-align="MiddleCenter">
+                <text id="popularity-text" text="~popularity" align="Midline" hover-hint="Popularity" raycast="true" font-size="3.75" />
+                <text id="player-count-text" text="~player-count" align="Midline" hover-hint="Player Count" raycast="true" font-size="3.75" />
+            </horizontal>
+        </vertical>
+    </vertical>
+</bg>

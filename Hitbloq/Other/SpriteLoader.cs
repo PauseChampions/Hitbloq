@@ -2,26 +2,65 @@
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using IPA.Loader;
+using SiraUtil.Zenject;
 using UnityEngine;
 
 namespace Hitbloq.Other
 {
     internal class SpriteLoader
     {
+        private readonly PluginMetadata pluginMetadata;
         private readonly IHttpService siraHttpService;
         private readonly ConcurrentDictionary<string, Sprite> cachedSprites;
         private readonly Queue<Action> spriteQueue;
         private readonly object queueLock;
         private bool coroutineRunning;
 
-        public SpriteLoader(IHttpService siraHttpService)
+        public SpriteLoader(UBinder<Plugin, PluginMetadata> pluginMetadata, IHttpService siraHttpService)
         {
+            this.pluginMetadata = pluginMetadata.Value;
             this.siraHttpService = siraHttpService;
             cachedSprites = new ConcurrentDictionary<string, Sprite>();
             spriteQueue = new Queue<Action>();
             queueLock = new object();
+        }
+
+        public async Task FetchSpriteFromResourcesAsync(string spriteURL, Action<Sprite> onCompletion, CancellationToken cancellationToken = default)
+        {
+            // Check Cache
+            if (cachedSprites.TryGetValue(spriteURL, out var cachedSprite))
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    onCompletion?.Invoke(cachedSprite);
+                }
+                return;
+            }
+
+            try
+            {
+                using var mrs = pluginMetadata.Assembly.GetManifestResourceStream(spriteURL);
+                using var ms = new MemoryStream();
+                if (mrs != null)
+                {
+                    await mrs.CopyToAsync(ms);
+                }
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    QueueLoadSprite(spriteURL, ms.ToArray(), onCompletion, cancellationToken);
+                }
+            }
+            catch (Exception)
+            {
+                if (!cancellationToken.IsCancellationRequested)
+                {
+                    onCompletion?.Invoke(BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
+                }
+            }
         }
         
         public async Task DownloadSpriteAsync(string spriteURL, Action<Sprite> onCompletion, CancellationToken cancellationToken = default)

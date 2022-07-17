@@ -1,12 +1,11 @@
 ﻿using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Runtime.Serialization;
 using System.Text.RegularExpressions;
 
 namespace Hitbloq.Entries
 {
-    internal class HitbloqLeaderboardEntry
+    internal class HitbloqMapLeaderboardEntry
     {
         [JsonProperty("accuracy")]
         public float Accuracy { get; private set; }

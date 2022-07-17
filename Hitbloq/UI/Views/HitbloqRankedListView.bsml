@@ -1,0 +1,11 @@
+﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+    <vertical anchor-pos-x='-8' vertical-fit='MinSize' min-height='80' anchor-pos-y='2'>
+        <horizontal anchor-min-y='1'  bg='panel-top' pad-left='10' pad-right='10' horizontal-fit='PreferredSize'>
+            <text text='Ranked List' align='Center' font-size='8' />
+        </horizontal>
+        <horizontal/>
+        <loading-indicator active='~is-loading' preserve-aspect='true' pref-width='10' pref-height='10' />
+        <horizontal/>
+        <list id='list' active='~has-loaded' expand-cell='true' select-cell='list-select' list-width='70' show-scrollbar='true' stick-scrolling='true' />
+    </vertical>
+</bg>

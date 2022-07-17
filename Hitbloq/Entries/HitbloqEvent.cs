@@ -5,18 +5,18 @@ namespace Hitbloq.Entries
     internal class HitbloqEvent
     {
         [JsonProperty("id")] 
-        public int ID { get; private set; } = -1;
+        public int ID { get; set; } = -1;
 
         [JsonProperty("urt_title")]
-        public string? Title { get; private set; }
+        public string? Title { get; set; }
 
         [JsonProperty("image")]
-        public string? Image { get; private set; }
+        public string? Image { get; set; }
 
         [JsonProperty("urt_description")]
-        public string? Description { get; private set; }
+        public string? Description { get; set; }
 
         [JsonProperty("pool")]
-        public string? Pool { get; private set; }
+        public string? Pool { get; set; }
     }
 }

@@ -6,8 +6,9 @@ using SiraUtil.Web;
 
 namespace Hitbloq.Sources
 {
-    public abstract class Source<T>
+    internal abstract class Source<T>
     {
+        private T? cache;
         private IHttpService SiraHttpService { get; }
         protected abstract string EndpointURL { get; }
         
@@ -16,15 +17,18 @@ namespace Hitbloq.Sources
             SiraHttpService = siraHttpService;
         }
 
-        public virtual async Task<T?> GetAsync(CancellationToken cancellationToken = default)
+        public async Task<T?> GetAsync(CancellationToken cancellationToken = default)
         {
-            try
+            if (cache == null)
             {
-                var webResponse = await SiraHttpService.GetAsync(PluginConfig.Instance.HitbloqURL + EndpointURL, cancellationToken: cancellationToken).ConfigureAwait(false);
-                return await Utils.ParseWebResponse<T>(webResponse);
+                try
+                {
+                    var webResponse = await SiraHttpService.GetAsync(PluginConfig.Instance.HitbloqURL + "/" + EndpointURL, cancellationToken: cancellationToken).ConfigureAwait(false);
+                    cache = await Utils.ParseWebResponse<T>(webResponse);
+                }   
+                catch (TaskCanceledException) { }
             }
-            catch (TaskCanceledException) { }
-            return default;
+            return cache;
         }
     }
 }

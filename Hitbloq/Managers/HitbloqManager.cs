@@ -18,6 +18,7 @@ namespace Hitbloq.Managers
         private readonly HitbloqPanelController hitbloqPanelController;
         private readonly HitbloqProfileModalController hitbloqProfileModalController;
         private readonly HitbloqEventModalViewController hitbloqEventModalViewController;
+        private readonly HitbloqFlowCoordinator hitbloqFlowCoordinator;
 
         private readonly UserIDSource userIDSource;
         private readonly LevelInfoSource levelInfoSource;
@@ -33,8 +34,10 @@ namespace Hitbloq.Managers
         private CancellationTokenSource? levelInfoTokenSource;
         private CancellationTokenSource? leaderboardTokenSource;
 
+        private string? currentPool;
+
         public HitbloqManager(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, HitbloqPanelController hitbloqPanelController, HitbloqProfileModalController hitbloqProfileModalController,
-            HitbloqEventModalViewController hitbloqEventModalViewController, UserIDSource userIDSource, LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher, List<INotifyUserRegistered> notifyUserRegistereds,
+            HitbloqEventModalViewController hitbloqEventModalViewController, HitbloqFlowCoordinator hitbloqFlowCoordinator, UserIDSource userIDSource, LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher, List<INotifyUserRegistered> notifyUserRegistereds,
             List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters, List<INotifyViewActivated> notifyViewActivateds, List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters,
             List<IPoolUpdater> poolUpdaters)
         {
@@ -42,6 +45,7 @@ namespace Hitbloq.Managers
             this.hitbloqPanelController = hitbloqPanelController;
             this.hitbloqProfileModalController = hitbloqProfileModalController;
             this.hitbloqEventModalViewController = hitbloqEventModalViewController;
+            this.hitbloqFlowCoordinator = hitbloqFlowCoordinator;
 
             this.userIDSource = userIDSource;
             this.levelInfoSource = levelInfoSource;
@@ -64,6 +68,7 @@ namespace Hitbloq.Managers
             hitbloqPanelController.PoolChangedEvent += OnPoolChanged;
             hitbloqPanelController.RankTextClickedEvent += OnRankTextClicked;
             hitbloqPanelController.LogoClickedEvent += OnLogoClicked;
+            hitbloqPanelController.EventClickedEvent += OnEventClicked;
         }
 
         public void Dispose()
@@ -76,6 +81,7 @@ namespace Hitbloq.Managers
             hitbloqPanelController.PoolChangedEvent -= OnPoolChanged;
             hitbloqPanelController.RankTextClickedEvent -= OnRankTextClicked;
             hitbloqPanelController.LogoClickedEvent -= OnLogoClicked;
+            hitbloqPanelController.EventClickedEvent -= OnEventClicked;
         }
 
         public void OnScoreUploaded() => _ = OnScoreUploadAsync();
@@ -136,10 +142,10 @@ namespace Hitbloq.Managers
             }
         }
 
-        private void OnPageRequested(IDifficultyBeatmap difficultyBeatmap, ILeaderboardSource leaderboardSource, int page) =>
+        private void OnPageRequested(IDifficultyBeatmap difficultyBeatmap, IMapLeaderboardSource leaderboardSource, int page) =>
             _ = OnPageRequestedAsync(difficultyBeatmap, leaderboardSource, page);
 
-        private async Task OnPageRequestedAsync(IDifficultyBeatmap difficultyBeatmap, ILeaderboardSource leaderboardSource, int page)
+        private async Task OnPageRequestedAsync(IDifficultyBeatmap difficultyBeatmap, IMapLeaderboardSource leaderboardSource, int page)
         {
             leaderboardTokenSource?.Cancel();
             leaderboardTokenSource?.Dispose();
@@ -166,16 +172,14 @@ namespace Hitbloq.Managers
             {
                 poolUpdater.PoolUpdated(pool);
             }
+            
+            currentPool = pool;
         }
 
-        private void OnRankTextClicked(HitbloqRankInfo rankInfo, string pool)
-        {
-            hitbloqProfileModalController.ShowModalForSelf(hitbloqLeaderboardViewController.transform, rankInfo, pool);
-        }
+        private void OnRankTextClicked(HitbloqRankInfo rankInfo, string pool) => hitbloqProfileModalController.ShowModalForSelf(hitbloqLeaderboardViewController.transform, rankInfo, pool);
 
-        private void OnLogoClicked()
-        {
-            hitbloqEventModalViewController.ShowModal(hitbloqLeaderboardViewController.transform);
-        }
+        private void OnLogoClicked() => hitbloqFlowCoordinator.ShowAndOpenPoolWithID(currentPool);
+
+        private void OnEventClicked() => hitbloqEventModalViewController.ShowModal(hitbloqLeaderboardViewController.transform);
     }
 }

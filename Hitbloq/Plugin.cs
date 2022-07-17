@@ -4,7 +4,6 @@ using IPA;
 using IPA.Config;
 using IPA.Config.Stores;
 using SiraUtil.Zenject;
-using Zenject;
 using IPALogger = IPA.Logging.Logger;
 
 namespace Hitbloq
@@ -26,6 +25,7 @@ namespace Hitbloq
             Instance = this;
             Plugin.Log = logger;
             Configuration.PluginConfig.Instance = conf.Generated<Configuration.PluginConfig>();
+            zenjector.UseMetadataBinder<Plugin>();
             zenjector.UseHttpService();
             zenjector.Install(Location.App, Container =>
             {
