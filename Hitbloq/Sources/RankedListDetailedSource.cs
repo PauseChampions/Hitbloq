@@ -22,7 +22,7 @@ namespace Hitbloq.Sources
         {
             try
             {
-                var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}api/ranked_list_detailed/{poolID}/{page}", cancellationToken: cancellationToken).ConfigureAwait(false);
+                var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}/api/ranked_list_detailed/{poolID}/{page}", cancellationToken: cancellationToken).ConfigureAwait(false);
                 var rankedList = await Utils.ParseWebResponse<List<HitbloqRankedListDetailedEntry>>(webResponse);
                 if (rankedList != null)
                 {

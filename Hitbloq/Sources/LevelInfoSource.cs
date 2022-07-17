@@ -33,7 +33,7 @@ namespace Hitbloq.Sources
 
             try
             {
-                var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}api/leaderboard/{beatmapString}/info", cancellationToken: cancellationToken).ConfigureAwait(false);
+                var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}/api/leaderboard/{beatmapString}/info", cancellationToken: cancellationToken).ConfigureAwait(false);
                 var levelInfo = await Utils.ParseWebResponse<HitbloqLevelInfo>(webResponse);
                 
                 cache[difficultyBeatmap] = levelInfo;

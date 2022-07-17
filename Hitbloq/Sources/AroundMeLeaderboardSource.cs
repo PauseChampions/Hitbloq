@@ -58,7 +58,7 @@ namespace Hitbloq.Sources
 
                 try
                 {
-                    var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}api/leaderboard/{beatmapString}/nearby_scores_extended/{id}", cancellationToken: cancellationToken).ConfigureAwait(false);
+                    var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}/api/leaderboard/{beatmapString}/nearby_scores_extended/{id}", cancellationToken: cancellationToken).ConfigureAwait(false);
                     cachedEntries = await Utils.ParseWebResponse<List<HitbloqMapLeaderboardEntry>>(webResponse);
                 }
                 catch (TaskCanceledException) { }

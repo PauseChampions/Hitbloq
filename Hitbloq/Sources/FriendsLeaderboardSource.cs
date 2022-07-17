@@ -68,7 +68,7 @@ namespace Hitbloq.Sources
                     {
                         { "friends", friendIDs.ToArray()}
                     };
-                    var webResponse = await siraHttpService.PostAsync($"{PluginConfig.Instance.HitbloqURL}api/leaderboard/{beatmapString}/friends_extended", content, cancellationToken).ConfigureAwait(false);
+                    var webResponse = await siraHttpService.PostAsync($"{PluginConfig.Instance.HitbloqURL}/api/leaderboard/{beatmapString}/friends_extended", content, cancellationToken).ConfigureAwait(false);
                     // like an hour of debugging and we had to remove the slash from the end of the url. that was it. not pog.
 
                     var leaderboardEntries = await Utils.ParseWebResponse<List<HitbloqMapLeaderboardEntry>>(webResponse);

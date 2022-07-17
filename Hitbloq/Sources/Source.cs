@@ -23,7 +23,7 @@ namespace Hitbloq.Sources
             {
                 try
                 {
-                    var webResponse = await SiraHttpService.GetAsync(PluginConfig.Instance.HitbloqURL + EndpointURL, cancellationToken: cancellationToken).ConfigureAwait(false);
+                    var webResponse = await SiraHttpService.GetAsync(PluginConfig.Instance.HitbloqURL + "/" + EndpointURL, cancellationToken: cancellationToken).ConfigureAwait(false);
                     cache = await Utils.ParseWebResponse<T>(webResponse);
                 }   
                 catch (TaskCanceledException) { }

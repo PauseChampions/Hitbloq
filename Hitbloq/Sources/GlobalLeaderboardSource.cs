@@ -49,7 +49,7 @@ namespace Hitbloq.Sources
                 
                 try
                 {
-                    var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}api/leaderboard/{beatmapString}/scores_extended/{page}", cancellationToken: cancellationToken).ConfigureAwait(false);
+                    var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}/api/leaderboard/{beatmapString}/scores_extended/{page}", cancellationToken: cancellationToken).ConfigureAwait(false);
                     var scores = await Utils.ParseWebResponse<List<HitbloqMapLeaderboardEntry>>(webResponse);
                     if (scores != null)
                     {

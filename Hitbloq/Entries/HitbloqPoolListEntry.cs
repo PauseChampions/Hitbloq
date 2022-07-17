@@ -42,7 +42,7 @@ namespace Hitbloq.Entries
         {
             if (BannerImageURL != null && BannerImageURL.StartsWith("/"))
             {
-                BannerImageURL = PluginConfig.Instance.HitbloqURL + BannerImageURL;
+                BannerImageURL = PluginConfig.Instance.HitbloqURL + "/" + BannerImageURL;
             }
 
             Description = Description?.Replace("&emsp;", " ");
