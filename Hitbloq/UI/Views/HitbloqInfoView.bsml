@@ -3,9 +3,9 @@
         <text text="~version" align="Top" font-size="8" bold="true" />
         <text text="DaFluffyPotato, PixelBoom &amp; Team" align="Top" />
     </vertical>
-    <horizontal horizontal-fit='PreferredSize' pref-width="70" anchor-pos-y="20">
-        <clickable-text text="Tutorial" align="Midline" on-click="tutorial-click" />
-        <text text="|" align="Midline" />
+    <horizontal horizontal-fit='PreferredSize' pref-width="50" anchor-pos-y="20">
+        <!--<clickable-text text="Tutorial" align="Midline" on-click="tutorial-click" />
+        <text text="|" align="Midline" />-->
         <clickable-text text="Website" align="Midline" on-click="website-click" />
         <text text="|" align="Midline" />
         <clickable-text text="Discord" align="Midline" on-click="discord-click" />
