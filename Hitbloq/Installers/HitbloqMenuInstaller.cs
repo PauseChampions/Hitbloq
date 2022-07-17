@@ -5,7 +5,6 @@ using Hitbloq.Sources;
 using Hitbloq.Other;
 using IPA.Loader;
 using System;
-using Hitbloq.UI.ViewControllers;
 using MorePlaylists.UI;
 
 namespace Hitbloq.Installers

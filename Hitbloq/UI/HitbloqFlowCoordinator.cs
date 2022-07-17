@@ -1,7 +1,6 @@
 ﻿using HMUI;
 using BeatSaberMarkupLanguage;
 using Hitbloq.Entries;
-using Hitbloq.UI.ViewControllers;
 using MorePlaylists.UI;
 using Zenject;
 

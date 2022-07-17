@@ -16,7 +16,7 @@ using Tweening;
 using UnityEngine;
 using Zenject;
 
-namespace Hitbloq.UI.ViewControllers
+namespace Hitbloq.UI
 {
     [HotReload(RelativePathToLayout = @"..\Views\HitbloqPoolLeaderboardView.bsml")]
     [ViewDefinition("Hitbloq.UI.Views.HitbloqPoolLeaderboardView.bsml")]
