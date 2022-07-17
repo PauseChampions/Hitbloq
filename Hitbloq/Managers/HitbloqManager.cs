@@ -63,7 +63,7 @@ namespace Hitbloq.Managers
 
             hitbloqPanelController.PoolChangedEvent += OnPoolChanged;
             hitbloqPanelController.RankTextClickedEvent += OnRankTextClicked;
-            hitbloqPanelController.LogoClickedEvent += OnLogoClicked;
+            hitbloqPanelController.EventClickedEvent += OnEventClicked;
         }
 
         public void Dispose()
@@ -75,7 +75,7 @@ namespace Hitbloq.Managers
 
             hitbloqPanelController.PoolChangedEvent -= OnPoolChanged;
             hitbloqPanelController.RankTextClickedEvent -= OnRankTextClicked;
-            hitbloqPanelController.LogoClickedEvent -= OnLogoClicked;
+            hitbloqPanelController.EventClickedEvent -= OnEventClicked;
         }
 
         public void OnScoreUploaded() => _ = OnScoreUploadAsync();
@@ -173,9 +173,6 @@ namespace Hitbloq.Managers
             hitbloqProfileModalController.ShowModalForSelf(hitbloqLeaderboardViewController.transform, rankInfo, pool);
         }
 
-        private void OnLogoClicked()
-        {
-            hitbloqEventModalViewController.ShowModal(hitbloqLeaderboardViewController.transform);
-        }
+        private void OnEventClicked() => hitbloqEventModalViewController.ShowModal(hitbloqLeaderboardViewController.transform);
     }
 }

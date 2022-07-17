@@ -17,4 +17,5 @@
   </horizontal>
   <clickable-image id='pm-image' src='Hitbloq.Images.PlaylistManager.png' hover-hint='~pm-hover' on-click='pm-click' active='~pm-active' preserve-aspect='true' size-delta-x='3' anchor-pos-x='32' anchor-pos-y='-1.5' />
   <loading-indicator active='~downloading-active' preserve-aspect='true' pref-width='4' pref-height='4' anchor-pos-x='32' anchor-pos-y='-1.5' />
+  <clickable-image id="event-image" active="~event-active" src="Hitbloq.Images.Event.png" on-click="event-click" size-delta-y="5" preserve-aspect='true' anchor-pos-x="-36" anchor-pos-y="9" hover-hint="Show event info" />
 </bg>
