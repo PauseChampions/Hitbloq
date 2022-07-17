@@ -55,16 +55,9 @@ namespace Hitbloq.UI
                 PushViewControllerToNavigationController(hitbloqNavigationController, hitbloqPoolDetailViewController);
             }
             
-            if (!hitbloqRankedListViewController.isInViewControllerHierarchy)
-            {
-                SetLeftScreenViewController(hitbloqRankedListViewController, ViewController.AnimationType.In);
-            }
-            
-            if (!hitbloqPoolLeaderboardViewController.isInViewControllerHierarchy)
-            {
-                SetRightScreenViewController(hitbloqPoolLeaderboardViewController, ViewController.AnimationType.In);
-            }
-            
+            SetLeftScreenViewController(hitbloqRankedListViewController, ViewController.AnimationType.In);
+            SetRightScreenViewController(hitbloqPoolLeaderboardViewController, ViewController.AnimationType.In);
+
             hitbloqPoolDetailViewController.SetPool(pool);
             hitbloqRankedListViewController.SetPool(pool.ID);
             hitbloqPoolLeaderboardViewController.SetPool(pool.ID);
