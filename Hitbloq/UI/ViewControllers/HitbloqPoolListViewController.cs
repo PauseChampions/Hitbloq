@@ -41,6 +41,8 @@ namespace Hitbloq.UI
         private CancellationTokenSource? poolCancellationTokenSource;
         private CancellationTokenSource? sortCancellationTokenSource;
 
+        public string? poolToOpen;
+
         public event Action<HitbloqPoolListEntry>? PoolSelectedEvent;
         public event Action? DetailDismissRequested;
 
@@ -60,8 +62,12 @@ namespace Hitbloq.UI
                 poolCancellationTokenSource = new CancellationTokenSource();
                 _ = FetchPools(poolCancellationTokenSource.Token);
             }
+            else
+            {
+                OpenPoolToSelect();
+            }
         }
-
+        
         private async Task FetchPools(CancellationToken cancellationToken = default)
         {
             if (customListTableData == null)
@@ -128,6 +134,28 @@ namespace Hitbloq.UI
                 });
                 DetailDismissRequested?.Invoke();
                 poolLoadSemaphore.Release();
+                OpenPoolToSelect();
+            }
+        }
+
+        private void OpenPoolToSelect()
+        {
+            if (poolToOpen != null && customListTableData != null)
+            {
+                for (var i = 0; i < pools.Count; i++)
+                {
+                    if (pools[i].ID == poolToOpen)
+                    {
+                        _ = IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+                        {
+                            customListTableData.tableView.SelectCellWithIdx(i);
+                            customListTableData.tableView.ScrollToCellWithIdx(i, TableView.ScrollPositionType.Center, true);
+                            PoolSelectedEvent?.Invoke(pools[i]);
+                        });
+                        break;
+                    }
+                }
+                poolToOpen = null;
             }
         }
 

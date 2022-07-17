@@ -34,6 +34,8 @@ namespace Hitbloq.Managers
         private CancellationTokenSource? levelInfoTokenSource;
         private CancellationTokenSource? leaderboardTokenSource;
 
+        private string? currentPool;
+
         public HitbloqManager(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, HitbloqPanelController hitbloqPanelController, HitbloqProfileModalController hitbloqProfileModalController,
             HitbloqEventModalViewController hitbloqEventModalViewController, HitbloqFlowCoordinator hitbloqFlowCoordinator, UserIDSource userIDSource, LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher, List<INotifyUserRegistered> notifyUserRegistereds,
             List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters, List<INotifyViewActivated> notifyViewActivateds, List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters,
@@ -170,11 +172,13 @@ namespace Hitbloq.Managers
             {
                 poolUpdater.PoolUpdated(pool);
             }
+            
+            currentPool = pool;
         }
 
         private void OnRankTextClicked(HitbloqRankInfo rankInfo, string pool) => hitbloqProfileModalController.ShowModalForSelf(hitbloqLeaderboardViewController.transform, rankInfo, pool);
 
-        private void OnLogoClicked() => hitbloqFlowCoordinator.Show();
+        private void OnLogoClicked() => hitbloqFlowCoordinator.ShowAndOpenPoolWithID(currentPool);
 
         private void OnEventClicked() => hitbloqEventModalViewController.ShowModal(hitbloqLeaderboardViewController.transform);
     }

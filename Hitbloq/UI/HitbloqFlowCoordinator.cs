@@ -28,13 +28,20 @@ namespace Hitbloq.UI
         
         [Inject]
         private readonly HitbloqPoolLeaderboardViewController hitbloqPoolLeaderboardViewController = null!;
+        
+        private bool flowAnimationComplete;
+        private HitbloqPoolListEntry? currentPool;
 
         protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
         {
             SetTitle("Hitbloq");
             showBackButton = true;
+            flowAnimationComplete = false;
+            currentPool = null;
+
             SetViewControllersToNavigationController(hitbloqNavigationController, hitbloqPoolListViewController);
             ProvideInitialViewControllers(hitbloqNavigationController);
+            
             hitbloqPoolListViewController.PoolSelectedEvent += OnPoolSelected;
             hitbloqPoolListViewController.DetailDismissRequested += OnDetailDismissRequested;
             hitbloqPoolDetailViewController.FlowDismissRequested += OnFlowDismissRequested;
@@ -50,17 +57,22 @@ namespace Hitbloq.UI
 
         private void OnPoolSelected(HitbloqPoolListEntry pool)
         {
-            if (!hitbloqPoolDetailViewController.isInViewControllerHierarchy)
+            if (flowAnimationComplete)
             {
-                PushViewControllerToNavigationController(hitbloqNavigationController, hitbloqPoolDetailViewController);
+                if (!hitbloqPoolDetailViewController.isInViewControllerHierarchy)
+                {
+                    PushViewControllerToNavigationController(hitbloqNavigationController, hitbloqPoolDetailViewController);
+                }
+            
+                SetLeftScreenViewController(hitbloqRankedListViewController, ViewController.AnimationType.In);
+                SetRightScreenViewController(hitbloqPoolLeaderboardViewController, ViewController.AnimationType.In);   
+                
+                hitbloqPoolDetailViewController.SetPool(pool);
+                hitbloqRankedListViewController.SetPool(pool.ID);
+                hitbloqPoolLeaderboardViewController.SetPool(pool.ID);
             }
             
-            SetLeftScreenViewController(hitbloqRankedListViewController, ViewController.AnimationType.In);
-            SetRightScreenViewController(hitbloqPoolLeaderboardViewController, ViewController.AnimationType.In);
-
-            hitbloqPoolDetailViewController.SetPool(pool);
-            hitbloqRankedListViewController.SetPool(pool.ID);
-            hitbloqPoolLeaderboardViewController.SetPool(pool.ID);
+            currentPool = pool;
         }
         
         private void OnDetailDismissRequested()
@@ -96,7 +108,20 @@ namespace Hitbloq.UI
         internal void Show()
         {
             parentFlowCoordinator = mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf();
-            parentFlowCoordinator.PresentFlowCoordinator(this);
+            parentFlowCoordinator.PresentFlowCoordinator(this, () =>
+            {
+                flowAnimationComplete = true;
+                if (currentPool != null)
+                {
+                    OnPoolSelected(currentPool);
+                }
+            });
+        }
+        
+        internal void ShowAndOpenPoolWithID(string? poolID)
+        {
+            hitbloqPoolListViewController.poolToOpen = poolID;
+            Show();
         }
     }
     
