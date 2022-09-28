@@ -32,7 +32,7 @@ namespace Hitbloq
                 Container.Bind<BeatmapListener>().AsSingle();
             });
             zenjector.Install<HitbloqMenuInstaller>(Location.Menu);
-            zenjector.Install(Location.StandardPlayer, Container =>
+            zenjector.Install(Location.Player, Container =>
             {
                 Container.BindInterfacesTo<BeatmapReporter>().AsSingle();
             });
