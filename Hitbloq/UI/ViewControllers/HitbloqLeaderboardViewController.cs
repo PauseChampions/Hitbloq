@@ -8,6 +8,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Hitbloq.Utilities;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
@@ -46,7 +47,7 @@ namespace Hitbloq.UI
                 if (leaderboard != null && loadingControl != null && difficultyBeatmap != null)
                 {
                     leaderboard.SetScores(new List<LeaderboardTableView.ScoreData>(), 0);
-                    loadingControl.SetActive(true);
+                    loadingControl.gameObject.SetActive(true);
                     PageRequested?.Invoke(difficultyBeatmap, leaderboardSources[SelectedCellIndex], value);
                 }
             }
@@ -58,7 +59,7 @@ namespace Hitbloq.UI
         [UIComponent("leaderboard")]
         private readonly LeaderboardTableView? leaderboard = null!;
 
-        private GameObject? loadingControl;
+        private LoadingControl? loadingControl;
 
         #region Info Buttons
 
@@ -120,6 +121,15 @@ namespace Hitbloq.UI
                 });
             }
 
+            if (!Utils.IsDependencyLeaderboardInstalled)
+            {
+                if (loadingControl != null)
+                {
+                    loadingControl.ShowText("<size=125%>Please install ScoreSaber or BeatLeader!</size>", false);
+                }
+
+                return;
+            }
             if (leaderboardEntries == null || leaderboardEntries.Count == 0)
             {
                 scores.Add(new LeaderboardTableView.ScoreData(0, "You haven't set a score on this leaderboard - <size=75%>(<color=#FFD42A>0%</color>)</size>", 0, false));
@@ -161,7 +171,7 @@ namespace Hitbloq.UI
             {
                 await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
                 {
-                    loadingControl.SetActive(false);
+                    loadingControl.gameObject.SetActive(false);
                     leaderboard.SetScores(scores, myScorePos);
                 });
             }
@@ -188,19 +198,18 @@ namespace Hitbloq.UI
         {
             // To set rich text, I have to iterate through all cells, set each cell to allow rich text and next time they will have it
             var leaderboardTableCells = leaderboardTransform!.GetComponentsInChildren<LeaderboardTableCell>(true);
+            
             foreach (var leaderboardTableCell in leaderboardTableCells)
             {
                 leaderboardTableCell.transform.Find("PlayerName").GetComponent<CurvedTextMeshPro>().richText = true;
             }
             
-            loadingControl = leaderboardTransform.Find("LoadingControl").gameObject;
+            loadingControl = leaderboardTransform.GetComponentInChildren<LoadingControl>(true);
 
             var loadingContainer = loadingControl.transform.Find("LoadingContainer");
             loadingContainer.gameObject.SetActive(true);
-            Destroy(loadingContainer.Find("Text").gameObject);
-            Destroy(loadingControl.transform.Find("RefreshContainer").gameObject);
-            Destroy(loadingControl.transform.Find("DownloadingContainer").gameObject);
-
+            loadingControl.ShowLoading();
+            
             infoButtons = new List<Button>();
 
             // Change info button scales

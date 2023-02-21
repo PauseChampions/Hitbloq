@@ -147,6 +147,11 @@ namespace Hitbloq.Managers
 
         private async Task OnPageRequestedAsync(IDifficultyBeatmap difficultyBeatmap, IMapLeaderboardSource leaderboardSource, int page)
         {
+            if (!Utilities.Utils.IsDependencyLeaderboardInstalled)
+            {
+                return;
+            }
+            
             leaderboardTokenSource?.Cancel();
             leaderboardTokenSource?.Dispose();
             leaderboardTokenSource = new CancellationTokenSource();

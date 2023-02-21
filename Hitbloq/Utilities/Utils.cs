@@ -3,6 +3,7 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using IPA.Loader;
 using Newtonsoft.Json;
 using SiraUtil.Web;
 using UnityEngine;
@@ -11,6 +12,29 @@ namespace Hitbloq.Utilities
 {
     internal static class Utils
     {
+        private static bool? isScoreSaberInstalled;
+        private static bool? isBeatLeaderInstalled;
+
+        public static bool IsScoreSaberInstalled
+        {
+            get
+            {
+                isScoreSaberInstalled ??= PluginManager.GetPluginFromId("ScoreSaber") != null;
+                return (bool) isScoreSaberInstalled;
+            }
+        }
+        
+        public static bool IsBeatLeaderInstalled
+        {
+            get
+            {
+                isBeatLeaderInstalled ??= PluginManager.GetPluginFromId("BeatLeader") != null;
+                return (bool) isBeatLeaderInstalled;
+            }
+        }
+        
+        public static bool IsDependencyLeaderboardInstalled => IsScoreSaberInstalled || IsBeatLeaderInstalled;
+
         public static string? DifficultyBeatmapToString(IDifficultyBeatmap difficultyBeatmap)
         {
             if (difficultyBeatmap.level is CustomPreviewBeatmapLevel customLevel)
