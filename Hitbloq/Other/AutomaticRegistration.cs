@@ -5,6 +5,7 @@ using Hitbloq.Utilities;
 using SiraUtil.Web;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using SiraUtil.Logging;
 using Zenject;
 
 namespace Hitbloq.Other
@@ -16,7 +17,7 @@ namespace Hitbloq.Other
         private readonly IPlatformUserModel platformUserModel;
         private readonly UserIDSource userIDSource;
 
-        public AutomaticRegistration(IHttpService siraHttpService, HitbloqPanelController hitbloqPanelController, IPlatformUserModel platformUserModel, UserIDSource userIDSource)
+        public AutomaticRegistration(IHttpService siraHttpService, HitbloqPanelController hitbloqPanelController, IPlatformUserModel platformUserModel, UserIDSource userIDSource, SiraLog siraLog)
         {
             this.siraHttpService = siraHttpService;
             this.hitbloqPanelController = hitbloqPanelController;
@@ -27,7 +28,7 @@ namespace Hitbloq.Other
         public void Initialize() => _ = InitializeAsync();
 
         private async Task InitializeAsync()
-        { 
+        {
             // Check if user id exists, if it does this is not needed
             var userID = await userIDSource.GetUserIDAsync();
             if (userID == null || userID.ID != -1)
@@ -40,29 +41,39 @@ namespace Hitbloq.Other
                 return;
             }
 
-            // If a valid platform id doesnt exist, return
+            // If a valid platform id doesn't exist, return
             var userInfo = await platformUserModel.GetUserInfo();
             if (userInfo == null)
             {
                 return;
             }
 
-            // If a valid scoresaber id doesnt exist, return
-            var webResponse = await siraHttpService.GetAsync($"https://scoresaber.com/api/player/{userInfo.platformUserId}/full").ConfigureAwait(false);
-            var scoreSaberUserInfo = await Utils.ParseWebResponse<ScoreSaberUserInfo>(webResponse);
-            if (scoreSaberUserInfo?.ErrorMessage == "Player not found")
-            {
-                hitbloqPanelController.PromptText = "<color=red>Please submit some scores from your ScoreSaber account.</color>";
-                hitbloqPanelController.LoadingActive = false;
+            // If a valid ScoreSaber or BeatLeader id doesn't exist, return
+            if (!Utils.IsDependencyLeaderboardInstalled)
                 return;
-            }
 
-            var content = new Dictionary<string, string>
+            bool result;
+            Dictionary<string, string> content;
+            if (Utils.IsScoreSaberInstalled)
             {
-                { "url", $"https://scoresaber.com/u/{userInfo.platformUserId}"}
-            };
-
-            webResponse = await siraHttpService.PostAsync("https://hitbloq.com/api/add_user", content);
+                result = await CheckScoreSaberIdExists(userInfo).ConfigureAwait(false);
+                content = new Dictionary<string, string>
+                {
+                    { "url", $"https://scoresaber.com/u/{userInfo.platformUserId}"}
+                };
+            }
+            else
+            {
+                result = await CheckBeatLeaderIdExists(userInfo).ConfigureAwait(false);
+                content = new Dictionary<string, string>
+                {
+                    { "url", $"https://www.beatleader.xyz/u/{userInfo.platformUserId}"}
+                };
+            }
+            if (!result)
+                return;
+            
+            var webResponse = await siraHttpService.PostAsync("https://hitbloq.com/api/add_user", content);
             var registrationEntry = await Utils.ParseWebResponse<HitbloqRegistrationEntry>(webResponse);
 
             if (registrationEntry != null && registrationEntry.Status != "ratelimit")
@@ -74,6 +85,33 @@ namespace Hitbloq.Other
                 hitbloqPanelController.PromptText = "<color=red>Please register for Hitbloq on the Discord Server.</color>";
                 hitbloqPanelController.LoadingActive = false;
             }
+        }
+
+        private async Task<bool> CheckScoreSaberIdExists(UserInfo userInfo)
+        {
+            var webResponse = await siraHttpService.GetAsync($"https://scoresaber.com/api/player/{userInfo.platformUserId}/full").ConfigureAwait(false);
+            var scoreSaberUserInfo = await Utils.ParseWebResponse<ScoreSaberUserInfo>(webResponse);
+            if (scoreSaberUserInfo?.ErrorMessage == "Player not found")
+            {
+                hitbloqPanelController.PromptText = "<color=red>Please submit some scores to your ScoreSaber account.</color>";
+                hitbloqPanelController.LoadingActive = false;
+                return false;
+            }
+
+            return true;
+        }
+
+        private async Task<bool> CheckBeatLeaderIdExists(UserInfo userInfo)
+        {
+            var webResponse = await siraHttpService.GetAsync($"https://api.beatleader.xyz/player/{userInfo.platformUserId}").ConfigureAwait(false);
+            if (webResponse.Code is 404 or 400)
+            {
+                hitbloqPanelController.PromptText = "<color=red>Please submit some scores to your BeatLeader account.</color>";
+                hitbloqPanelController.LoadingActive = false;
+                return false;
+            }
+            
+            return true;
         }
 
         private void HandleRegistrationProgress()

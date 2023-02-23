@@ -15,8 +15,12 @@
         "BeatSaberMarkupLanguage": "^1.6.3",
         "SiraUtil": "^3.0.0",
         "LeaderboardCore": "^1.2.1",
-        "SongCore": "^3.9.5",
+        "SongCore": "^3.9.5"
     },
+    "loadAfter": [
+        "ScoreSaber",
+        "BeatLeader"
+    ],
     "links": {
         "project-home": "https://hitbloq.com/",
         "project-source": "https://github.com/PauseChampions/Hitbloq",
