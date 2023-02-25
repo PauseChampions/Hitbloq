@@ -12,7 +12,7 @@ using Hitbloq.Other;
 
 namespace Hitbloq.Managers
 {
-    internal class HitbloqManager : IInitializable, IDisposable, INotifyScoreUpload, INotifyLeaderboardSet
+    internal class HitbloqManager : IInitializable, IDisposable, INotifyLeaderboardSet
     {
         private readonly HitbloqLeaderboardViewController hitbloqLeaderboardViewController;
         private readonly HitbloqPanelController hitbloqPanelController;
@@ -87,6 +87,7 @@ namespace Hitbloq.Managers
         public void OnScoreUploaded() => _ = OnScoreUploadAsync();
         private async Task OnScoreUploadAsync()
         {
+            Plugin.Log.Critical("score upload woohoo!");
             if (await leaderboardRefresher.Refresh())
             {
                 await OnLeaderboardSetAsync(selectedDifficultyBeatmap);

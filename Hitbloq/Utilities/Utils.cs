@@ -3,10 +3,12 @@ using System.IO;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using Hive.Versioning;
 using IPA.Loader;
 using Newtonsoft.Json;
 using SiraUtil.Web;
 using UnityEngine;
+using Version = Hive.Versioning.Version;
 
 namespace Hitbloq.Utilities
 {
@@ -28,7 +30,12 @@ namespace Hitbloq.Utilities
         {
             get
             {
-                isBeatLeaderInstalled ??= PluginManager.GetPluginFromId("BeatLeader") != null;
+                if (isBeatLeaderInstalled is null)
+                {
+                    var plugin = PluginManager.GetPluginFromId("BeatLeader");
+                    isBeatLeaderInstalled = plugin is not null && plugin.HVersion >= new Version(6, 0, 1);
+                }
+                isBeatLeaderInstalled ??= PluginManager.GetPluginFromId("BeatLeader") is not null;
                 return (bool) isBeatLeaderInstalled;
             }
         }

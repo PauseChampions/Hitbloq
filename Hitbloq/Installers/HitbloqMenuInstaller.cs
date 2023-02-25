@@ -29,9 +29,13 @@ namespace Hitbloq.Installers
             Container.BindInterfacesAndSelfTo<HitbloqInfoViewController>().FromNewComponentAsViewController().AsSingle();
 
             Container.BindInterfacesTo<HitbloqCustomLeaderboard>().AsSingle();
-            Container.BindInterfacesTo<HitbloqManager>().AsSingle();
+            Container.BindInterfacesAndSelfTo<HitbloqManager>().AsSingle();
+            if (Utilities.Utils.IsScoreSaberInstalled)
+	            Container.BindInterfacesTo<ScoreSaberUploadManager>().AsSingle();
+            else if (Utilities.Utils.IsBeatLeaderInstalled) 
+	            Container.BindInterfacesTo<BeatLeaderUploadManager>().AsSingle();
 
-            Container.Bind<UserIDSource>().AsSingle();
+	        Container.Bind<UserIDSource>().AsSingle();
             Container.Bind<FriendIDSource>().AsSingle();
             Container.Bind<ProfileSource>().AsSingle();
             Container.Bind<RankInfoSource>().AsSingle();

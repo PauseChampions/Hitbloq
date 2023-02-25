@@ -31,8 +31,7 @@ namespace Hitbloq.Other
             {
                 hitbloqPanelController.LoadingActive = true;
                 hitbloqPanelController.PromptText = "Refreshing Score...";
-
-                await Task.Delay(3000);
+                
                 var userID = await userIDSource.GetUserIDAsync();
 
                 if (userID == null)

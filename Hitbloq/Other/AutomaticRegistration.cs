@@ -5,7 +5,6 @@ using Hitbloq.Utilities;
 using SiraUtil.Web;
 using System.Collections.Generic;
 using System.Threading.Tasks;
-using SiraUtil.Logging;
 using Zenject;
 
 namespace Hitbloq.Other
@@ -17,7 +16,7 @@ namespace Hitbloq.Other
         private readonly IPlatformUserModel platformUserModel;
         private readonly UserIDSource userIDSource;
 
-        public AutomaticRegistration(IHttpService siraHttpService, HitbloqPanelController hitbloqPanelController, IPlatformUserModel platformUserModel, UserIDSource userIDSource, SiraLog siraLog)
+        public AutomaticRegistration(IHttpService siraHttpService, HitbloqPanelController hitbloqPanelController, IPlatformUserModel platformUserModel, UserIDSource userIDSource)
         {
             this.siraHttpService = siraHttpService;
             this.hitbloqPanelController = hitbloqPanelController;
