@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using Zenject;
 using LeaderboardCore.Interfaces;
 using Hitbloq.Other;
+using UnityEngine.SceneManagement;
 
 namespace Hitbloq.Managers
 {
@@ -35,6 +36,7 @@ namespace Hitbloq.Managers
         private CancellationTokenSource? leaderboardTokenSource;
 
         private string? currentPool;
+        private bool scoreAlreadyUploaded;
 
         public HitbloqManager(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, HitbloqPanelController hitbloqPanelController, HitbloqProfileModalController hitbloqProfileModalController,
             HitbloqEventModalViewController hitbloqEventModalViewController, HitbloqFlowCoordinator hitbloqFlowCoordinator, UserIDSource userIDSource, LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher, List<INotifyUserRegistered> notifyUserRegistereds,
@@ -69,6 +71,8 @@ namespace Hitbloq.Managers
             hitbloqPanelController.RankTextClickedEvent += OnRankTextClicked;
             hitbloqPanelController.LogoClickedEvent += OnLogoClicked;
             hitbloqPanelController.EventClickedEvent += OnEventClicked;
+            
+            SceneManager.activeSceneChanged += SceneManagerOnactiveSceneChanged;
         }
 
         public void Dispose()
@@ -82,14 +86,16 @@ namespace Hitbloq.Managers
             hitbloqPanelController.RankTextClickedEvent -= OnRankTextClicked;
             hitbloqPanelController.LogoClickedEvent -= OnLogoClicked;
             hitbloqPanelController.EventClickedEvent -= OnEventClicked;
+            
+            SceneManager.activeSceneChanged -= SceneManagerOnactiveSceneChanged;
         }
 
         public void OnScoreUploaded() => _ = OnScoreUploadAsync();
         private async Task OnScoreUploadAsync()
         {
-            Plugin.Log.Critical("score upload woohoo!");
-            if (await leaderboardRefresher.Refresh())
+            if (!scoreAlreadyUploaded && await leaderboardRefresher.Refresh())
             {
+                scoreAlreadyUploaded = true;
                 await OnLeaderboardSetAsync(selectedDifficultyBeatmap);
             }
         }
@@ -187,5 +193,11 @@ namespace Hitbloq.Managers
         private void OnLogoClicked() => hitbloqFlowCoordinator.ShowAndOpenPoolWithID(currentPool);
 
         private void OnEventClicked() => hitbloqEventModalViewController.ShowModal(hitbloqLeaderboardViewController.transform);
+        
+        private void SceneManagerOnactiveSceneChanged(Scene currentScene, Scene nextScene)
+        {
+            if (currentScene.name == "MainMenu")
+                scoreAlreadyUploaded = false;
+        }
     }
 }

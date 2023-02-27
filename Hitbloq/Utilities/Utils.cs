@@ -33,7 +33,7 @@ namespace Hitbloq.Utilities
                 if (isBeatLeaderInstalled is null)
                 {
                     var plugin = PluginManager.GetPluginFromId("BeatLeader");
-                    isBeatLeaderInstalled = plugin is not null && plugin.HVersion >= new Version(6, 0, 1);
+                    isBeatLeaderInstalled = plugin is not null && plugin.HVersion >= new Version(0, 6, 1);
                 }
                 isBeatLeaderInstalled ??= PluginManager.GetPluginFromId("BeatLeader") is not null;
                 return (bool) isBeatLeaderInstalled;

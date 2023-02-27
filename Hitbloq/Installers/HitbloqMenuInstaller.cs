@@ -32,7 +32,7 @@ namespace Hitbloq.Installers
             Container.BindInterfacesAndSelfTo<HitbloqManager>().AsSingle();
             if (Utilities.Utils.IsScoreSaberInstalled)
 	            Container.BindInterfacesTo<ScoreSaberUploadManager>().AsSingle();
-            else if (Utilities.Utils.IsBeatLeaderInstalled) 
+	        if (Utilities.Utils.IsBeatLeaderInstalled) 
 	            Container.BindInterfacesTo<BeatLeaderUploadManager>().AsSingle();
 
 	        Container.Bind<UserIDSource>().AsSingle();
