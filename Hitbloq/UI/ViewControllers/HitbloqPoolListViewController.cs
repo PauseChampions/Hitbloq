@@ -11,6 +11,7 @@ using Hitbloq.Entries;
 using Hitbloq.Other;
 using Hitbloq.Sources;
 using HMUI;
+using IPA.Utilities.Async;
 using Tweening;
 using UnityEngine;
 using Zenject;
@@ -83,7 +84,7 @@ namespace Hitbloq.UI
             
             try
             {
-                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+                await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
                 {
                     customListTableData.tableView.ClearSelection();
                     Loaded = false;
@@ -128,7 +129,7 @@ namespace Hitbloq.UI
             {
                 Loaded = true;
                 await SiraUtil.Extras.Utilities.PauseChamp;
-                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+                await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
                 {
                     customListTableData.tableView.ReloadData();
                 });
@@ -146,7 +147,7 @@ namespace Hitbloq.UI
                 {
                     if (pools[i].ID == poolToOpen)
                     {
-                        _ = IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+                        _ = UnityMainThreadTaskScheduler.Factory.StartNew(() =>
                         {
                             customListTableData.tableView.SelectCellWithIdx(i);
                             customListTableData.tableView.ScrollToCellWithIdx(i, TableView.ScrollPositionType.Center, true);

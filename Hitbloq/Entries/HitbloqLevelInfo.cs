@@ -1,5 +1,5 @@
-﻿using Newtonsoft.Json;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
+using Newtonsoft.Json;
 
 namespace Hitbloq.Entries
 {

@@ -1,4 +1,9 @@
-﻿using BeatSaberMarkupLanguage.Attributes;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Components.Settings;
 using BeatSaberMarkupLanguage.ViewControllers;
@@ -9,13 +14,8 @@ using Hitbloq.Sources;
 using Hitbloq.Utilities;
 using HMUI;
 using IPA.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
+using IPA.Utilities.Async;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using Zenject;
 
 namespace Hitbloq.UI
@@ -138,7 +138,7 @@ namespace Hitbloq.UI
             // I want to make a maximum of 2 cells visible, however I first need to parse exactly 2 cells and clean them up
             // After that I populate the current pool options
             (dropDownListSetting!.dropdown as DropdownWithTableView).SetField("_numberOfVisibleCells", 2);
-            dropDownListSetting.values = new List<object>() {"1", "2"};
+            dropDownListSetting.values = new List<object> {"1", "2"};
             dropDownListSetting.UpdateChoices();
             dropDownListSetting.values = pools.Count != 0 ? pools : new List<object> {"None"};
             dropDownListSetting.UpdateChoices();
@@ -284,7 +284,7 @@ namespace Hitbloq.UI
 
             var poolIndex = poolNames.IndexOf(selectedPool ?? "");
 
-            await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+            await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
             {
                 PoolChangedEvent?.Invoke(poolNames[poolIndex == -1 ? 0 : poolIndex]);
 
@@ -326,7 +326,7 @@ namespace Hitbloq.UI
             set
             {
                 promptText = value;
-                NotifyPropertyChanged(nameof(PromptText));
+                NotifyPropertyChanged();
             }
         }
 
@@ -337,7 +337,7 @@ namespace Hitbloq.UI
             set
             {
                 loadingActive = value;
-                NotifyPropertyChanged(nameof(LoadingActive));
+                NotifyPropertyChanged();
             }
         }
 
@@ -354,7 +354,7 @@ namespace Hitbloq.UI
                     playlistManagerImage.HighlightColor = value ? cancelHighlightColor : defaultHighlightColour.Value;
                 }
 
-                NotifyPropertyChanged(nameof(DownloadingActive));
+                NotifyPropertyChanged();
                 NotifyPropertyChanged(nameof(PlaylistManagerHoverHint));
             }
         }

@@ -1,11 +1,12 @@
-﻿using Zenject;
-using Hitbloq.UI;
+﻿using System;
 using Hitbloq.Managers;
-using Hitbloq.Sources;
 using Hitbloq.Other;
+using Hitbloq.Sources;
+using Hitbloq.UI;
+using Hitbloq.Utilities;
 using IPA.Loader;
-using System;
 using MorePlaylists.UI;
+using Zenject;
 
 namespace Hitbloq.Installers
 {
@@ -30,9 +31,9 @@ namespace Hitbloq.Installers
 
             Container.BindInterfacesTo<HitbloqCustomLeaderboard>().AsSingle();
             Container.BindInterfacesAndSelfTo<HitbloqManager>().AsSingle();
-            if (Utilities.Utils.IsScoreSaberInstalled)
+            if (Utils.IsScoreSaberInstalled)
 	            Container.BindInterfacesTo<ScoreSaberUploadManager>().AsSingle();
-	        if (Utilities.Utils.IsBeatLeaderInstalled) 
+	        if (Utils.IsBeatLeaderInstalled) 
 	            Container.BindInterfacesTo<BeatLeaderUploadManager>().AsSingle();
 
 	        Container.Bind<UserIDSource>().AsSingle();

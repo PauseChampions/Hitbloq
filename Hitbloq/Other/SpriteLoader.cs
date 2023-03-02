@@ -1,11 +1,12 @@
-﻿using SiraUtil.Web;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using IPA.Loader;
+using IPA.Utilities.Async;
+using SiraUtil.Web;
 using SiraUtil.Zenject;
 using UnityEngine;
 
@@ -145,7 +146,7 @@ namespace Hitbloq.Other
                     break;
                 }
                 var loader = spriteQueue.Dequeue();
-                _ = IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => loader?.Invoke());
+                _ = UnityMainThreadTaskScheduler.Factory.StartNew(() => loader?.Invoke());
             }
             coroutineRunning = false;
             if (spriteQueue.Count > 0)

@@ -1,4 +1,4 @@
-﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
     <vertical child-control-width="false" child-control-height="false" child-align="MiddleCenter">
         <img id="banner-image" preserve-aspect="false" size-delta-x="60" size-delta-y="12">
             <text id="pool-name-text" text="~pool-name" font-size="6" active="~show-banner-title" size-delta-x="60" size-delta-y="12" overflow-mode="Ellipsis" align="Midline" />

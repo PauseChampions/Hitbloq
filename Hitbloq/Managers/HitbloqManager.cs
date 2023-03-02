@@ -1,15 +1,17 @@
-﻿using Hitbloq.Entries;
-using Hitbloq.Interfaces;
-using Hitbloq.Sources;
-using Hitbloq.UI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Zenject;
-using LeaderboardCore.Interfaces;
+using Hitbloq.Entries;
+using Hitbloq.Interfaces;
 using Hitbloq.Other;
+using Hitbloq.Sources;
+using Hitbloq.UI;
+using Hitbloq.Utilities;
+using IPA.Utilities.Async;
+using LeaderboardCore.Interfaces;
 using UnityEngine.SceneManagement;
+using Zenject;
 
 namespace Hitbloq.Managers
 {
@@ -128,7 +130,7 @@ namespace Hitbloq.Managers
 
                 foreach (var difficultyBeatmapUpdater in difficultyBeatmapUpdaters)
                 {
-                    await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => difficultyBeatmapUpdater.DifficultyBeatmapUpdated(difficultyBeatmap, levelInfoEntry));
+                    await UnityMainThreadTaskScheduler.Factory.StartNew(() => difficultyBeatmapUpdater.DifficultyBeatmapUpdated(difficultyBeatmap, levelInfoEntry));
                 }
             }
         }
@@ -154,7 +156,7 @@ namespace Hitbloq.Managers
 
         private async Task OnPageRequestedAsync(IDifficultyBeatmap difficultyBeatmap, IMapLeaderboardSource leaderboardSource, int page)
         {
-            if (!Utilities.Utils.IsDependencyLeaderboardInstalled)
+            if (!Utils.IsDependencyLeaderboardInstalled)
             {
                 return;
             }
@@ -174,7 +176,7 @@ namespace Hitbloq.Managers
 
             foreach(var leaderboardEntriesUpdater in leaderboardEntriesUpdaters)
             {
-                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => leaderboardEntriesUpdater.LeaderboardEntriesUpdated(leaderboardEntries));
+                await UnityMainThreadTaskScheduler.Factory.StartNew(() => leaderboardEntriesUpdater.LeaderboardEntriesUpdated(leaderboardEntries));
             }
         }
 

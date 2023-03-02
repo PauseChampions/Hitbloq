@@ -1,12 +1,15 @@
-﻿using HMUI;
-using IPA.Utilities;
-using SiraUtil.Web;
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using BeatSaberPlaylistsLib.Types;
 using Hitbloq.Utilities;
+using HMUI;
+using IPA.Utilities;
+using IPA.Utilities.Async;
+using PlaylistManager.Utilities;
+using SiraUtil.Web;
 using Zenject;
 using Utils = Hitbloq.Utilities.Utils;
 
@@ -50,12 +53,12 @@ namespace Hitbloq.Other
 
         public void Initialize()
         {
-            PlaylistManager.Utilities.Events.playlistSelected += OnPlaylistSelected;
+            Events.playlistSelected += OnPlaylistSelected;
         }
 
         public void Dispose()
         {
-            PlaylistManager.Utilities.Events.playlistSelected -= OnPlaylistSelected;
+            Events.playlistSelected -= OnPlaylistSelected;
         }
 
         public void DownloadOrOpenPlaylist(string poolID, Action? onDownloadComplete = null)
@@ -73,7 +76,7 @@ namespace Hitbloq.Other
                 return;
             }
 
-            await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+            await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
             {
                 onDownloadComplete?.Invoke();
                 OpenPlaylist(playlistToSelect);
@@ -163,7 +166,7 @@ namespace Hitbloq.Other
             }
         }
 
-        private void OnPlaylistSelected(BeatSaberPlaylistsLib.Types.IPlaylist playlist, BeatSaberPlaylistsLib.PlaylistManager parentManager)
+        private void OnPlaylistSelected(IPlaylist playlist, BeatSaberPlaylistsLib.PlaylistManager parentManager)
         {
             if (playlist.TryGetCustomData("syncURL", out var url) && url is string urlString)
             {

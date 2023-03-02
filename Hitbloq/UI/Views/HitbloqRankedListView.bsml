@@ -1,4 +1,4 @@
-﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
     <vertical anchor-pos-x='-8' vertical-fit='MinSize' min-height='80' anchor-pos-y='2'>
         <horizontal anchor-min-y='1'  bg='panel-top' pad-left='10' pad-right='10' horizontal-fit='PreferredSize'>
             <text text='Ranked List' align='Center' font-size='8' />

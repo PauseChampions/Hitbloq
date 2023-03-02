@@ -1,6 +1,7 @@
 ﻿using System;
 using BeatLeader.API;
 using BeatLeader.API.Methods;
+using BeatLeader.Models;
 using Zenject;
 
 namespace Hitbloq.Managers
@@ -24,7 +25,7 @@ namespace Hitbloq.Managers
 			UploadReplayRequest.RemoveStateListener(OnUploadReplayRequestStateChange);
 		}
 
-		private void OnUploadReplayRequestStateChange(RequestState state, BeatLeader.Models.Score result, string failReason)
+		private void OnUploadReplayRequestStateChange(RequestState state, Score result, string failReason)
 		{
 			if (state is RequestState.Finished)
 				hitbloqManager.OnScoreUploaded();

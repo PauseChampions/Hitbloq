@@ -1,6 +1,6 @@
 ﻿namespace Hitbloq.Interfaces
 {
-    interface INotifyUserRegistered
+    internal interface INotifyUserRegistered
     {
         public void UserRegistered();
     }

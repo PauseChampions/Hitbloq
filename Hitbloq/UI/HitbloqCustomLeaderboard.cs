@@ -1,9 +1,9 @@
-﻿using Hitbloq.Entries;
+﻿using System;
+using Hitbloq.Entries;
 using Hitbloq.Interfaces;
 using HMUI;
 using LeaderboardCore.Managers;
 using LeaderboardCore.Models;
-using System;
 
 namespace Hitbloq.UI
 {
@@ -11,8 +11,7 @@ namespace Hitbloq.UI
     {
         private readonly CustomLeaderboardManager customLeaderboardManager;
 
-        private readonly ViewController hitbloqPanelController;
-        protected override ViewController panelViewController => hitbloqPanelController;
+        protected override ViewController panelViewController { get; }
 
         private readonly HitbloqLeaderboardViewController hitbloqLeaderboardViewController;
         protected override ViewController leaderboardViewController => hitbloqLeaderboardViewController;
@@ -20,8 +19,8 @@ namespace Hitbloq.UI
         internal HitbloqCustomLeaderboard(CustomLeaderboardManager customLeaderboardManager, HitbloqPanelController hitbloqPanelController, HitbloqLeaderboardViewController mainLeaderboardViewController)
         {
             this.customLeaderboardManager = customLeaderboardManager;
-            this.hitbloqPanelController = hitbloqPanelController;
-            this.hitbloqLeaderboardViewController = mainLeaderboardViewController;
+            this.panelViewController = hitbloqPanelController;
+            hitbloqLeaderboardViewController = mainLeaderboardViewController;
         }
 
         public void Dispose()

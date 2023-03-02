@@ -1,5 +1,8 @@
-﻿using BeatSaberMarkupLanguage;
+﻿using System.Reflection;
+using System.Threading.Tasks;
+using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
+using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Parser;
 using Hitbloq.Configuration;
 using Hitbloq.Entries;
@@ -7,9 +10,7 @@ using Hitbloq.Interfaces;
 using Hitbloq.Other;
 using Hitbloq.Utilities;
 using HMUI;
-using System.Reflection;
-using System.Threading.Tasks;
-using BeatSaberMarkupLanguage.Components;
+using IPA.Utilities.Async;
 using UnityEngine;
 
 namespace Hitbloq.UI
@@ -59,7 +60,7 @@ namespace Hitbloq.UI
                 {
                     if (!PluginConfig.Instance.ViewedEvents.Contains(hitbloqEvent.ID))
                     {
-                        await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() => ShowModal(hitbloqLeaderboardViewController.transform));
+                        await UnityMainThreadTaskScheduler.Factory.StartNew(() => ShowModal(hitbloqLeaderboardViewController.transform));
                         PluginConfig.Instance.ViewedEvents.Add(hitbloqEvent.ID);
                         PluginConfig.Instance.Changed();
                     }

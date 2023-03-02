@@ -1,9 +1,10 @@
-﻿using Hitbloq.Entries;
+﻿using System.Collections.Generic;
+using System.Threading.Tasks;
+using Hitbloq.Entries;
 using Hitbloq.Sources;
 using Hitbloq.UI;
+using Hitbloq.Utilities;
 using SiraUtil.Web;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Hitbloq.Other
 {
@@ -40,7 +41,7 @@ namespace Hitbloq.Other
                 }
                 
                 var webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/update_user/{userID.ID}").ConfigureAwait(false);
-                var refreshEntry = await Utilities.Utils.ParseWebResponse<HitbloqRefreshEntry>(webResponse);
+                var refreshEntry = await Utils.ParseWebResponse<HitbloqRefreshEntry>(webResponse);
 
                 if (refreshEntry is {Error: null})
                 {
@@ -49,8 +50,8 @@ namespace Hitbloq.Other
                     {
                         await Task.Delay(3000);
 
-                        webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/actions").ConfigureAwait(false);
-                        var actionQueueEntries = await Utilities.Utils.ParseWebResponse<List<HitbloqActionQueueEntry>>(webResponse);
+                        webResponse = await siraHttpService.GetAsync("https://hitbloq.com/api/actions").ConfigureAwait(false);
+                        var actionQueueEntries = await Utils.ParseWebResponse<List<HitbloqActionQueueEntry>>(webResponse);
 
                         if (actionQueueEntries == null || !actionQueueEntries.Exists(entry => entry.ID == refreshEntry.ID))
                         {

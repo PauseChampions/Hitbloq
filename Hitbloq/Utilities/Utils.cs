@@ -1,14 +1,11 @@
-﻿using System;
-using System.IO;
-using System.Reflection;
+﻿using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using Hive.Versioning;
 using IPA.Loader;
 using Newtonsoft.Json;
 using SiraUtil.Web;
-using UnityEngine;
-using Version = Hive.Versioning.Version;
+using SongCore.Utilities;
 
 namespace Hitbloq.Utilities
 {
@@ -46,7 +43,7 @@ namespace Hitbloq.Utilities
         {
             if (difficultyBeatmap.level is CustomPreviewBeatmapLevel customLevel)
             {
-                var hash = SongCore.Utilities.Hashing.GetCustomLevelHash(customLevel);
+                var hash = Hashing.GetCustomLevelHash(customLevel);
                 var difficulty = difficultyBeatmap.difficulty.ToString();
                 var characteristic = difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic.serializedName;
                 return $"{hash}%7C_{difficulty}_Solo{characteristic}";   

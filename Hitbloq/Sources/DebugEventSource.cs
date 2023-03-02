@@ -9,7 +9,7 @@ namespace Hitbloq.Sources
     {
         public Task<HitbloqEvent?> GetAsync(CancellationToken cancellationToken = default)
         {
-            return Task.FromResult(new HitbloqEvent()
+            return Task.FromResult(new HitbloqEvent
             {
                 ID = 1,
                 Title = "Test Event",

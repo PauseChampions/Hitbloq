@@ -15,11 +15,11 @@ namespace Hitbloq.Configuration
 
         [UseConverter(typeof(ListConverter<int>))]
         [NonNullable]
-        public virtual List<int> Friends { get; set; } = new List<int>();
+        public virtual List<int> Friends { get; set; } = new();
 
         [UseConverter(typeof(ListConverter<int>))]
         [NonNullable]
-        public virtual List<int> ViewedEvents { get; set; } = new List<int>();
+        public virtual List<int> ViewedEvents { get; set; } = new();
 
         /// <summary>
         /// This is called whenever BSIPA reads the config from disk (including when file changes are detected).

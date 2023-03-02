@@ -1,4 +1,4 @@
-﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
+﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
 	<horizontal anchor-min-x='0.15' anchor-min-y='1.15'  bg='panel-top' pad-left='10' pad-right='10' horizontal-fit='PreferredSize'>
 		<text text='Pool Leaderboard' align='Center' font-size='8' />
 	</horizontal>

@@ -1,14 +1,15 @@
-﻿using BeatSaberMarkupLanguage.Attributes;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using Hitbloq.Entries;
 using Hitbloq.Interfaces;
 using Hitbloq.Sources;
-using HMUI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Hitbloq.Utilities;
+using HMUI;
+using IPA.Utilities.Async;
 using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
@@ -112,7 +113,7 @@ namespace Hitbloq.UI
 
             if (infoButtons != null)
             {
-                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+                await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
                 {
                     foreach (var button in infoButtons)
                     {
@@ -144,7 +145,7 @@ namespace Hitbloq.UI
                 var userID = await userIDSource.GetUserIDAsync();
                 var id = userID?.ID ?? -1;
 
-                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+                await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
                 {
                     for (var i = 0; i < (leaderboardEntries.Count > 10 ? 10 : leaderboardEntries.Count); i++)
                     {
@@ -169,7 +170,7 @@ namespace Hitbloq.UI
 
             if (loadingControl != null && leaderboard != null)
             {
-                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+                await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
                 {
                     loadingControl.gameObject.SetActive(false);
                     leaderboard.SetScores(scores, myScorePos);
@@ -302,7 +303,7 @@ namespace Hitbloq.UI
 
         public void PoolUpdated(string pool)
         {
-            this.selectedPool = pool;
+            selectedPool = pool;
             if (isActiveAndEnabled)
             {
                 _ = SetScores(leaderboardEntries);

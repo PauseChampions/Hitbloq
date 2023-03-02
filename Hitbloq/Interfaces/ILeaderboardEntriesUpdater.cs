@@ -1,5 +1,5 @@
-﻿using Hitbloq.Entries;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using Hitbloq.Entries;
 
 namespace Hitbloq.Interfaces
 {

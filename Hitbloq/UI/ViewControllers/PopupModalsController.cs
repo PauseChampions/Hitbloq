@@ -1,12 +1,11 @@
-﻿using BeatSaberMarkupLanguage;
-using BeatSaberMarkupLanguage.Attributes;
-using BeatSaberMarkupLanguage.Parser;
-using HMUI;
-using System;
-using System.ComponentModel;
+﻿using System;
 using System.Reflection;
+using BeatSaberMarkupLanguage;
+using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
+using BeatSaberMarkupLanguage.Parser;
 using Hitbloq.Utilities;
+using HMUI;
 using UnityEngine;
 
 namespace Hitbloq.UI

@@ -12,6 +12,7 @@ using Hitbloq.Pages;
 using Hitbloq.Sources;
 using Hitbloq.Utilities;
 using HMUI;
+using IPA.Utilities.Async;
 using Tweening;
 using UnityEngine;
 using Zenject;
@@ -140,7 +141,7 @@ namespace Hitbloq.UI
             {
                 if (firstPage)
                 {
-                    await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+                    await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
                     {
                         leaderboardEntries.Clear();
                         customListTableData.tableView.ClearSelection();
@@ -160,7 +161,7 @@ namespace Hitbloq.UI
 
                 if (firstPage || currentPage == null)
                 {
-                    page = await leaderboardSources[SelectedCellIndex].GetScoresAsync(poolID, cancellationToken, 0);
+                    page = await leaderboardSources[SelectedCellIndex].GetScoresAsync(poolID, cancellationToken);
                 }
                 else
                 {
@@ -179,7 +180,7 @@ namespace Hitbloq.UI
             {
                 Loaded = true;
                 await SiraUtil.Extras.Utilities.PauseChamp;
-                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+                await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
                 {
                     customListTableData.tableView.ReloadDataKeepingPosition();
                 });

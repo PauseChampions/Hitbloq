@@ -1,13 +1,14 @@
-﻿using BeatSaberMarkupLanguage.Attributes;
+﻿using System.Threading;
+using System.Threading.Tasks;
+using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.ViewControllers;
-using HMUI;
-using System.Threading;
-using System.Threading.Tasks;
 using Hitbloq.Other;
 using Hitbloq.Pages;
 using Hitbloq.Sources;
 using Hitbloq.Utilities;
+using HMUI;
+using IPA.Utilities.Async;
 using Zenject;
 
 namespace Hitbloq.UI
@@ -107,7 +108,7 @@ namespace Hitbloq.UI
             {
                 if (firstPage)
                 {
-                    await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+                    await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
                     {
                         customListTableData.data.Clear();
                         customListTableData.tableView.ReloadData();
@@ -126,7 +127,7 @@ namespace Hitbloq.UI
 
                 if (firstPage || currentPage == null)
                 {
-                    page = await rankedListDetailedSource.GetRankedListAsync(poolID, cancellationToken, 0);
+                    page = await rankedListDetailedSource.GetRankedListAsync(poolID, cancellationToken);
                 }
                 else
                 {
@@ -163,7 +164,7 @@ namespace Hitbloq.UI
             {
                 Loaded = true;
                 await SiraUtil.Extras.Utilities.PauseChamp;
-                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+                await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
                 {
                     customListTableData.tableView.ReloadDataKeepingPosition();
                 });

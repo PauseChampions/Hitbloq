@@ -1,4 +1,8 @@
-﻿using BeatSaberMarkupLanguage;
+﻿using System.ComponentModel;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Parser;
@@ -8,10 +12,7 @@ using Hitbloq.Other;
 using Hitbloq.Sources;
 using Hitbloq.Utilities;
 using HMUI;
-using System.ComponentModel;
-using System.Reflection;
-using System.Threading;
-using System.Threading.Tasks;
+using IPA.Utilities.Async;
 using UnityEngine;
 
 namespace Hitbloq.UI
@@ -28,7 +29,7 @@ namespace Hitbloq.UI
         private readonly SpriteLoader spriteLoader;
         private readonly MaterialGrabber materialGrabber;
 
-        private readonly SemaphoreSlim modalSemaphore = new SemaphoreSlim(1, 1);
+        private readonly SemaphoreSlim modalSemaphore = new(1, 1);
         private CancellationTokenSource? modalTokenSource;
 
         private bool isFriend;
@@ -248,7 +249,7 @@ namespace Hitbloq.UI
                     return;
                 }
 
-                await IPA.Utilities.Async.UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+                await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
                 {
                     parserParams?.EmitEvent("close-modal");
                     parserParams?.EmitEvent("open-modal");
