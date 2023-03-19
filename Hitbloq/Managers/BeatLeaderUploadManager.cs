@@ -15,15 +15,9 @@ namespace Hitbloq.Managers
 			this.hitbloqManager = hitbloqManager;
 		}
 
-		public void Initialize()
-		{
-			UploadReplayRequest.AddStateListener(OnUploadReplayRequestStateChange);
-		}
+		public void Initialize() => UploadReplayRequest.AddStateListener(OnUploadReplayRequestStateChange);
 
-		public void Dispose()
-		{
-			UploadReplayRequest.RemoveStateListener(OnUploadReplayRequestStateChange);
-		}
+		public void Dispose() => UploadReplayRequest.RemoveStateListener(OnUploadReplayRequestStateChange);
 
 		private void OnUploadReplayRequestStateChange(RequestState state, Score result, string failReason)
 		{

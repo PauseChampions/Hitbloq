@@ -61,6 +61,7 @@ namespace Hitbloq.Utilities
                 var jsonSerializer = new JsonSerializer();
                 return jsonSerializer.Deserialize<T>(jsonTextReader);
             }
+            Plugin.Log.Error($"Unsuccessful web response for parsing {typeof(T)}. Code: {webResponse.Code}");
             return default;
         }
         
