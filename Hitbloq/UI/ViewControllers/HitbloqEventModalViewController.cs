@@ -15,114 +15,122 @@ using UnityEngine;
 
 namespace Hitbloq.UI
 {
-    internal class HitbloqEventModalViewController : NotifiableBase, INotifyViewActivated
-    {
-        private readonly IEventSource eventSource;
-        private readonly SpriteLoader spriteLoader;
-        private readonly HitbloqFlowCoordinator hitbloqFlowCoordinator;
-        
-        private HitbloqEvent? currentEvent;
-        private bool parsed;
-        
-        [UIComponent("modal")]
-        private ModalView? modalView;
-        
-        private Vector3? modalPosition;
+	internal class HitbloqEventModalViewController : NotifiableBase, INotifyViewActivated
+	{
+		[UIComponent("text-page")]
+		private readonly TextPageScrollView? _descriptionTextPage = null!;
 
-        [UIComponent("modal")]
-        private readonly RectTransform? modalTransform = null!;
+		[UIComponent("event-image")]
+		private readonly ImageView? _eventImage = null!;
 
-        [UIComponent("event-image")]
-        private readonly ImageView? eventImage = null!;
+		private readonly IEventSource _eventSource;
+		private readonly HitbloqFlowCoordinator _hitbloqFlowCoordinator;
 
-        [UIComponent("text-page")]
-        private readonly TextPageScrollView? descriptionTextPage = null!;
+		[UIComponent("modal")]
+		private readonly RectTransform? _modalTransform = null!;
 
-        [UIParams]
-        private readonly BSMLParserParams? parserParams = null!;
+		[UIParams]
+		private readonly BSMLParserParams? _parserParams = null!;
 
-        public HitbloqEventModalViewController(IEventSource eventSource, SpriteLoader spriteLoader, HitbloqFlowCoordinator hitbloqFlowCoordinator)
-        {
-            this.eventSource = eventSource;
-            this.spriteLoader = spriteLoader;
-            this.hitbloqFlowCoordinator = hitbloqFlowCoordinator;
-        }
+		private readonly SpriteLoader _spriteLoader;
 
-        public void ViewActivated(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling) =>
-            _ = ViewActivatedAsync(hitbloqLeaderboardViewController, firstActivation);
+		private HitbloqEvent? _currentEvent;
 
-        private async Task ViewActivatedAsync(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, bool firstActivation)
-        {
-            if (firstActivation)
-            {
-                var hitbloqEvent = await eventSource.GetAsync();
-                if (hitbloqEvent != null && hitbloqEvent.ID != -1)
-                {
-                    if (!PluginConfig.Instance.ViewedEvents.Contains(hitbloqEvent.ID))
-                    {
-                        await UnityMainThreadTaskScheduler.Factory.StartNew(() => ShowModal(hitbloqLeaderboardViewController.transform));
-                        PluginConfig.Instance.ViewedEvents.Add(hitbloqEvent.ID);
-                        PluginConfig.Instance.Changed();
-                    }
-                }
-            }
-        }
+		private Vector3? _modalPosition;
 
-        private void Parse(Transform parentTransform)
-        {
-            if (!parsed)
-            {
-                BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqEventModal.bsml"), parentTransform.gameObject, this);
-                modalPosition = modalTransform!.localPosition;
-            }
-            modalTransform!.SetParent(parentTransform);
-            modalTransform.localPosition = modalPosition!.Value;
-            Accessors.AnimateCanvasAccessor(ref modalView!) = true;
-            descriptionTextPage!.ScrollTo(0, true);
-        }
+		[UIComponent("modal")]
+		private ModalView? _modalView;
 
-        internal void ShowModal(Transform parentTransform)
-        {
-            Parse(parentTransform);
-            parserParams?.EmitEvent("close-modal");
-            parserParams?.EmitEvent("open-modal");
-        }
+		private bool _parsed;
 
-        [UIAction("#post-parse")]
-        private void PostParse() => _ = PostParseAsync();
+		public HitbloqEventModalViewController(IEventSource eventSource, SpriteLoader spriteLoader, HitbloqFlowCoordinator hitbloqFlowCoordinator)
+		{
+			_eventSource = eventSource;
+			_spriteLoader = spriteLoader;
+			_hitbloqFlowCoordinator = hitbloqFlowCoordinator;
+		}
 
-        private async Task PostParseAsync()
-        {
-            parsed = true;
-            modalView!.gameObject.name = "HitbloqEventModal";
-            currentEvent = await eventSource.GetAsync();
+		[UIValue("event-title")]
+		private string EventTitle => $"{_currentEvent?.Title}";
 
-            if (currentEvent?.Image != null)
-            {
-                _ = spriteLoader.DownloadSpriteAsync(currentEvent.Image, sprite => eventImage!.sprite = sprite);
-            }
+		[UIValue("event-description")]
+		private string EventDescription => $"{_currentEvent?.Description}";
 
-            NotifyPropertyChanged(nameof(EventTitle));
-            NotifyPropertyChanged(nameof(EventDescription));
-            NotifyPropertyChanged(nameof(PoolExists));
-        }
+		[UIValue("pool-exists")]
+		private bool PoolExists => _currentEvent is {Pool: { }};
 
-        [UIAction("pool-click")]
-        private void PoolClick()
-        {
-            if (PoolExists)
-            {
-                hitbloqFlowCoordinator.ShowAndOpenPoolWithID(currentEvent!.Pool);
-            }
-        }
+		public void ViewActivated(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+		{
+			_ = ViewActivatedAsync(hitbloqLeaderboardViewController, firstActivation);
+		}
 
-        [UIValue("event-title")]
-        private string EventTitle => $"{currentEvent?.Title}";
+		private async Task ViewActivatedAsync(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, bool firstActivation)
+		{
+			if (firstActivation)
+			{
+				var hitbloqEvent = await _eventSource.GetAsync();
+				if (hitbloqEvent != null && hitbloqEvent.ID != -1)
+				{
+					if (!PluginConfig.Instance.ViewedEvents.Contains(hitbloqEvent.ID))
+					{
+						await UnityMainThreadTaskScheduler.Factory.StartNew(() => ShowModal(hitbloqLeaderboardViewController.transform));
+						PluginConfig.Instance.ViewedEvents.Add(hitbloqEvent.ID);
+						PluginConfig.Instance.Changed();
+					}
+				}
+			}
+		}
 
-        [UIValue("event-description")]
-        private string EventDescription => $"{currentEvent?.Description}";
-        
-        [UIValue("pool-exists")]
-        private bool PoolExists => currentEvent is {Pool: { }};
-    }
+		private void Parse(Transform parentTransform)
+		{
+			if (!_parsed)
+			{
+				BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqEventModal.bsml"), parentTransform.gameObject, this);
+				_modalPosition = _modalTransform!.localPosition;
+			}
+
+			_modalTransform!.SetParent(parentTransform);
+			_modalTransform.localPosition = _modalPosition!.Value;
+			Accessors.AnimateCanvasAccessor(ref _modalView!) = true;
+			_descriptionTextPage!.ScrollTo(0, true);
+		}
+
+		internal void ShowModal(Transform parentTransform)
+		{
+			Parse(parentTransform);
+			_parserParams?.EmitEvent("close-modal");
+			_parserParams?.EmitEvent("open-modal");
+		}
+
+		[UIAction("#post-parse")]
+		private void PostParse()
+		{
+			_ = PostParseAsync();
+		}
+
+		private async Task PostParseAsync()
+		{
+			_parsed = true;
+			_modalView!.gameObject.name = "HitbloqEventModal";
+			_currentEvent = await _eventSource.GetAsync();
+
+			if (_currentEvent?.Image != null)
+			{
+				_ = _spriteLoader.DownloadSpriteAsync(_currentEvent.Image, sprite => _eventImage!.sprite = sprite);
+			}
+
+			NotifyPropertyChanged(nameof(EventTitle));
+			NotifyPropertyChanged(nameof(EventDescription));
+			NotifyPropertyChanged(nameof(PoolExists));
+		}
+
+		[UIAction("pool-click")]
+		private void PoolClick()
+		{
+			if (PoolExists)
+			{
+				_hitbloqFlowCoordinator.ShowAndOpenPoolWithID(_currentEvent!.Pool);
+			}
+		}
+	}
 }

@@ -9,93 +9,97 @@ using SongCore.Utilities;
 
 namespace Hitbloq.Utilities
 {
-    internal static class Utils
-    {
-        private static bool? isScoreSaberInstalled;
-        private static bool? isBeatLeaderInstalled;
+	internal static class Utils
+	{
+		private static bool? _isScoreSaberInstalled;
+		private static bool? _isBeatLeaderInstalled;
 
-        public static bool IsScoreSaberInstalled
-        {
-            get
-            {
-                isScoreSaberInstalled ??= PluginManager.GetPluginFromId("ScoreSaber") != null;
-                return (bool) isScoreSaberInstalled;
-            }
-        }
-        
-        public static bool IsBeatLeaderInstalled
-        {
-            get
-            {
-                if (isBeatLeaderInstalled is null)
-                {
-                    var plugin = PluginManager.GetPluginFromId("BeatLeader");
-                    isBeatLeaderInstalled = plugin is not null && plugin.HVersion >= new Version(0, 6, 1);
-                }
-                isBeatLeaderInstalled ??= PluginManager.GetPluginFromId("BeatLeader") is not null;
-                return (bool) isBeatLeaderInstalled;
-            }
-        }
-        
-        public static bool IsDependencyLeaderboardInstalled => IsScoreSaberInstalled || IsBeatLeaderInstalled;
+		public static bool IsScoreSaberInstalled
+		{
+			get
+			{
+				_isScoreSaberInstalled ??= PluginManager.GetPluginFromId("ScoreSaber") != null;
+				return (bool) _isScoreSaberInstalled;
+			}
+		}
 
-        public static string? DifficultyBeatmapToString(IDifficultyBeatmap difficultyBeatmap)
-        {
-            if (difficultyBeatmap.level is CustomPreviewBeatmapLevel customLevel)
-            {
-                var hash = Hashing.GetCustomLevelHash(customLevel);
-                var difficulty = difficultyBeatmap.difficulty.ToString();
-                var characteristic = difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic.serializedName;
-                return $"{hash}%7C_{difficulty}_Solo{characteristic}";   
-            }
+		public static bool IsBeatLeaderInstalled
+		{
+			get
+			{
+				if (_isBeatLeaderInstalled is null)
+				{
+					var plugin = PluginManager.GetPluginFromId("BeatLeader");
+					_isBeatLeaderInstalled = plugin is not null && plugin.HVersion >= new Version(0, 6, 1);
+				}
 
-            return null;
-        }
+				_isBeatLeaderInstalled ??= PluginManager.GetPluginFromId("BeatLeader") is not null;
+				return (bool) _isBeatLeaderInstalled;
+			}
+		}
 
-        public static async Task<T?> ParseWebResponse<T>(IHttpResponse webResponse)
-        {
-            if (webResponse.Successful && (await webResponse.ReadAsByteArrayAsync()).Length > 3)
-            {
-                using var streamReader = new StreamReader(await webResponse.ReadAsStreamAsync());
-                using var jsonTextReader = new JsonTextReader(streamReader);
-                var jsonSerializer = new JsonSerializer();
-                return jsonSerializer.Deserialize<T>(jsonTextReader);
-            }
-            Plugin.Log.Error($"Unsuccessful web response for parsing {typeof(T)}. Code: {webResponse.Code}");
-            return default;
-        }
-        
-        public static bool DoesNotHaveAlphaNumericCharacters(this string str)
-        {
-            var sb = new StringBuilder();
-            foreach (var c in str)
-            {
-                if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
-                {
-                    sb.Append(c);
-                }
-            }
-            return sb.Length == 0;
-        }
+		public static bool IsDependencyLeaderboardInstalled => IsScoreSaberInstalled || IsBeatLeaderInstalled;
 
-        public static string RemoveSpecialCharacters(this string str)
-        {
-            var sb = new StringBuilder();
-            foreach (var c in str)
-            {
-                if (c <= 255)
-                {
-                    sb.Append(c);
-                }
-            }
-            return sb.ToString();
-        }
-        
-        public static LevelSelectionFlowCoordinator.State GetStateForPlaylist(IBeatmapLevelPack beatmapLevelPack)
-        {
-            var state = new LevelSelectionFlowCoordinator.State(beatmapLevelPack);
-            Accessors.LevelCategoryAccessor(ref state) = SelectLevelCategoryViewController.LevelCategory.CustomSongs;
-            return state;
-        }
-    }
+		public static string? DifficultyBeatmapToString(IDifficultyBeatmap difficultyBeatmap)
+		{
+			if (difficultyBeatmap.level is CustomPreviewBeatmapLevel customLevel)
+			{
+				var hash = Hashing.GetCustomLevelHash(customLevel);
+				var difficulty = difficultyBeatmap.difficulty.ToString();
+				var characteristic = difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic.serializedName;
+				return $"{hash}%7C_{difficulty}_Solo{characteristic}";
+			}
+
+			return null;
+		}
+
+		public static async Task<T?> ParseWebResponse<T>(IHttpResponse webResponse)
+		{
+			if (webResponse.Successful && (await webResponse.ReadAsByteArrayAsync()).Length > 3)
+			{
+				using var streamReader = new StreamReader(await webResponse.ReadAsStreamAsync());
+				using var jsonTextReader = new JsonTextReader(streamReader);
+				var jsonSerializer = new JsonSerializer();
+				return jsonSerializer.Deserialize<T>(jsonTextReader);
+			}
+
+			Plugin.Log.Error($"Unsuccessful web response for parsing {typeof(T)}. Code: {webResponse.Code}");
+			return default;
+		}
+
+		public static bool DoesNotHaveAlphaNumericCharacters(this string str)
+		{
+			var sb = new StringBuilder();
+			foreach (var c in str)
+			{
+				if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z'))
+				{
+					sb.Append(c);
+				}
+			}
+
+			return sb.Length == 0;
+		}
+
+		public static string RemoveSpecialCharacters(this string str)
+		{
+			var sb = new StringBuilder();
+			foreach (var c in str)
+			{
+				if (c <= 255)
+				{
+					sb.Append(c);
+				}
+			}
+
+			return sb.ToString();
+		}
+
+		public static LevelSelectionFlowCoordinator.State GetStateForPlaylist(IBeatmapLevelPack beatmapLevelPack)
+		{
+			var state = new LevelSelectionFlowCoordinator.State(beatmapLevelPack);
+			Accessors.LevelCategoryAccessor(ref state) = SelectLevelCategoryViewController.LevelCategory.CustomSongs;
+			return state;
+		}
+	}
 }

@@ -4,13 +4,16 @@ namespace Hitbloq.Managers
 {
 	internal sealed class ScoreSaberUploadManager : INotifyScoreUpload
 	{
-		private readonly HitbloqManager hitbloqManager;
+		private readonly HitbloqManager _hitbloqManager;
 
 		public ScoreSaberUploadManager(HitbloqManager hitbloqManager)
 		{
-			this.hitbloqManager = hitbloqManager;
+			_hitbloqManager = hitbloqManager;
 		}
 
-		public void OnScoreUploaded() => hitbloqManager.OnScoreUploaded();
+		public void OnScoreUploaded()
+		{
+			_hitbloqManager.OnScoreUploaded();
+		}
 	}
 }

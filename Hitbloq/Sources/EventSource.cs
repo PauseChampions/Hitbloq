@@ -4,12 +4,12 @@ using SiraUtil.Web;
 
 namespace Hitbloq.Sources
 {
-    internal class EventSource : Source<HitbloqEvent>, IEventSource
-    {
-        protected override string EndpointURL => "api/event";
+	internal class EventSource : Source<HitbloqEvent>, IEventSource
+	{
+		public EventSource(IHttpService siraHttpService) : base(siraHttpService)
+		{
+		}
 
-        public EventSource(IHttpService siraHttpService) : base(siraHttpService)
-        {
-        }
-    }
+		protected override string EndpointURL => "api/event";
+	}
 }

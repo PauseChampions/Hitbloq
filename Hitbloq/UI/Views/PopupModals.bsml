@@ -1,10 +1,14 @@
-﻿<bg id="root" xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
-    <modal id='yes-no-modal' show-event='open-yes-no' hide-event='close-yes-no' clickerino-offerino-closerino='true' size-delta-x='65' size-delta-y='35'>
-        <vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' spacing='3' preferred-width='60' preferred-height='30'>
-            <text text='~yes-no-text' word-wrapping='true' align='Center' />
+﻿<bg id="root">
+    <modal id='yes-no-modal' show-event='open-yes-no' hide-event='close-yes-no' clickerino-offerino-closerino='true'
+           size-delta-x='65' size-delta-y='35'>
+        <vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' spacing='3' preferred-width='60'
+                  preferred-height='30'>
+            <text text='~yes-no-text' word-wrapping='true' align='Center'/>
             <horizontal>
-                <primary-button text='~yes-button-text' on-click='yes-button-pressed' click-event='close-yes-no' min-width='16' pref-height='8' />
-                <button text='~no-button-text' on-click='no-button-pressed' click-event='close-yes-no' min-width='16' pref-height='8' />
+                <primary-button text='~yes-button-text' on-click='yes-button-pressed' click-event='close-yes-no'
+                                min-width='16' pref-height='8'/>
+                <button text='~no-button-text' on-click='no-button-pressed' click-event='close-yes-no' min-width='16'
+                        pref-height='8'/>
             </horizontal>
         </vertical>
     </modal>

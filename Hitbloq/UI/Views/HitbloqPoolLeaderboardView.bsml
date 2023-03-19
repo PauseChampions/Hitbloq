@@ -1,14 +1,17 @@
-﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance'>
-	<horizontal anchor-min-x='0.15' anchor-min-y='1.15'  bg='panel-top' pad-left='10' pad-right='10' horizontal-fit='PreferredSize'>
-		<text text='Pool Leaderboard' align='Center' font-size='8' />
-	</horizontal>
-	<horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='100' pref-height='70'>
-		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='9' pref-height='25'>
-			<vertical-icon-segments data='cell-data' select-cell='cell-selected' />
-		</vertical>
-		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='80' pref-height='70'>
-			<list id='list' active='~has-loaded' show-scrollbar='true' stick-scrolling='true' select-cell='list-select' vertical-fit='PreferredSize' />
-			<loading-indicator active='~is-loading' preserve-aspect='true' ignore-layout="true" pref-height="20" pref-width="20" />
-		</vertical>
-	</horizontal>
+﻿<bg>
+    <horizontal anchor-min-x='0.15' anchor-min-y='1.15' bg='panel-top' pad-left='10' pad-right='10'
+                horizontal-fit='PreferredSize'>
+        <text text='Pool Leaderboard' align='Center' font-size='8'/>
+    </horizontal>
+    <horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='100' pref-height='70'>
+        <vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='9' pref-height='25'>
+            <vertical-icon-segments data='cell-data' select-cell='cell-selected'/>
+        </vertical>
+        <vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='80' pref-height='70'>
+            <list id='list' active='~has-loaded' show-scrollbar='true' stick-scrolling='true' select-cell='list-select'
+                  vertical-fit='PreferredSize'/>
+            <loading-indicator active='~is-loading' preserve-aspect='true' ignore-layout="true" pref-height="20"
+                               pref-width="20"/>
+        </vertical>
+    </horizontal>
 </bg>

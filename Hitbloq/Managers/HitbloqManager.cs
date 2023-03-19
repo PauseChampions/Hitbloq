@@ -15,191 +15,207 @@ using Zenject;
 
 namespace Hitbloq.Managers
 {
-    internal class HitbloqManager : IInitializable, IDisposable, INotifyLeaderboardSet
-    {
-        private readonly HitbloqLeaderboardViewController hitbloqLeaderboardViewController;
-        private readonly HitbloqPanelController hitbloqPanelController;
-        private readonly HitbloqProfileModalController hitbloqProfileModalController;
-        private readonly HitbloqEventModalViewController hitbloqEventModalViewController;
-        private readonly HitbloqFlowCoordinator hitbloqFlowCoordinator;
+	internal class HitbloqManager : IInitializable, IDisposable, INotifyLeaderboardSet
+	{
+		private readonly List<IDifficultyBeatmapUpdater> _difficultyBeatmapUpdaters;
+		private readonly HitbloqEventModalViewController _hitbloqEventModalViewController;
+		private readonly HitbloqFlowCoordinator _hitbloqFlowCoordinator;
+		private readonly HitbloqLeaderboardViewController _hitbloqLeaderboardViewController;
+		private readonly HitbloqPanelController _hitbloqPanelController;
+		private readonly HitbloqProfileModalController _hitbloqProfileModalController;
+		private readonly List<ILeaderboardEntriesUpdater> _leaderboardEntriesUpdaters;
+		private readonly LeaderboardRefresher _leaderboardRefresher;
+		private readonly LevelInfoSource _levelInfoSource;
 
-        private readonly UserIDSource userIDSource;
-        private readonly LevelInfoSource levelInfoSource;
-        private readonly LeaderboardRefresher leaderboardRefresher;
+		private readonly List<INotifyUserRegistered> _notifyUserRegistereds;
+		private readonly List<INotifyViewActivated> _notifyViewActivateds;
+		private readonly List<IPoolUpdater> _poolUpdaters;
 
-        private readonly List<INotifyUserRegistered> notifyUserRegistereds;
-        private readonly List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters;
-        private readonly List<INotifyViewActivated> notifyViewActivateds;
-        private readonly List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters;
-        private readonly List<IPoolUpdater> poolUpdaters;
+		private readonly UserIDSource _userIDSource;
 
-        private IDifficultyBeatmap? selectedDifficultyBeatmap;
-        private CancellationTokenSource? levelInfoTokenSource;
-        private CancellationTokenSource? leaderboardTokenSource;
+		private string? _currentPool;
+		private CancellationTokenSource? _leaderboardTokenSource;
+		private CancellationTokenSource? _levelInfoTokenSource;
+		private bool _scoreAlreadyUploaded;
 
-        private string? currentPool;
-        private bool scoreAlreadyUploaded;
+		private IDifficultyBeatmap? _selectedDifficultyBeatmap;
 
-        public HitbloqManager(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, HitbloqPanelController hitbloqPanelController, HitbloqProfileModalController hitbloqProfileModalController,
-            HitbloqEventModalViewController hitbloqEventModalViewController, HitbloqFlowCoordinator hitbloqFlowCoordinator, UserIDSource userIDSource, LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher, List<INotifyUserRegistered> notifyUserRegistereds,
-            List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters, List<INotifyViewActivated> notifyViewActivateds, List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters,
-            List<IPoolUpdater> poolUpdaters)
-        {
-            this.hitbloqLeaderboardViewController = hitbloqLeaderboardViewController;
-            this.hitbloqPanelController = hitbloqPanelController;
-            this.hitbloqProfileModalController = hitbloqProfileModalController;
-            this.hitbloqEventModalViewController = hitbloqEventModalViewController;
-            this.hitbloqFlowCoordinator = hitbloqFlowCoordinator;
+		public HitbloqManager(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, HitbloqPanelController hitbloqPanelController, HitbloqProfileModalController hitbloqProfileModalController, HitbloqEventModalViewController hitbloqEventModalViewController, HitbloqFlowCoordinator hitbloqFlowCoordinator, UserIDSource userIDSource, LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher, List<INotifyUserRegistered> notifyUserRegistereds, List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters, List<INotifyViewActivated> notifyViewActivateds, List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters, List<IPoolUpdater> poolUpdaters)
+		{
+			_hitbloqLeaderboardViewController = hitbloqLeaderboardViewController;
+			_hitbloqPanelController = hitbloqPanelController;
+			_hitbloqProfileModalController = hitbloqProfileModalController;
+			_hitbloqEventModalViewController = hitbloqEventModalViewController;
+			_hitbloqFlowCoordinator = hitbloqFlowCoordinator;
 
-            this.userIDSource = userIDSource;
-            this.levelInfoSource = levelInfoSource;
-            this.leaderboardRefresher = leaderboardRefresher;
+			_userIDSource = userIDSource;
+			_levelInfoSource = levelInfoSource;
+			_leaderboardRefresher = leaderboardRefresher;
 
-            this.notifyUserRegistereds = notifyUserRegistereds;
-            this.difficultyBeatmapUpdaters = difficultyBeatmapUpdaters;
-            this.notifyViewActivateds = notifyViewActivateds;
-            this.leaderboardEntriesUpdaters = leaderboardEntriesUpdaters;
-            this.poolUpdaters = poolUpdaters;
-        }
+			_notifyUserRegistereds = notifyUserRegistereds;
+			_difficultyBeatmapUpdaters = difficultyBeatmapUpdaters;
+			_notifyViewActivateds = notifyViewActivateds;
+			_leaderboardEntriesUpdaters = leaderboardEntriesUpdaters;
+			_poolUpdaters = poolUpdaters;
+		}
 
-        public void Initialize()
-        {
-            userIDSource.UserRegisteredEvent += OnUserRegistered;
+		public void Dispose()
+		{
+			_userIDSource.UserRegisteredEvent -= OnUserRegistered;
 
-            hitbloqLeaderboardViewController.didActivateEvent += OnViewActivated;
-            hitbloqLeaderboardViewController.PageRequested += OnPageRequested;
+			_hitbloqLeaderboardViewController.didActivateEvent -= OnViewActivated;
+			_hitbloqLeaderboardViewController.PageRequested -= OnPageRequested;
 
-            hitbloqPanelController.PoolChangedEvent += OnPoolChanged;
-            hitbloqPanelController.RankTextClickedEvent += OnRankTextClicked;
-            hitbloqPanelController.LogoClickedEvent += OnLogoClicked;
-            hitbloqPanelController.EventClickedEvent += OnEventClicked;
-            
-            SceneManager.activeSceneChanged += SceneManagerOnactiveSceneChanged;
-        }
+			_hitbloqPanelController.PoolChangedEvent -= OnPoolChanged;
+			_hitbloqPanelController.RankTextClickedEvent -= OnRankTextClicked;
+			_hitbloqPanelController.LogoClickedEvent -= OnLogoClicked;
+			_hitbloqPanelController.EventClickedEvent -= OnEventClicked;
 
-        public void Dispose()
-        {
-            userIDSource.UserRegisteredEvent -= OnUserRegistered;
+			SceneManager.activeSceneChanged -= SceneManagerOnactiveSceneChanged;
+		}
 
-            hitbloqLeaderboardViewController.didActivateEvent -= OnViewActivated;
-            hitbloqLeaderboardViewController.PageRequested -= OnPageRequested;
+		public void Initialize()
+		{
+			_userIDSource.UserRegisteredEvent += OnUserRegistered;
 
-            hitbloqPanelController.PoolChangedEvent -= OnPoolChanged;
-            hitbloqPanelController.RankTextClickedEvent -= OnRankTextClicked;
-            hitbloqPanelController.LogoClickedEvent -= OnLogoClicked;
-            hitbloqPanelController.EventClickedEvent -= OnEventClicked;
-            
-            SceneManager.activeSceneChanged -= SceneManagerOnactiveSceneChanged;
-        }
+			_hitbloqLeaderboardViewController.didActivateEvent += OnViewActivated;
+			_hitbloqLeaderboardViewController.PageRequested += OnPageRequested;
 
-        public void OnScoreUploaded() => _ = OnScoreUploadAsync();
-        private async Task OnScoreUploadAsync()
-        {
-            if (!scoreAlreadyUploaded && await leaderboardRefresher.Refresh())
-            {
-                scoreAlreadyUploaded = true;
-                await OnLeaderboardSetAsync(selectedDifficultyBeatmap);
-            }
-        }
+			_hitbloqPanelController.PoolChangedEvent += OnPoolChanged;
+			_hitbloqPanelController.RankTextClickedEvent += OnRankTextClicked;
+			_hitbloqPanelController.LogoClickedEvent += OnLogoClicked;
+			_hitbloqPanelController.EventClickedEvent += OnEventClicked;
 
-        public void OnLeaderboardSet(IDifficultyBeatmap? difficultyBeatmap) =>
-            _ = OnLeaderboardSetAsync(difficultyBeatmap);
+			SceneManager.activeSceneChanged += SceneManagerOnactiveSceneChanged;
+		}
 
-        private async Task OnLeaderboardSetAsync(IDifficultyBeatmap? difficultyBeatmap)
-        {
-            if (difficultyBeatmap != null)
-            {
-                selectedDifficultyBeatmap = difficultyBeatmap;
-                levelInfoTokenSource?.Cancel();
-                levelInfoTokenSource?.Dispose();
-                HitbloqLevelInfo? levelInfoEntry = null;
+		public void OnLeaderboardSet(IDifficultyBeatmap? difficultyBeatmap)
+		{
+			_ = OnLeaderboardSetAsync(difficultyBeatmap);
+		}
 
-                if (difficultyBeatmap.level is CustomPreviewBeatmapLevel)
-                {
-                    levelInfoTokenSource = new CancellationTokenSource();
-                    levelInfoEntry = await levelInfoSource.GetLevelInfoAsync(difficultyBeatmap, levelInfoTokenSource.Token);
-                }
+		public void OnScoreUploaded()
+		{
+			_ = OnScoreUploadAsync();
+		}
 
-                if (levelInfoEntry != null)
-                {
-                    if (levelInfoEntry.Pools.Count == 0)
-                    {
-                        levelInfoEntry = null;
-                    }
-                }
+		private async Task OnScoreUploadAsync()
+		{
+			if (!_scoreAlreadyUploaded && await _leaderboardRefresher.Refresh())
+			{
+				_scoreAlreadyUploaded = true;
+				await OnLeaderboardSetAsync(_selectedDifficultyBeatmap);
+			}
+		}
 
-                foreach (var difficultyBeatmapUpdater in difficultyBeatmapUpdaters)
-                {
-                    await UnityMainThreadTaskScheduler.Factory.StartNew(() => difficultyBeatmapUpdater.DifficultyBeatmapUpdated(difficultyBeatmap, levelInfoEntry));
-                }
-            }
-        }
+		private async Task OnLeaderboardSetAsync(IDifficultyBeatmap? difficultyBeatmap)
+		{
+			if (difficultyBeatmap != null)
+			{
+				_selectedDifficultyBeatmap = difficultyBeatmap;
+				_levelInfoTokenSource?.Cancel();
+				_levelInfoTokenSource?.Dispose();
+				HitbloqLevelInfo? levelInfoEntry = null;
 
-        private void OnUserRegistered()
-        {
-            foreach (var notifyUserRegistered in notifyUserRegistereds)
-            {
-                notifyUserRegistered.UserRegistered();
-            }
-        }
+				if (difficultyBeatmap.level is CustomPreviewBeatmapLevel)
+				{
+					_levelInfoTokenSource = new CancellationTokenSource();
+					levelInfoEntry = await _levelInfoSource.GetLevelInfoAsync(difficultyBeatmap, _levelInfoTokenSource.Token);
+				}
 
-        private void OnViewActivated(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
-        {
-            foreach (var notifyViewActivated in notifyViewActivateds)
-            {
-                notifyViewActivated.ViewActivated(hitbloqLeaderboardViewController, firstActivation, addedToHierarchy, screenSystemEnabling);
-            }
-        }
+				if (levelInfoEntry != null)
+				{
+					if (levelInfoEntry.Pools.Count == 0)
+					{
+						levelInfoEntry = null;
+					}
+				}
 
-        private void OnPageRequested(IDifficultyBeatmap difficultyBeatmap, IMapLeaderboardSource leaderboardSource, int page) =>
-            _ = OnPageRequestedAsync(difficultyBeatmap, leaderboardSource, page);
+				foreach (var difficultyBeatmapUpdater in _difficultyBeatmapUpdaters)
+				{
+					await UnityMainThreadTaskScheduler.Factory.StartNew(() => difficultyBeatmapUpdater.DifficultyBeatmapUpdated(difficultyBeatmap, levelInfoEntry));
+				}
+			}
+		}
 
-        private async Task OnPageRequestedAsync(IDifficultyBeatmap difficultyBeatmap, IMapLeaderboardSource leaderboardSource, int page)
-        {
-            if (!Utils.IsDependencyLeaderboardInstalled)
-            {
-                return;
-            }
-            
-            leaderboardTokenSource?.Cancel();
-            leaderboardTokenSource?.Dispose();
-            leaderboardTokenSource = new CancellationTokenSource();
-            var leaderboardEntries = await leaderboardSource.GetScoresAsync(difficultyBeatmap, leaderboardTokenSource.Token, page);
+		private void OnUserRegistered()
+		{
+			foreach (var notifyUserRegistered in _notifyUserRegistereds)
+			{
+				notifyUserRegistered.UserRegistered();
+			}
+		}
 
-            if (leaderboardEntries != null)
-            {
-                if (leaderboardEntries.Count == 0 || leaderboardEntries[0].CR.Count == 0)
-                {
-                    leaderboardEntries = null;
-                }
-            }
+		private void OnViewActivated(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+		{
+			foreach (var notifyViewActivated in _notifyViewActivateds)
+			{
+				notifyViewActivated.ViewActivated(_hitbloqLeaderboardViewController, firstActivation, addedToHierarchy, screenSystemEnabling);
+			}
+		}
 
-            foreach(var leaderboardEntriesUpdater in leaderboardEntriesUpdaters)
-            {
-                await UnityMainThreadTaskScheduler.Factory.StartNew(() => leaderboardEntriesUpdater.LeaderboardEntriesUpdated(leaderboardEntries));
-            }
-        }
+		private void OnPageRequested(IDifficultyBeatmap difficultyBeatmap, IMapLeaderboardSource leaderboardSource, int page)
+		{
+			_ = OnPageRequestedAsync(difficultyBeatmap, leaderboardSource, page);
+		}
 
-        private void OnPoolChanged(string pool)
-        {
-            foreach (var poolUpdater in poolUpdaters)
-            {
-                poolUpdater.PoolUpdated(pool);
-            }
-            
-            currentPool = pool;
-        }
+		private async Task OnPageRequestedAsync(IDifficultyBeatmap difficultyBeatmap, IMapLeaderboardSource leaderboardSource, int page)
+		{
+			if (!Utils.IsDependencyLeaderboardInstalled)
+			{
+				return;
+			}
 
-        private void OnRankTextClicked(HitbloqRankInfo rankInfo, string pool) => hitbloqProfileModalController.ShowModalForSelf(hitbloqLeaderboardViewController.transform, rankInfo, pool);
+			_leaderboardTokenSource?.Cancel();
+			_leaderboardTokenSource?.Dispose();
+			_leaderboardTokenSource = new CancellationTokenSource();
+			var leaderboardEntries = await leaderboardSource.GetScoresAsync(difficultyBeatmap, _leaderboardTokenSource.Token, page);
 
-        private void OnLogoClicked() => hitbloqFlowCoordinator.ShowAndOpenPoolWithID(currentPool);
+			if (leaderboardEntries != null)
+			{
+				if (leaderboardEntries.Count == 0 || leaderboardEntries[0].CR.Count == 0)
+				{
+					leaderboardEntries = null;
+				}
+			}
 
-        private void OnEventClicked() => hitbloqEventModalViewController.ShowModal(hitbloqLeaderboardViewController.transform);
-        
-        private void SceneManagerOnactiveSceneChanged(Scene currentScene, Scene nextScene)
-        {
-            if (currentScene.name == "MainMenu")
-                scoreAlreadyUploaded = false;
-        }
-    }
+			foreach (var leaderboardEntriesUpdater in _leaderboardEntriesUpdaters)
+			{
+				await UnityMainThreadTaskScheduler.Factory.StartNew(() => leaderboardEntriesUpdater.LeaderboardEntriesUpdated(leaderboardEntries));
+			}
+		}
+
+		private void OnPoolChanged(string pool)
+		{
+			foreach (var poolUpdater in _poolUpdaters)
+			{
+				poolUpdater.PoolUpdated(pool);
+			}
+
+			_currentPool = pool;
+		}
+
+		private void OnRankTextClicked(HitbloqRankInfo rankInfo, string pool)
+		{
+			_hitbloqProfileModalController.ShowModalForSelf(_hitbloqLeaderboardViewController.transform, rankInfo, pool);
+		}
+
+		private void OnLogoClicked()
+		{
+			_hitbloqFlowCoordinator.ShowAndOpenPoolWithID(_currentPool);
+		}
+
+		private void OnEventClicked()
+		{
+			_hitbloqEventModalViewController.ShowModal(_hitbloqLeaderboardViewController.transform);
+		}
+
+		private void SceneManagerOnactiveSceneChanged(Scene currentScene, Scene nextScene)
+		{
+			if (currentScene.name == "MainMenu")
+			{
+				_scoreAlreadyUploaded = false;
+			}
+		}
+	}
 }

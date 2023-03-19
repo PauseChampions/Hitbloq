@@ -1,8 +1,11 @@
 ﻿<vertical id="root" horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='75'>
-    <horizontal id="pool-cell" vertical-fit='PreferredSize' pref-height="23" />
-    <horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='75' pref-height='40' spacing='2'>
-        <text-page id='text-page' text='~description' />
+    <horizontal id="pool-cell" vertical-fit='PreferredSize' pref-height="23"/>
+    <horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='75' pref-height='40'
+                spacing='2'>
+        <text-page id='text-page' text='~description'/>
     </horizontal>
-    <button text='⏬ Download Playlist' on-click='download-click' interactable='~download-interactable' active='~download-active' pref-height='10' pref-width='50' anchor-pos-y='25' />
-    <primary-button text='Go To Playlist!' on-click='go-to-playlist' active='~go-to-active' pref-height='10' pref-width='50' anchor-pos-y='25' />
+    <button text='⏬ Download Playlist' on-click='download-click' interactable='~download-interactable'
+            active='~download-active' pref-height='10' pref-width='50' anchor-pos-y='25'/>
+    <primary-button text='Go To Playlist!' on-click='go-to-playlist' active='~go-to-active' pref-height='10'
+                    pref-width='50' anchor-pos-y='25'/>
 </vertical>
