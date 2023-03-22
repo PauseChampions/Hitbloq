@@ -1,11 +1,12 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
-using Hive.Versioning;
 using IPA.Loader;
 using Newtonsoft.Json;
 using SiraUtil.Web;
 using SongCore.Utilities;
+using Version = Hive.Versioning.Version;
 
 namespace Hitbloq.Utilities
 {
@@ -64,6 +65,7 @@ namespace Hitbloq.Utilities
 			}
 
 			Plugin.Log.Error($"Unsuccessful web response for parsing {typeof(T)}. Code: {webResponse.Code}");
+			Plugin.Log.Debug(Environment.StackTrace);
 			return default;
 		}
 
