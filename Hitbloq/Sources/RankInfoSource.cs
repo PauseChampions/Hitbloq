@@ -32,6 +32,11 @@ namespace Hitbloq.Sources
 		{
 			try
 			{
+				// Because poolID is None the API sends back code 500, resulting in ParseWebResponse returning the default for HitbloqRankInfo
+				// This just saves an unnecessary call to Hitbloq
+				if (poolID == "None")
+					return default;
+
 				var webResponse = await _siraHttpService.GetAsync($"https://hitbloq.com/api/player_rank/{poolID}/{userID}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
 				return await Utils.ParseWebResponse<HitbloqRankInfo>(webResponse);
 			}
