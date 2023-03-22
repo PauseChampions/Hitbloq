@@ -113,12 +113,12 @@ namespace Hitbloq.Managers
 			if (difficultyBeatmap != null)
 			{
 				_selectedDifficultyBeatmap = difficultyBeatmap;
-				_levelInfoTokenSource?.Cancel();
-				_levelInfoTokenSource?.Dispose();
 				HitbloqLevelInfo? levelInfoEntry = null;
 
 				if (difficultyBeatmap.level is CustomPreviewBeatmapLevel)
 				{
+					_levelInfoTokenSource?.Cancel();
+					_levelInfoTokenSource?.Dispose();
 					_levelInfoTokenSource = new CancellationTokenSource();
 					levelInfoEntry = await _levelInfoSource.GetLevelInfoAsync(difficultyBeatmap, _levelInfoTokenSource.Token);
 				}
