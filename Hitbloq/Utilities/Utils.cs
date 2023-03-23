@@ -64,7 +64,7 @@ namespace Hitbloq.Utilities
 				return jsonSerializer.Deserialize<T>(jsonTextReader);
 			}
 
-			Plugin.Log.Error($"Unsuccessful web response for parsing {typeof(T)}. Code: {webResponse.Code}");
+			Plugin.Log.Error($"Unsuccessful web response for parsing {typeof(T)}. Status code: {webResponse.Code}");
 			Plugin.Log.Debug(Environment.StackTrace);
 			return default;
 		}

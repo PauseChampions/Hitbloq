@@ -52,7 +52,7 @@ namespace Hitbloq.UI
 			{
 				_pageNumber = value;
 				NotifyPropertyChanged(nameof(UpEnabled));
-				if (_leaderboard != null && _loadingControl != null && _difficultyBeatmap != null)
+				if (_leaderboard != null && _loadingControl != null && _difficultyBeatmap != null && Utils.IsDependencyLeaderboardInstalled)
 				{
 					_leaderboard.SetScores(new List<LeaderboardTableView.ScoreData>(), 0);
 					_loadingControl.gameObject.SetActive(true);
@@ -110,11 +110,19 @@ namespace Hitbloq.UI
 				leaderboardSource.ClearCache();
 			}
 
+			if (!firstActivation && !Utils.IsDependencyLeaderboardInstalled)
+			{
+				SetNoDependenciesInstalledText();
+			}
+
 			PageNumber = 0;
 		}
 
 		private async Task SetScores(List<HitbloqMapLeaderboardEntry>? leaderboardEntries)
 		{
+			if (Utils.IsDependencyLeaderboardInstalled is false)
+				return;
+
 			var scores = new List<LeaderboardTableView.ScoreData>();
 			var myScorePos = -1;
 
@@ -127,16 +135,6 @@ namespace Hitbloq.UI
 						button.gameObject.SetActive(false);
 					}
 				});
-			}
-
-			if (!Utils.IsDependencyLeaderboardInstalled)
-			{
-				if (_loadingControl != null)
-				{
-					_loadingControl.ShowText("<size=125%>Please install ScoreSaber or BeatLeader!</size>", false);
-				}
-
-				return;
 			}
 
 			if (leaderboardEntries == null || leaderboardEntries.Count == 0)
@@ -200,6 +198,14 @@ namespace Hitbloq.UI
 			}
 		}
 
+		private void SetNoDependenciesInstalledText()
+		{
+			if (_loadingControl is not null)
+			{
+				_loadingControl.ShowText("<size=125%>Please install ScoreSaber or BeatLeader!</size>", false);
+			}
+		}
+
 		[UIAction("#post-parse")]
 		private void PostParse()
 		{
@@ -230,6 +236,16 @@ namespace Hitbloq.UI
 			ChangeButtonScale(_button8!, 0.425f);
 			ChangeButtonScale(_button9!, 0.425f);
 			ChangeButtonScale(_button10!, 0.425f);
+			
+			if (Utils.IsDependencyLeaderboardInstalled is false)
+			{
+				SetNoDependenciesInstalledText();
+				
+				foreach (var button in _infoButtons)
+				{
+					button.gameObject.SetActive(false);
+				}
+			}
 		}
 
 		[UIAction("up-clicked")]
