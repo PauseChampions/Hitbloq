@@ -19,7 +19,7 @@ namespace Hitbloq.Utilities
 		{
 			get
 			{
-				_isScoreSaberInstalled ??= PluginManager.GetPluginFromId("ScoreSaber") != null;
+				_isScoreSaberInstalled ??= PluginManager.GetPluginFromId("ScoreSaber") is not null;
 				return (bool) _isScoreSaberInstalled;
 			}
 		}
@@ -33,8 +33,7 @@ namespace Hitbloq.Utilities
 					var plugin = PluginManager.GetPluginFromId("BeatLeader");
 					_isBeatLeaderInstalled = plugin is not null && plugin.HVersion >= new Version(0, 6, 1);
 				}
-
-				_isBeatLeaderInstalled ??= PluginManager.GetPluginFromId("BeatLeader") is not null;
+				
 				return (bool) _isBeatLeaderInstalled;
 			}
 		}
@@ -64,8 +63,12 @@ namespace Hitbloq.Utilities
 				return jsonSerializer.Deserialize<T>(jsonTextReader);
 			}
 
-			Plugin.Log.Error($"Unsuccessful web response for parsing {typeof(T)}. Status code: {webResponse.Code}");
-			Plugin.Log.Debug(Environment.StackTrace);
+			if (!webResponse.Successful)
+			{
+				Plugin.Log.Error($"Unsuccessful web response for parsing {typeof(T)}. Status code: {webResponse.Code}");
+				Plugin.Log.Debug(Environment.StackTrace);
+			}
+			
 			return default;
 		}
 
