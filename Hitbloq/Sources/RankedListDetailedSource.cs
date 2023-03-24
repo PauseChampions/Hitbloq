@@ -9,28 +9,31 @@ using SiraUtil.Web;
 
 namespace Hitbloq.Sources
 {
-    internal class RankedListDetailedSource
-    {
-        private readonly IHttpService siraHttpService;
+	internal class RankedListDetailedSource
+	{
+		private readonly IHttpService _siraHttpService;
 
-        public RankedListDetailedSource(IHttpService siraHttpService)
-        {
-            this.siraHttpService = siraHttpService;
-        }
+		public RankedListDetailedSource(IHttpService siraHttpService)
+		{
+			_siraHttpService = siraHttpService;
+		}
 
-        public async Task<RankedListDetailedPage?> GetRankedListAsync(string poolID, CancellationToken cancellationToken = default, int page = 0)
-        {
-            try
-            {
-                var webResponse = await siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}/api/ranked_list_detailed/{poolID}/{page}", cancellationToken: cancellationToken).ConfigureAwait(false);
-                var rankedList = await Utils.ParseWebResponse<List<HitbloqRankedListDetailedEntry>>(webResponse);
-                if (rankedList != null)
-                {
-                    return new RankedListDetailedPage(this, rankedList, poolID, page);
-                }
-            }
-            catch (TaskCanceledException) { }
-            return null;
-        }
-    }
+		public async Task<RankedListDetailedPage?> GetRankedListAsync(string poolID, CancellationToken cancellationToken = default, int page = 0)
+		{
+			try
+			{
+				var webResponse = await _siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}/api/ranked_list_detailed/{poolID}/{page}", cancellationToken: cancellationToken).ConfigureAwait(false);
+				var rankedList = await Utils.ParseWebResponse<List<HitbloqRankedListDetailedEntry>>(webResponse);
+				if (rankedList != null)
+				{
+					return new RankedListDetailedPage(this, rankedList, poolID, page);
+				}
+			}
+			catch (TaskCanceledException)
+			{
+			}
+
+			return null;
+		}
+	}
 }

@@ -2,9 +2,9 @@
 
 namespace Hitbloq.Entries
 {
-    internal class HitbloqActionQueueEntry
-    {
-        [JsonProperty("_id")] 
-        public string ID { get; private set; } = null!;
-    }
+	internal class HitbloqActionQueueEntry
+	{
+		[JsonProperty("_id")]
+		public string ID { get; private set; } = null!;
+	}
 }

@@ -2,20 +2,20 @@
 
 namespace Hitbloq.Other
 {
-    internal class BeatmapReporter : IInitializable
-    {
-        private readonly IDifficultyBeatmap difficultyBeatmap;
-        private readonly BeatmapListener beatmapListener;
+	internal class BeatmapReporter : IInitializable
+	{
+		private readonly BeatmapListener _beatmapListener;
+		private readonly IDifficultyBeatmap _difficultyBeatmap;
 
-        public BeatmapReporter(IDifficultyBeatmap difficultyBeatmap, BeatmapListener beatmapListener)
-        {
-            this.difficultyBeatmap = difficultyBeatmap;
-            this.beatmapListener = beatmapListener;
-        }
+		public BeatmapReporter(IDifficultyBeatmap difficultyBeatmap, BeatmapListener beatmapListener)
+		{
+			_difficultyBeatmap = difficultyBeatmap;
+			_beatmapListener = beatmapListener;
+		}
 
-        public void Initialize()
-        {
-            beatmapListener.LastPlayedDifficultyBeatmap = difficultyBeatmap;
-        }
-    }
+		public void Initialize()
+		{
+			_beatmapListener.LastPlayedDifficultyBeatmap = _difficultyBeatmap;
+		}
+	}
 }

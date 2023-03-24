@@ -7,147 +7,149 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using Hitbloq.Entries;
 using Hitbloq.Other;
-using Hitbloq.UI;
 using HMUI;
 using Tweening;
 using UnityEngine;
 using Zenject;
 
-namespace MorePlaylists.UI
+namespace Hitbloq.UI.ViewControllers
 {
-    [HotReload(RelativePathToLayout = @"..\Views\HitbloqPoolDetailView.bsml")]
-    [ViewDefinition("Hitbloq.UI.Views.HitbloqPoolDetailView.bsml")]
-    internal class HitbloqPoolDetailViewController : BSMLAutomaticViewController
-    {
-        [Inject]
-        private readonly SpriteLoader spriteLoader = null!;
-        
-        [Inject] 
-        private readonly MaterialGrabber materialGrabber = null!;
-        
-        [Inject]
-        private readonly TimeTweeningManager uwuTweenyManager = null!;
-        
-        [InjectOptional]
-        private readonly PlaylistManagerIHardlyKnowHer? playlistManagerIHardlyKnowHer = null!;
+	[HotReload(RelativePathToLayout = @"..\Views\HitbloqPoolDetailView.bsml")]
+	[ViewDefinition("Hitbloq.UI.Views.HitbloqPoolDetailView.bsml")]
+	internal class HitbloqPoolDetailViewController : BSMLAutomaticViewController
+	{
+		[UIComponent("text-page")]
+		private readonly TextPageScrollView _descriptionTextPage = null!;
 
-        private HitbloqPoolCellController? hitbloqPoolCell;
-        private HitbloqPoolListEntry? hitbloqPoolListEntry;
-        private IBeatmapLevelPack? localPlaylist;
-        private CancellationTokenSource? playlistSearchTokenSource;
+		[Inject]
+		private readonly MaterialGrabber _materialGrabber = null!;
 
-        public event Action? FlowDismissRequested;
+		[InjectOptional]
+		private readonly PlaylistManagerIHardlyKnowHer? _playlistManagerIHardlyKnowHer = null!;
 
-        [UIComponent("pool-cell")] 
-        private readonly RectTransform? poolCellParentTransform = null!;
-        
-        [UIComponent("text-page")]
-        private readonly TextPageScrollView descriptionTextPage = null!;
+		[UIComponent("pool-cell")]
+		private readonly RectTransform? _poolCellParentTransform = null!;
 
-        #region Actions
+		[Inject]
+		private readonly SpriteLoader _spriteLoader = null!;
 
-        [UIAction("#post-parse")]
-        private void PostParse()
-        {
-            rectTransform.anchorMax = new Vector2(0.5f, 1);
-            hitbloqPoolCell = new GameObject("PoolCellDetail").AddComponent<HitbloqPoolCellController>();
-            hitbloqPoolCell.transform.SetParent(poolCellParentTransform, false);
-            hitbloqPoolCell.transform.SetSiblingIndex(0);
-            hitbloqPoolCell.SetRequiredUtils(spriteLoader, materialGrabber, uwuTweenyManager);
-            hitbloqPoolCell.interactable = false;
-            BSMLParser.instance.Parse(Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqPoolCell.bsml"), hitbloqPoolCell.gameObject, hitbloqPoolCell);
-        }
+		[Inject]
+		private readonly TimeTweeningManager _uwuTweenyManager = null!;
 
-        [UIAction("download-click")]
-        private void DownloadPressed() => _ = DownloadPoolAsync();
+		private HitbloqPoolCellController? _hitbloqPoolCell;
+		private HitbloqPoolListEntry? _hitbloqPoolListEntry;
+		private IBeatmapLevelPack? _localPlaylist;
+		private CancellationTokenSource? _playlistSearchTokenSource;
 
-        private async Task DownloadPoolAsync()
-        {
-            var pool = hitbloqPoolListEntry;
-            if (pool != null && playlistManagerIHardlyKnowHer != null)
-            {
-                pool.DownloadBlocked = true;
-                NotifyPropertyChanged(nameof(DownloadInteractable));
-                
-                var localPlaylist = await playlistManagerIHardlyKnowHer.DownloadPlaylistFromPoolID(pool.ID);
-                if (hitbloqPoolListEntry == pool)
-                {
-                    this.localPlaylist = localPlaylist;
-                }
-                
-                pool.DownloadBlocked = false;
-                NotifyPropertyChanged(nameof(DownloadInteractable));
-                NotifyPropertyChanged(nameof(DownloadActive));
-                NotifyPropertyChanged(nameof(GoToActive));
-            }
-        }
-        
-        [UIAction("go-to-playlist")]
-        private void GoToPlaylist()
-        {
-            if (playlistManagerIHardlyKnowHer != null && localPlaylist != null)
-            {
-                FlowDismissRequested?.Invoke();
-                playlistManagerIHardlyKnowHer.OpenPlaylist(localPlaylist);
-            }
-        }
+		public event Action? FlowDismissRequested;
 
-        public void SetPool(HitbloqPoolListEntry hitbloqPoolListEntry)
-        {
-            this.hitbloqPoolListEntry = hitbloqPoolListEntry;
-            localPlaylist = null;
-            
-            if (hitbloqPoolCell != null)
-            {
-                hitbloqPoolCell.PopulateCell(hitbloqPoolListEntry);
-            }
-            
-            NotifyPropertyChanged(nameof(Description));
-            NotifyPropertyChanged(nameof(DownloadInteractable));
-            NotifyPropertyChanged(nameof(DownloadActive));
-            NotifyPropertyChanged(nameof(GoToActive));
-            
-            descriptionTextPage.ScrollTo(0, true);
-            
-            playlistSearchTokenSource?.Cancel();
-            playlistSearchTokenSource?.Dispose();
-            playlistSearchTokenSource = new CancellationTokenSource();
-            _ = FetchPlaylistAsync(hitbloqPoolListEntry.ID, playlistSearchTokenSource.Token);
-        }
+		#region Actions
 
-        private async Task FetchPlaylistAsync(string poolID, CancellationToken token)
-        {
-            if (playlistManagerIHardlyKnowHer == null)
-            {
-                return;
-            }
+		[UIAction("#post-parse")]
+		private void PostParse()
+		{
+			rectTransform.anchorMax = new Vector2(0.5f, 1);
+			_hitbloqPoolCell = new GameObject("PoolCellDetail").AddComponent<HitbloqPoolCellController>();
+			_hitbloqPoolCell.transform.SetParent(_poolCellParentTransform, false);
+			_hitbloqPoolCell.transform.SetSiblingIndex(0);
+			_hitbloqPoolCell.SetRequiredUtils(_spriteLoader, _materialGrabber, _uwuTweenyManager);
+			_hitbloqPoolCell.interactable = false;
+			BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqPoolCell.bsml"), _hitbloqPoolCell.gameObject, _hitbloqPoolCell);
+		}
 
-            var localPlaylist = await playlistManagerIHardlyKnowHer.FindLocalPlaylistFromPoolID(poolID, token);
+		[UIAction("download-click")]
+		private void DownloadPressed()
+		{
+			_ = DownloadPoolAsync();
+		}
 
-            if (localPlaylist != null)
-            {
-                this.localPlaylist = localPlaylist;
-                NotifyPropertyChanged(nameof(DownloadActive));
-                NotifyPropertyChanged(nameof(GoToActive));
-            }
-        }
+		private async Task DownloadPoolAsync()
+		{
+			var pool = _hitbloqPoolListEntry;
+			if (pool != null && _playlistManagerIHardlyKnowHer != null)
+			{
+				pool.DownloadBlocked = true;
+				NotifyPropertyChanged(nameof(DownloadInteractable));
 
-        #endregion
+				var localPlaylist = await _playlistManagerIHardlyKnowHer.DownloadPlaylistFromPoolID(pool.ID);
+				if (_hitbloqPoolListEntry == pool)
+				{
+					_localPlaylist = localPlaylist;
+				}
 
-        #region Values
+				pool.DownloadBlocked = false;
+				NotifyPropertyChanged(nameof(DownloadInteractable));
+				NotifyPropertyChanged(nameof(DownloadActive));
+				NotifyPropertyChanged(nameof(GoToActive));
+			}
+		}
 
-        [UIValue("description")]
-        private string Description => $"Owners: {hitbloqPoolListEntry?.Author}\n\n" + (string.IsNullOrWhiteSpace(hitbloqPoolListEntry?.Description) ? "No Description available for this pool." : hitbloqPoolListEntry?.Description ?? "");
-        
-        [UIValue("download-interactable")]
-        public bool DownloadInteractable => hitbloqPoolListEntry is {DownloadBlocked: false};
+		[UIAction("go-to-playlist")]
+		private void GoToPlaylist()
+		{
+			if (_playlistManagerIHardlyKnowHer != null && _localPlaylist != null)
+			{
+				FlowDismissRequested?.Invoke();
+				_playlistManagerIHardlyKnowHer.OpenPlaylist(_localPlaylist);
+			}
+		}
 
-        [UIValue("download-active")]
-        public bool DownloadActive => playlistManagerIHardlyKnowHer is {CanOpenPlaylist: true} && hitbloqPoolListEntry != null && localPlaylist == null;
+		public void SetPool(HitbloqPoolListEntry hitbloqPoolListEntry)
+		{
+			_hitbloqPoolListEntry = hitbloqPoolListEntry;
+			_localPlaylist = null;
 
-        [UIValue("go-to-active")]
-        public bool GoToActive => playlistManagerIHardlyKnowHer != null && localPlaylist != null;
+			if (_hitbloqPoolCell != null)
+			{
+				_hitbloqPoolCell.PopulateCell(hitbloqPoolListEntry);
+			}
 
-        #endregion
-    }
+			NotifyPropertyChanged(nameof(Description));
+			NotifyPropertyChanged(nameof(DownloadInteractable));
+			NotifyPropertyChanged(nameof(DownloadActive));
+			NotifyPropertyChanged(nameof(GoToActive));
+
+			_descriptionTextPage.ScrollTo(0, true);
+
+			_playlistSearchTokenSource?.Cancel();
+			_playlistSearchTokenSource?.Dispose();
+			_playlistSearchTokenSource = new CancellationTokenSource();
+			_ = FetchPlaylistAsync(hitbloqPoolListEntry.ID, _playlistSearchTokenSource.Token);
+		}
+
+		private async Task FetchPlaylistAsync(string poolID, CancellationToken token)
+		{
+			if (_playlistManagerIHardlyKnowHer == null)
+			{
+				return;
+			}
+
+			var localPlaylist = await _playlistManagerIHardlyKnowHer.FindLocalPlaylistFromPoolID(poolID, token);
+
+			if (localPlaylist != null)
+			{
+				_localPlaylist = localPlaylist;
+				NotifyPropertyChanged(nameof(DownloadActive));
+				NotifyPropertyChanged(nameof(GoToActive));
+			}
+		}
+
+		#endregion
+
+		#region Values
+
+		[UIValue("description")]
+		private string Description => $"Owners: {_hitbloqPoolListEntry?.Author}\n\n" + (string.IsNullOrWhiteSpace(_hitbloqPoolListEntry?.Description) ? "No Description available for this pool." : _hitbloqPoolListEntry?.Description ?? "");
+
+		[UIValue("download-interactable")]
+		public bool DownloadInteractable => _hitbloqPoolListEntry is {DownloadBlocked: false};
+
+		[UIValue("download-active")]
+		public bool DownloadActive => _playlistManagerIHardlyKnowHer is {CanOpenPlaylist: true} && _hitbloqPoolListEntry != null && _localPlaylist == null;
+
+		[UIValue("go-to-active")]
+		public bool GoToActive => _playlistManagerIHardlyKnowHer != null && _localPlaylist != null;
+
+		#endregion
+	}
 }

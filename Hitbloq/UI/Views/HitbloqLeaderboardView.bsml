@@ -1,24 +1,46 @@
-﻿<bg xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xsi:schemaLocation='https://monkeymanboy.github.io/BSML-Docs/ https://raw.githubusercontent.com/monkeymanboy/BSML-Docs/gh-pages/BSMLSchema.xsd'>
-	<horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='100' pref-height='70'>
-		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='9' pref-height='25'>
-			<vertical-icon-segments data='cell-data' select-cell='cell-selected' />
-		</vertical>
-		<vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='80' pref-height='70'>
-			<leaderboard id='leaderboard' cell-size='5.99' />
-		</vertical>
-	</horizontal>
+﻿<bg>
+    <horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='100' pref-height='70'>
+        <vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='9' pref-height='25'>
+            <vertical-icon-segments data='cell-data' select-cell='cell-selected'/>
+        </vertical>
+        <vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='80' pref-height='70'>
+            <leaderboard id='leaderboard' cell-size='5.99'/>
+        </vertical>
+    </horizontal>
 
-	<button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button1'  hover-hint='Info' on-click='b-1-click'  pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5' anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='32'/>
-	<button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button2'  hover-hint='Info' on-click='b-2-click'  pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5' anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='26'/>
-	<button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button3'  hover-hint='Info' on-click='b-3-click'  pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5' anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='20'/>
-	<button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button4'  hover-hint='Info' on-click='b-4-click'  pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5' anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='14'/>
-	<button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button5'  hover-hint='Info' on-click='b-5-click'  pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5' anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='8'/>
-	<button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button6'  hover-hint='Info' on-click='b-6-click'  pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5' anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='2'/>
-	<button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button7'  hover-hint='Info' on-click='b-7-click'  pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5' anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='-4'/>
-	<button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button8'  hover-hint='Info' on-click='b-8-click'  pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5' anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='-10'/>
-	<button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button9'  hover-hint='Info' on-click='b-9-click'  pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5' anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='-16'/>
-	<button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button10' hover-hint='Info' on-click='b-10-click' pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5' anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='-22'/>	
-	
-	<page-button direction='Up' anchor-pos-x='-42.75' anchor-pos-y='-5.5' active='~up-enabled' pref-width='5' on-click='up-clicked' />
-	<page-button direction='Down' anchor-pos-x='-42.75' anchor-pos-y='-35.5' active='~down-enabled' pref-width='5' on-click='down-clicked' />
+    <button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button1' hover-hint='Info' on-click='b-1-click'
+                      pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
+                      anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='32'/>
+    <button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button2' hover-hint='Info' on-click='b-2-click'
+                      pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
+                      anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='26'/>
+    <button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button3' hover-hint='Info' on-click='b-3-click'
+                      pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
+                      anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='20'/>
+    <button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button4' hover-hint='Info' on-click='b-4-click'
+                      pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
+                      anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='14'/>
+    <button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button5' hover-hint='Info' on-click='b-5-click'
+                      pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
+                      anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='8'/>
+    <button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button6' hover-hint='Info' on-click='b-6-click'
+                      pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
+                      anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='2'/>
+    <button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button7' hover-hint='Info' on-click='b-7-click'
+                      pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
+                      anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='-4'/>
+    <button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button8' hover-hint='Info' on-click='b-8-click'
+                      pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
+                      anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='-10'/>
+    <button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button9' hover-hint='Info' on-click='b-9-click'
+                      pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
+                      anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='-16'/>
+    <button-with-icon icon='Hitbloq.Images.InfoIcon.png' id='button10' hover-hint='Info' on-click='b-10-click'
+                      pref-width='15' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
+                      anchor-min-y='.5' anchor-pos-x='47' anchor-pos-y='-22'/>
+
+    <page-button direction='Up' anchor-pos-x='-42.75' anchor-pos-y='-5.5' active='~up-enabled' pref-width='5'
+                 on-click='up-clicked'/>
+    <page-button direction='Down' anchor-pos-x='-42.75' anchor-pos-y='-35.5' active='~down-enabled' pref-width='5'
+                 on-click='down-clicked'/>
 </bg>

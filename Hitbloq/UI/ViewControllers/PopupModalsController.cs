@@ -1,129 +1,132 @@
-﻿using BeatSaberMarkupLanguage;
-using BeatSaberMarkupLanguage.Attributes;
-using BeatSaberMarkupLanguage.Parser;
-using HMUI;
-using System;
-using System.ComponentModel;
+﻿using System;
 using System.Reflection;
+using BeatSaberMarkupLanguage;
+using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
+using BeatSaberMarkupLanguage.Parser;
 using Hitbloq.Utilities;
+using HMUI;
 using UnityEngine;
 
-namespace Hitbloq.UI
+namespace Hitbloq.UI.ViewControllers
 {
-    internal class PopupModalsController : NotifiableBase
-    {
-        private readonly MainMenuViewController mainMenuViewController;
-        private bool parsed;
-        
-        private Action? yesButtonPressed;
-        private Action? noButtonPressed;
-        
-        private string yesNoText = "";
-        private string yesButtonText = "Yes";
-        private string noButtonText = "No";
+	internal class PopupModalsController : NotifiableBase
+	{
+		private readonly MainMenuViewController _mainMenuViewController;
 
-        [UIComponent("yes-no-modal")]
-        private readonly RectTransform yesNoModalTransform = null!;
+		[UIParams]
+		private readonly BSMLParserParams _parserParams = null!;
 
-        [UIComponent("yes-no-modal")]
-        private ModalView yesNoModalView = null!;
+		[UIComponent("yes-no-modal")]
+		private readonly RectTransform _yesNoModalTransform = null!;
 
-        private Vector3 yesNoModalPosition;
-        
-        [UIParams]
-        private readonly BSMLParserParams parserParams = null!;
+		private Action? _noButtonPressed;
+		private string _noButtonText = "No";
+		private bool _parsed;
 
-        public PopupModalsController(MainMenuViewController mainMenuViewController)
-        {
-            this.mainMenuViewController = mainMenuViewController;
-        }
+		private Action? _yesButtonPressed;
+		private string _yesButtonText = "Yes";
 
-        private void Parse()
-        {
-            if (!parsed)
-            {
-                BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.PopupModals.bsml"), mainMenuViewController.gameObject, this);
-                yesNoModalPosition = yesNoModalTransform.localPosition;
-                parsed = true;
-            }
-        }
+		private Vector3 _yesNoModalPosition;
 
-        #region Yes/No Modal
+		[UIComponent("yes-no-modal")]
+		private ModalView _yesNoModalView = null!;
 
-        // Methods
+		private string _yesNoText = "";
 
-        internal void ShowYesNoModal(Transform parent, string text, Action yesButtonPressedCallback, string yesButtonText = "Yes", string noButtonText = "No", Action? noButtonPressedCallback = null, bool animateParentCanvas = true)
-        {
-            Parse();
-            yesNoModalTransform.localPosition = yesNoModalPosition;
-            yesNoModalTransform.transform.SetParent(parent);
+		public PopupModalsController(MainMenuViewController mainMenuViewController)
+		{
+			_mainMenuViewController = mainMenuViewController;
+		}
 
-            YesNoText = text;
-            YesButtonText = yesButtonText;
-            NoButtonText = noButtonText;
+		private void Parse()
+		{
+			if (!_parsed)
+			{
+				BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.PopupModals.bsml"), _mainMenuViewController.gameObject, this);
+				_yesNoModalPosition = _yesNoModalTransform.localPosition;
+				_parsed = true;
+			}
+		}
 
-            yesButtonPressed = yesButtonPressedCallback;
-            noButtonPressed = noButtonPressedCallback;
+		#region Yes/No Modal
 
-            Accessors.AnimateCanvasAccessor(ref yesNoModalView) = animateParentCanvas;
-            Accessors.ViewValidAccessor(ref yesNoModalView) = false; // Need to do this to show the animation after parent changes
+		// Methods
 
-            parserParams.EmitEvent("close-yes-no");
-            parserParams.EmitEvent("open-yes-no");
-        }
+		internal void ShowYesNoModal(Transform parent, string text, Action yesButtonPressedCallback, string yesButtonText = "Yes", string noButtonText = "No", Action? noButtonPressedCallback = null, bool animateParentCanvas = true)
+		{
+			Parse();
+			_yesNoModalTransform.localPosition = _yesNoModalPosition;
+			_yesNoModalTransform.transform.SetParent(parent);
 
-        internal void HideYesNoModal() => parserParams.EmitEvent("close-yes-no");
+			YesNoText = text;
+			YesButtonText = yesButtonText;
+			NoButtonText = noButtonText;
 
-        [UIAction("yes-button-pressed")]
-        private void YesButtonPressed()
-        {
-            yesButtonPressed?.Invoke();
-            yesButtonPressed = null;
-        }
+			_yesButtonPressed = yesButtonPressedCallback;
+			_noButtonPressed = noButtonPressedCallback;
 
-        [UIAction("no-button-pressed")]
-        private void NoButtonPressed()
-        {
-            noButtonPressed?.Invoke();
-            noButtonPressed = null;
-        }
+			Accessors.AnimateCanvasAccessor(ref _yesNoModalView) = animateParentCanvas;
+			Accessors.ViewValidAccessor(ref _yesNoModalView) = false; // Need to do this to show the animation after parent changes
 
-        // Values
+			_parserParams.EmitEvent("close-yes-no");
+			_parserParams.EmitEvent("open-yes-no");
+		}
 
-        [UIValue("yes-no-text")]
-        private string YesNoText
-        {
-            get => yesNoText;
-            set
-            {
-                yesNoText = value;
-                NotifyPropertyChanged();
-            }
-        }
+		internal void HideYesNoModal()
+		{
+			_parserParams.EmitEvent("close-yes-no");
+		}
 
-        [UIValue("yes-button-text")]
-        private string YesButtonText
-        {
-            get => yesButtonText;
-            set
-            {
-                yesButtonText = value;
-                NotifyPropertyChanged();
-            }
-        }
+		[UIAction("yes-button-pressed")]
+		private void YesButtonPressed()
+		{
+			_yesButtonPressed?.Invoke();
+			_yesButtonPressed = null;
+		}
 
-        [UIValue("no-button-text")]
-        private string NoButtonText
-        {
-            get => noButtonText;
-            set
-            {
-                noButtonText = value;
-                NotifyPropertyChanged();
-            }
-        }
-        
-        #endregion
-    }
+		[UIAction("no-button-pressed")]
+		private void NoButtonPressed()
+		{
+			_noButtonPressed?.Invoke();
+			_noButtonPressed = null;
+		}
+
+		// Values
+
+		[UIValue("yes-no-text")]
+		private string YesNoText
+		{
+			get => _yesNoText;
+			set
+			{
+				_yesNoText = value;
+				NotifyPropertyChanged();
+			}
+		}
+
+		[UIValue("yes-button-text")]
+		private string YesButtonText
+		{
+			get => _yesButtonText;
+			set
+			{
+				_yesButtonText = value;
+				NotifyPropertyChanged();
+			}
+		}
+
+		[UIValue("no-button-text")]
+		private string NoButtonText
+		{
+			get => _noButtonText;
+			set
+			{
+				_noButtonText = value;
+				NotifyPropertyChanged();
+			}
+		}
+
+		#endregion
+	}
 }

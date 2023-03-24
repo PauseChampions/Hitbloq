@@ -1,101 +1,108 @@
-﻿using Hitbloq.Entries;
-using Hitbloq.Utilities;
-using SiraUtil.Web;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Hitbloq.Configuration;
+using Hitbloq.Entries;
+using Hitbloq.Utilities;
+using SiraUtil.Web;
 using UnityEngine;
 
 namespace Hitbloq.Sources
 {
-    internal class FriendsLeaderboardSource : IMapLeaderboardSource
-    {
-        private readonly IHttpService siraHttpService;
-        private Sprite? icon;
+	internal class FriendsLeaderboardSource : IMapLeaderboardSource
+	{
+		private readonly FriendIDSource _friendIDSource;
+		private readonly IHttpService _siraHttpService;
 
-        private readonly UserIDSource userIDSource;
-        private readonly FriendIDSource friendIDSource;
+		private readonly UserIDSource _userIDSource;
 
-        private List<List<HitbloqMapLeaderboardEntry>>? cachedEntries;
+		private List<List<HitbloqMapLeaderboardEntry>>? _cachedEntries;
+		private Sprite? _icon;
 
-        public FriendsLeaderboardSource(IHttpService siraHttpService, UserIDSource userIDSource, FriendIDSource friendIDSource)
-        {
-            this.siraHttpService = siraHttpService;
-            this.userIDSource = userIDSource;
-            this.friendIDSource = friendIDSource;
-        }
+		public FriendsLeaderboardSource(IHttpService siraHttpService, UserIDSource userIDSource, FriendIDSource friendIDSource)
+		{
+			_siraHttpService = siraHttpService;
+			_userIDSource = userIDSource;
+			_friendIDSource = friendIDSource;
+		}
 
-        public string HoverHint => "Friends";
+		public string HoverHint => "Friends";
 
-        public Sprite Icon
-        {
-            get
-            {
-                if (icon == null)
-                {
-                    icon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.FriendsIcon.png");
-                }
-                return icon;
-            }
-        }
+		public Sprite Icon
+		{
+			get
+			{
+				if (_icon == null)
+				{
+					_icon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.FriendsIcon.png");
+				}
 
-        public bool Scrollable => true;
+				return _icon;
+			}
+		}
 
-        public async Task<List<HitbloqMapLeaderboardEntry>?> GetScoresAsync(IDifficultyBeatmap difficultyBeatmap, CancellationToken cancellationToken = default, int page = 0)
-        {
-            if (cachedEntries == null)
-            {
-                var beatmapString = Utils.DifficultyBeatmapToString(difficultyBeatmap);
-                if (beatmapString == null)
-                {
-                    return null;
-                }
-                
-                var userID = await userIDSource.GetUserIDAsync(cancellationToken);
-                var friendIDs = await friendIDSource.GetFriendIDsAsync(cancellationToken);
+		public bool Scrollable => true;
 
-                if (userID == null || userID.ID == -1)
-                {
-                    return null;
-                }
+		public async Task<List<HitbloqMapLeaderboardEntry>?> GetScoresAsync(IDifficultyBeatmap difficultyBeatmap, CancellationToken cancellationToken = default, int page = 0)
+		{
+			if (_cachedEntries == null)
+			{
+				var beatmapString = Utils.DifficultyBeatmapToString(difficultyBeatmap);
+				if (beatmapString == null)
+				{
+					return null;
+				}
 
-                friendIDs.Add(userID.ID);
+				var userID = await _userIDSource.GetUserIDAsync(cancellationToken);
+				var friendIDs = await _friendIDSource.GetFriendIDsAsync(cancellationToken);
 
-                try
-                {
-                    var content = new Dictionary<string, int[]>
-                    {
-                        { "friends", friendIDs.ToArray()}
-                    };
-                    var webResponse = await siraHttpService.PostAsync($"{PluginConfig.Instance.HitbloqURL}/api/leaderboard/{beatmapString}/friends_extended", content, cancellationToken).ConfigureAwait(false);
-                    // like an hour of debugging and we had to remove the slash from the end of the url. that was it. not pog.
+				if (userID == null || userID.ID == -1)
+				{
+					return null;
+				}
 
-                    var leaderboardEntries = await Utils.ParseWebResponse<List<HitbloqMapLeaderboardEntry>>(webResponse);
-                    cachedEntries = new List<List<HitbloqMapLeaderboardEntry>>();
+				friendIDs.Add(userID.ID);
 
-                    if (leaderboardEntries != null)
-                    {
-                        // Splitting entries into lists of 10
-                        var p = 0;
-                        cachedEntries.Add(new List<HitbloqMapLeaderboardEntry>());
-                        for (var i = 0; i < leaderboardEntries.Count; i++)
-                        {
-                            if (cachedEntries[p].Count == 10)
-                            {
-                                cachedEntries.Add(new List<HitbloqMapLeaderboardEntry>());
-                                p++;
-                            }
-                            cachedEntries[p].Add(leaderboardEntries[i]);
-                        }
-                    }
-                }
-                catch (TaskCanceledException) { }
-            }
+				try
+				{
+					var content = new Dictionary<string, int[]>
+					{
+						{"friends", friendIDs.ToArray()}
+					};
+					var webResponse = await _siraHttpService.PostAsync($"{PluginConfig.Instance.HitbloqURL}/api/leaderboard/{beatmapString}/friends_extended", content, cancellationToken).ConfigureAwait(false);
+					// like an hour of debugging and we had to remove the slash from the end of the url. that was it. not pog.
 
-            return page < cachedEntries?.Count ? cachedEntries[page] : null;
-        }
+					var leaderboardEntries = await Utils.ParseWebResponse<List<HitbloqMapLeaderboardEntry>>(webResponse);
+					_cachedEntries = new List<List<HitbloqMapLeaderboardEntry>>();
 
-        public void ClearCache() => cachedEntries = null;
-    }
+					if (leaderboardEntries != null)
+					{
+						// Splitting entries into lists of 10
+						var p = 0;
+						_cachedEntries.Add(new List<HitbloqMapLeaderboardEntry>());
+						for (var i = 0; i < leaderboardEntries.Count; i++)
+						{
+							if (_cachedEntries[p].Count == 10)
+							{
+								_cachedEntries.Add(new List<HitbloqMapLeaderboardEntry>());
+								p++;
+							}
+
+							_cachedEntries[p].Add(leaderboardEntries[i]);
+						}
+					}
+				}
+				catch (TaskCanceledException)
+				{
+				}
+			}
+
+			return page < _cachedEntries?.Count ? _cachedEntries[page] : null;
+		}
+
+		public void ClearCache()
+		{
+			_cachedEntries = null;
+		}
+	}
 }

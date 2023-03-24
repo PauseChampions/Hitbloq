@@ -2,9 +2,9 @@
 
 namespace Hitbloq.Entries
 {
-    internal class ScoreSaberUserInfo
-    {
-        [JsonProperty("errorMessage")]
-        public string? ErrorMessage { get; private set; }
-    }
+	internal class ScoreSaberUserInfo
+	{
+		[JsonProperty("errorMessage")]
+		public string? ErrorMessage { get; private set; }
+	}
 }

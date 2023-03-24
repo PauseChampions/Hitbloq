@@ -1,49 +1,53 @@
-﻿using Hitbloq.Entries;
-using Hitbloq.Utilities;
-using SiraUtil.Web;
-using System;
+﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using Hitbloq.Entries;
+using Hitbloq.Utilities;
+using SiraUtil.Web;
 
 namespace Hitbloq.Sources
 {
-    internal class UserIDSource
-    {
-        private readonly IHttpService siraHttpService;
-        private readonly IPlatformUserModel platformUserModel;
+	internal class UserIDSource
+	{
+		private readonly IPlatformUserModel _platformUserModel;
+		private readonly IHttpService _siraHttpService;
 
-        private HitbloqUserID? hitbloqUserID;
-        public bool registrationRequested;
-        public event Action? UserRegisteredEvent;
+		private HitbloqUserID? _hitbloqUserID;
+		public bool RegistrationRequested;
 
-        public UserIDSource(IHttpService siraHttpService, IPlatformUserModel platformUserModel)
-        {
-            this.siraHttpService = siraHttpService;
-            this.platformUserModel = platformUserModel;
-        }
+		public UserIDSource(IHttpService siraHttpService, IPlatformUserModel platformUserModel)
+		{
+			_siraHttpService = siraHttpService;
+			_platformUserModel = platformUserModel;
+		}
 
-        public async Task<HitbloqUserID?> GetUserIDAsync(CancellationToken? cancellationToken = null)
-        {
-            if (hitbloqUserID == null || registrationRequested)
-            {
-                var userInfo = await platformUserModel.GetUserInfo();
-                if (userInfo != null)
-                {
-                    try
-                    {
-                        var webResponse = await siraHttpService.GetAsync($"https://hitbloq.com/api/tools/ss_registered/{userInfo.platformUserId}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
-                        hitbloqUserID = await Utils.ParseWebResponse<HitbloqUserID>(webResponse);
+		public event Action? UserRegisteredEvent;
 
-                        if (hitbloqUserID is {Registered: true})
-                        {
-                            UserRegisteredEvent?.Invoke();
-                            registrationRequested = false;
-                        }
-                    }
-                    catch (TaskCanceledException) { }
-                }
-            }
-            return hitbloqUserID;
-        }
-    }
+		public async Task<HitbloqUserID?> GetUserIDAsync(CancellationToken? cancellationToken = null)
+		{
+			if (_hitbloqUserID == null || RegistrationRequested)
+			{
+				var userInfo = await _platformUserModel.GetUserInfo();
+				if (userInfo != null)
+				{
+					try
+					{
+						var webResponse = await _siraHttpService.GetAsync($"https://hitbloq.com/api/tools/ss_registered/{userInfo.platformUserId}", cancellationToken: cancellationToken ?? CancellationToken.None).ConfigureAwait(false);
+						_hitbloqUserID = await Utils.ParseWebResponse<HitbloqUserID>(webResponse);
+
+						if (_hitbloqUserID is {Registered: true})
+						{
+							UserRegisteredEvent?.Invoke();
+							RegistrationRequested = false;
+						}
+					}
+					catch (TaskCanceledException)
+					{
+					}
+				}
+			}
+
+			return _hitbloqUserID;
+		}
+	}
 }
