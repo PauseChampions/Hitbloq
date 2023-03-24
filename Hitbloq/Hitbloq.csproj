@@ -28,6 +28,7 @@
         </Reference>
         <Reference Include="BeatLeader">
             <HintPath>$(BeatSaberDir)\Plugins\BeatLeader.dll</HintPath>
+            <Private>False</Private>
         </Reference>
         <Reference Include="BeatmapCore">
             <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
