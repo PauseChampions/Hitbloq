@@ -15,7 +15,7 @@ using HMUI;
 using IPA.Utilities.Async;
 using UnityEngine;
 
-namespace Hitbloq.UI
+namespace Hitbloq.UI.ViewControllers
 {
 	internal class HitbloqProfileModalController : INotifyPropertyChanged
 	{

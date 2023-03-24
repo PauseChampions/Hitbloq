@@ -18,7 +18,7 @@ using IPA.Utilities.Async;
 using UnityEngine;
 using Zenject;
 
-namespace Hitbloq.UI
+namespace Hitbloq.UI.ViewControllers
 {
 	[HotReload(RelativePathToLayout = @"..\Views\HitbloqPanel.bsml")]
 	[ViewDefinition("Hitbloq.UI.Views.HitbloqPanel.bsml")]

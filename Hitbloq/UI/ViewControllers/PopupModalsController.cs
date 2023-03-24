@@ -8,7 +8,7 @@ using Hitbloq.Utilities;
 using HMUI;
 using UnityEngine;
 
-namespace Hitbloq.UI
+namespace Hitbloq.UI.ViewControllers
 {
 	internal class PopupModalsController : NotifiableBase
 	{

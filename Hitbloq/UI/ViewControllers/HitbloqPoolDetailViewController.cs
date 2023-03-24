@@ -7,13 +7,12 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using Hitbloq.Entries;
 using Hitbloq.Other;
-using Hitbloq.UI;
 using HMUI;
 using Tweening;
 using UnityEngine;
 using Zenject;
 
-namespace MorePlaylists.UI
+namespace Hitbloq.UI.ViewControllers
 {
 	[HotReload(RelativePathToLayout = @"..\Views\HitbloqPoolDetailView.bsml")]
 	[ViewDefinition("Hitbloq.UI.Views.HitbloqPoolDetailView.bsml")]
@@ -55,7 +54,7 @@ namespace MorePlaylists.UI
 			_hitbloqPoolCell.transform.SetSiblingIndex(0);
 			_hitbloqPoolCell.SetRequiredUtils(_spriteLoader, _materialGrabber, _uwuTweenyManager);
 			_hitbloqPoolCell.interactable = false;
-			BSMLParser.instance.Parse(Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqPoolCell.bsml"), _hitbloqPoolCell.gameObject, _hitbloqPoolCell);
+			BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqPoolCell.bsml"), _hitbloqPoolCell.gameObject, _hitbloqPoolCell);
 		}
 
 		[UIAction("download-click")]

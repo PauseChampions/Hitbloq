@@ -5,7 +5,7 @@ using IPA.Loader;
 using SiraUtil.Zenject;
 using Zenject;
 
-namespace Hitbloq.UI
+namespace Hitbloq.UI.ViewControllers
 {
 	[HotReload(RelativePathToLayout = @"..\Views\HitbloqInfoView.bsml")]
 	[ViewDefinition("Hitbloq.UI.Views.HitbloqInfoView.bsml")]

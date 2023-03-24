@@ -11,7 +11,7 @@ using HMUI;
 using IPA.Utilities.Async;
 using Zenject;
 
-namespace Hitbloq.UI
+namespace Hitbloq.UI.ViewControllers
 {
 	[HotReload(RelativePathToLayout = @"..\Views\HitbloqRankedListView.bsml")]
 	[ViewDefinition("Hitbloq.UI.Views.HitbloqRankedListView.bsml")]

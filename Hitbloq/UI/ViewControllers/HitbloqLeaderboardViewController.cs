@@ -14,7 +14,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using Zenject;
 
-namespace Hitbloq.UI
+namespace Hitbloq.UI.ViewControllers
 {
 	[HotReload(RelativePathToLayout = @"..\Views\HitbloqLeaderboardView.bsml")]
 	[ViewDefinition("Hitbloq.UI.Views.HitbloqLeaderboardView.bsml")]

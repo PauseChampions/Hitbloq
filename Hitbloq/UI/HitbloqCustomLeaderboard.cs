@@ -1,6 +1,7 @@
 ﻿using System;
 using Hitbloq.Entries;
 using Hitbloq.Interfaces;
+using Hitbloq.UI.ViewControllers;
 using HMUI;
 using LeaderboardCore.Managers;
 using LeaderboardCore.Models;

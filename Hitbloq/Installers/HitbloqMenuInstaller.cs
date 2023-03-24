@@ -3,9 +3,9 @@ using Hitbloq.Managers;
 using Hitbloq.Other;
 using Hitbloq.Sources;
 using Hitbloq.UI;
+using Hitbloq.UI.ViewControllers;
 using Hitbloq.Utilities;
 using IPA.Loader;
-using MorePlaylists.UI;
 using Zenject;
 
 namespace Hitbloq.Installers

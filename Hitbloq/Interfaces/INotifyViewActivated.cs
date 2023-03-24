@@ -1,4 +1,5 @@
 ﻿using Hitbloq.UI;
+using Hitbloq.UI.ViewControllers;
 
 namespace Hitbloq.Interfaces
 {

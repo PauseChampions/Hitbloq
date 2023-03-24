@@ -9,7 +9,7 @@ using TMPro;
 using Tweening;
 using UnityEngine;
 
-namespace Hitbloq.UI
+namespace Hitbloq.UI.ViewControllers
 {
 	internal class HitbloqPoolCellController : TableCell, INotifyPropertyChanged
 	{
