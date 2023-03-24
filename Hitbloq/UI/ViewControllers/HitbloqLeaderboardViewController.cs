@@ -55,7 +55,7 @@ namespace Hitbloq.UI.ViewControllers
 				if (_leaderboard != null && _loadingControl != null && _difficultyBeatmap != null && Utils.IsDependencyLeaderboardInstalled)
 				{
 					_leaderboard.SetScores(new List<LeaderboardTableView.ScoreData>(), 0);
-					_loadingControl.gameObject.SetActive(true);
+					_loadingControl.ShowLoading();
 					PageRequested?.Invoke(_difficultyBeatmap, _leaderboardSources[SelectedCellIndex], value);
 				}
 			}
@@ -176,7 +176,7 @@ namespace Hitbloq.UI.ViewControllers
 			{
 				await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
 				{
-					_loadingControl.gameObject.SetActive(false);
+					_loadingControl.Hide();
 					_leaderboard.SetScores(scores, myScorePos);
 				});
 			}
