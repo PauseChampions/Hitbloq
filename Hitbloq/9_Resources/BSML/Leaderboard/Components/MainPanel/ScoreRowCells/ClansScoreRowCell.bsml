@@ -1,5 +1,0 @@
-<vertical id="root-node">
-    <macro.as-host host="clan-tags">
-        <macro.reparent transform="ui-component"/>
-    </macro.as-host>
-</vertical>
