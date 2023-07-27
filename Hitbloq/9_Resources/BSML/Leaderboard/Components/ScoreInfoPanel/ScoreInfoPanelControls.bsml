@@ -1,0 +1,27 @@
+<horizontal spacing="1" vertical-fit="Unconstrained">
+    <macro.define name="icon-width" value="4"/>
+    
+    <!--  OVERVIEW PAGE1 BUTTON  -->
+    <clickable-image src="#BL_Overview1Icon" id="overview-page1-component" pref-width="~icon-width" preserve-aspect="true"
+                     on-click="overview-page1-on-click"/>
+    
+    <!--  OVERVIEW PAGE2 BUTTON  -->
+    <clickable-image src="#BL_Overview2Icon" id="overview-page2-component" pref-width="~icon-width" preserve-aspect="true"
+                     on-click="overview-page2-on-click"/>
+
+    <!--  ACCURACY BUTTON  -->
+    <clickable-image src="#BL_DetailsIcon" id="accuracy-component" pref-width="~icon-width" preserve-aspect="true"
+                     on-click="accuracy-on-click"/>
+
+    <!--  GRID BUTTON  -->
+    <clickable-image src="#BL_GridIcon" id="grid-component" pref-width="~icon-width" preserve-aspect="true"
+                     on-click="grid-on-click"/>
+
+    <!--  GRAPH BUTTON  -->
+    <clickable-image src="#BL_GraphIcon" id="graph-component" pref-width="~icon-width" preserve-aspect="true"
+                     on-click="graph-on-click"/>
+
+    <!--  REPLAY BUTTON  -->
+    <clickable-image src="#BL_ReplayIcon" id="replay-component" pref-width="~icon-width" preserve-aspect="true"
+                     on-click="replay-on-click"/>
+</horizontal>

@@ -31,7 +31,7 @@ namespace Hitbloq.Sources
 			{
 				if (_icon == null)
 				{
-					_icon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.PlayerIcon.png");
+					_icon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.LocationIcon.png");
 				}
 
 				return _icon;

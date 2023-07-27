@@ -105,15 +105,18 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="Directory.Build.props" Condition="Exists('Directory.Build.props')"/>
-        <None Include="Directory.Build.targets" Condition="Exists('Directory.Build.targets')"/>
-        <None Include="Hitbloq.csproj.user" Condition="Exists('Hitbloq.csproj.user')"/>
+        <None Include="Directory.Build.props" Condition="Exists('Directory.Build.props')" />
+        <None Include="Directory.Build.targets" Condition="Exists('Directory.Build.targets')" />
+        <None Include="Hitbloq.csproj.user" Condition="Exists('Hitbloq.csproj.user')" />
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="manifest.json"/>
-        <EmbeddedResource Include="Images\*.png"/>
-        <EmbeddedResource Include="UI\Views\*.bsml"/>
+        <EmbeddedResource Include="manifest.json" />
+        <EmbeddedResource Include="Images\*.png" />
+        <EmbeddedResource Include="UI\Views\*.bsml" />
+        <Compile Remove="Resources\**" />
+        <EmbeddedResource Remove="Resources\**" />
+        <None Remove="Resources\**" />
         <EmbeddedResource Update="UI\Views\HitbloqPoolLeaderboardView.bsml">
             <SubType>Code</SubType>
         </EmbeddedResource>
@@ -123,7 +126,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="UI\Views\HitbloqEventModal.bsml"/>
+        <None Remove="UI\Views\HitbloqEventModal.bsml" />
     </ItemGroup>
 
     <ItemGroup>
