@@ -236,20 +236,20 @@ namespace Hitbloq.UI.ViewControllers
 			dropdownText.fontSize = 3.5f;
 			dropdownText.transform.localPosition = new Vector3(-1.5f, 0, 0);
 
-			// A bit of explanation of what is going on
-			// I want to make a maximum of 2 cells visible, however I first need to parse exactly 2 cells and clean them up
-			// After that I populate the current pool options
-			(_dropDownListSetting!.dropdown as DropdownWithTableView).SetField("_numberOfVisibleCells", 2);
-			_dropDownListSetting.values = new List<object> {"1", "2"};
-			_dropDownListSetting.UpdateChoices();
-			_dropDownListSetting.values = _pools.Count != 0 ? _pools : new List<object> {"None"};
-			_dropDownListSetting.UpdateChoices();
-			var poolIndex = _poolNames?.IndexOf(_selectedPool ?? "") ?? 0;
-			_dropDownListSetting.dropdown.SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
+            // A bit of explanation of what is going on
+            // I want to make a maximum of 2 cells visible, however I first need to parse exactly 2 cells and clean them up
+            // After that I populate the current pool options
+            (_dropDownListSetting!.dropdown as DropdownWithTableView).SetField("_numberOfVisibleCells", 4);
+            _dropDownListSetting.values = new List<object> { "1", "2", "3", "4" };
+            _dropDownListSetting.UpdateChoices();
+            _dropDownListSetting.values = _pools.Count != 0 ? _pools : new List<object> { "None" };
+            _dropDownListSetting.UpdateChoices();
+            var poolIndex = _poolNames?.IndexOf(_selectedPool ?? "") ?? 0;
+            _dropDownListSetting.dropdown.SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
 
-			_defaultHighlightColour = _playlistManagerImage!.HighlightColor;
+            _defaultHighlightColour = _playlistManagerImage!.HighlightColor;
 
-			_ = FetchEvent();
+            _ = FetchEvent();
 		}
 
 		private async Task FetchEvent()
@@ -343,7 +343,14 @@ namespace Hitbloq.UI.ViewControllers
 
 			if (levelInfoEntry != null)
 			{
-				foreach (var pool in levelInfoEntry.Pools)
+				
+                var tempList = levelInfoEntry.Pools.OrderBy(x => {
+                    var poolInfo = _poolInfoSource.GetPoolInfoAsync(x.Key, _poolInfoTokenSource.Token).Result;
+                    return poolInfo.Popularity;
+                };
+                _pools = tempList.Select(x => (object)x).ToList();
+                _poolNames = tempList.Select(x => x.Title).ToList();
+                foreach (var pool in levelInfoEntry.Pools)
 				{
 					var poolInfo = await _poolInfoSource.GetPoolInfoAsync(pool.Key, _poolInfoTokenSource.Token);
 
