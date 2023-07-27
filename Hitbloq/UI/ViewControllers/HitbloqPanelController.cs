@@ -36,6 +36,9 @@ namespace Hitbloq.UI.ViewControllers
 		private readonly RectTransform? _dropDownListTransform = null!;
 
 		[Inject]
+		private readonly PoolListSource _poolListSource = null!;
+
+		[Inject]
 		private readonly IEventSource _eventSource = null!;
 
 		[Inject]
@@ -340,17 +343,16 @@ namespace Hitbloq.UI.ViewControllers
 
 			_pools = new List<object>();
 			_rankInfo = null;
-
 			if (levelInfoEntry != null)
 			{
-				
-                var tempList = levelInfoEntry.Pools.OrderBy(x => {
-                    var poolInfo = _poolInfoSource.GetPoolInfoAsync(x.Key, _poolInfoTokenSource.Token).Result;
-                    return poolInfo.Popularity;
-                };
-                _pools = tempList.Select(x => (object)x).ToList();
-                _poolNames = tempList.Select(x => x.Title).ToList();
-                foreach (var pool in levelInfoEntry.Pools)
+				var bruh = await _poolListSource.GetAsync(_poolInfoTokenSource.Token);
+                var orderedList = levelInfoEntry.Pools.OrderBy(pool => {
+					var poolInfo = bruh.First(x => x.ID == pool.Key);
+
+					return poolInfo.Popularity;
+                }).Reverse();
+
+                foreach (var pool in orderedList)
 				{
 					var poolInfo = await _poolInfoSource.GetPoolInfoAsync(pool.Key, _poolInfoTokenSource.Token);
 
