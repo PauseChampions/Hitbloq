@@ -345,9 +345,9 @@ namespace Hitbloq.UI.ViewControllers
 			_rankInfo = null;
 			if (levelInfoEntry != null)
 			{
-				var bruh = await _poolListSource.GetAsync(_poolInfoTokenSource.Token);
+				var poolList = await _poolListSource.GetAsync(_poolInfoTokenSource.Token);
                 var orderedList = levelInfoEntry.Pools.OrderBy(pool => {
-					var poolInfo = bruh.First(x => x.ID == pool.Key);
+					var poolInfo = poolList.First(x => x.ID == pool.Key);
 
 					return poolInfo.Popularity;
                 }).Reverse();
