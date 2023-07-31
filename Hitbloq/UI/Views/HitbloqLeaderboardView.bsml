@@ -4,40 +4,40 @@
             <vertical-icon-segments data='cell-data' select-cell='cell-selected'/>
         </vertical>
         <vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='85' pref-height='70' pad-top='3'>
-            <leaderboard id='leaderboard' cell-size='5'/>
+            <leaderboard id='leaderboard' cell-size='4.5'/>
         </vertical>
     </horizontal>
 
     <button-with-icon icon='Hitbloq.Images.TransparentPixel.png' id='button1' hover-hint='Info' on-click='b-1-click'
                       pref-width='190' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
-                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='29.3'/>
+                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='29.8'/>
     <button-with-icon icon='Hitbloq.Images.TransparentPixel.png' id='button2' hover-hint='Info' on-click='b-2-click'
                       pref-width='190' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
-                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='24.3'/>
+                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='25.3'/>
     <button-with-icon icon='Hitbloq.Images.TransparentPixel.png' id='button3' hover-hint='Info' on-click='b-3-click'
                       pref-width='190' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
-                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='19.3'/>
+                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='20.8'/>
     <button-with-icon icon='Hitbloq.Images.TransparentPixel.png' id='button4' hover-hint='Info' on-click='b-4-click'
                       pref-width='190' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
-                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='14.3'/>
+                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='16.3'/>
     <button-with-icon icon='Hitbloq.Images.TransparentPixel.png' id='button5' hover-hint='Info' on-click='b-5-click'
                       pref-width='190' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
-                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='9.3'/>
+                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='11.8'/>
     <button-with-icon icon='Hitbloq.Images.TransparentPixel.png' id='button6' hover-hint='Info' on-click='b-6-click'
                       pref-width='190' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
-                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='4.3'/>
+                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='7.3'/>
     <button-with-icon icon='Hitbloq.Images.TransparentPixel.png' id='button7' hover-hint='Info' on-click='b-7-click'
                       pref-width='190' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
-                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='-0.7'/>
+                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='2.8'/>
     <button-with-icon icon='Hitbloq.Images.TransparentPixel.png' id='button8' hover-hint='Info' on-click='b-8-click'
                       pref-width='190' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
-                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='-5.7'/>
+                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='-1.7'/>
     <button-with-icon icon='Hitbloq.Images.TransparentPixel.png' id='button9' hover-hint='Info' on-click='b-9-click'
                       pref-width='190' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
-                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='-10.7'/>
+                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='-6.2'/>
     <button-with-icon icon='Hitbloq.Images.TransparentPixel.png' id='button10' hover-hint='Info' on-click='b-10-click'
                       pref-width='190' pref-height='13' anchor-max-x='.5' anchor-max-y='.5' anchor-min-x='.5'
-                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='-15.7'/>
+                      anchor-min-y='.5' anchor-pos-x='3.5' anchor-pos-y='-10.8'/>
 
     <page-button direction='Up' anchor-pos-x='-43' anchor-pos-y='5.5' active='~up-enabled' pref-width='5'
                  on-click='up-clicked'/>
