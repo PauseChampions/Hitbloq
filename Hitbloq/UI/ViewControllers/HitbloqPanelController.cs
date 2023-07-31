@@ -340,7 +340,7 @@ namespace Hitbloq.UI.ViewControllers
 			_poolInfoTokenSource?.Cancel();
 			_poolInfoTokenSource?.Dispose();
 			_poolInfoTokenSource = new CancellationTokenSource();
-
+			
 			_pools = new List<object>();
 			_rankInfo = null;
 			if (levelInfoEntry != null)
@@ -370,8 +370,8 @@ namespace Hitbloq.UI.ViewControllers
 					_pools.Add($"{poolName} - {pool.Value}⭐");
 				}
 
-				_poolNames = levelInfoEntry.Pools.Keys.ToList();
-			}
+				_poolNames = orderedList.Select(pool => pool.Key).ToList(); ;
+            }
 			else
 			{
 				_poolNames = new List<string> {"None"};
