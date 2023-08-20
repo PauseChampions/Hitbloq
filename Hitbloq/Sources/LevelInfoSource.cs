@@ -22,7 +22,7 @@ namespace Hitbloq.Sources
 		{
 			if (_cache.TryGetValue(difficultyBeatmap, out var cachedValue))
 			{
-				return cachedValue;
+                return cachedValue;
 			}
 
 			var beatmapString = Utils.DifficultyBeatmapToString(difficultyBeatmap);
@@ -35,6 +35,11 @@ namespace Hitbloq.Sources
 			{
 				var webResponse = await _siraHttpService.GetAsync($"{PluginConfig.Instance.HitbloqURL}/api/leaderboard/{beatmapString}/info", cancellationToken: cancellationToken).ConfigureAwait(false);
 				var levelInfo = await Utils.ParseWebResponse<HitbloqLevelInfo>(webResponse);
+
+				if (levelInfo?.Error != null)
+				{
+					return null;
+				}
 
 				_cache[difficultyBeatmap] = levelInfo;
 				return levelInfo;
