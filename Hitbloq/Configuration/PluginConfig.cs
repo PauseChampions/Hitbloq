@@ -13,6 +13,7 @@ namespace Hitbloq.Configuration
 		public static PluginConfig Instance { get; set; } = null!;
 
 		public virtual string HitbloqURL { get; set; } = "https://hitbloq.com/";
+		public virtual bool PrioritisePlaylistPool { get; set; } = true;
 
 		[UseConverter(typeof(ListConverter<int>))]
 		[NonNullable]

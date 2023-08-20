@@ -65,8 +65,7 @@ namespace Hitbloq.Utilities
 
 			if (!webResponse.Successful)
 			{
-				Plugin.Log.Error($"Unsuccessful web response for parsing {typeof(T)}. Status code: {webResponse.Code}");
-				Plugin.Log.Debug(Environment.StackTrace);
+				// Plugin.Log.Error($"Unsuccessful web response for parsing {typeof(T)}. Status code: {webResponse.Code}");
 			}
 			
 			return default;

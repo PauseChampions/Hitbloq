@@ -7,6 +7,7 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.Components;
 using BeatSaberMarkupLanguage.Components.Settings;
 using BeatSaberMarkupLanguage.ViewControllers;
+using Hitbloq.Configuration;
 using Hitbloq.Entries;
 using Hitbloq.Interfaces;
 using Hitbloq.Other;
@@ -368,8 +369,17 @@ namespace Hitbloq.UI.ViewControllers
 				_poolNames = new List<string> {"None"};
 			}
 
-			var poolIndex = _poolNames.IndexOf(_selectedPool ?? "");
+			int poolIndex;
 
+			if (PluginConfig.Instance.PrioritisePlaylistPool && _playlistManagerIHardlyKnowHer is {SelectedPlaylist: not null})
+			{
+				poolIndex = _poolNames.IndexOf(PlaylistManagerIHardlyKnowHer.GetPlaylistPool(_playlistManagerIHardlyKnowHer.SelectedPlaylist) ?? "");
+			}
+			else
+			{
+				poolIndex = _poolNames.IndexOf(_selectedPool ?? "");
+			}
+			
 			await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
 			{
 				PoolChangedEvent?.Invoke(_poolNames[poolIndex == -1 ? 0 : poolIndex]);
@@ -390,7 +400,7 @@ namespace Hitbloq.UI.ViewControllers
 
 		private async Task PoolUpdatedAsync(string pool)
 		{
-			_rankInfoTokenSource?.Cancel();
+            _rankInfoTokenSource?.Cancel();
 			_rankInfoTokenSource?.Dispose();
 			_rankInfoTokenSource = new CancellationTokenSource();
 			_selectedPool = pool;

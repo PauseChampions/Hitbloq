@@ -8,6 +8,7 @@ using Hitbloq.Utilities;
 using HMUI;
 using IPA.Utilities;
 using IPA.Utilities.Async;
+using PlaylistManager;
 using PlaylistManager.Utilities;
 using SiraUtil.Web;
 using Zenject;
@@ -24,10 +25,11 @@ namespace Hitbloq.Other
 		private readonly SelectLevelCategoryViewController _selectLevelCategoryViewController;
 		private readonly IHttpService _siraHttpService;
 		private readonly SoloFreePlayFlowCoordinator _soloFreePlayFlowCoordinator;
+		private readonly PlaylistDataManager _playlistDataManager;
 
 		private CancellationTokenSource? _tokenSource;
 
-		public PlaylistManagerIHardlyKnowHer(IHttpService siraHttpService, MainFlowCoordinator mainFlowCoordinator, MainMenuViewController mainMenuViewController, SoloFreePlayFlowCoordinator soloFreePlayFlowCoordinator, LevelFilteringNavigationController levelFilteringNavigationController, SelectLevelCategoryViewController selectLevelCategoryViewController)
+		public PlaylistManagerIHardlyKnowHer(IHttpService siraHttpService, MainFlowCoordinator mainFlowCoordinator, MainMenuViewController mainMenuViewController, SoloFreePlayFlowCoordinator soloFreePlayFlowCoordinator, LevelFilteringNavigationController levelFilteringNavigationController, SelectLevelCategoryViewController selectLevelCategoryViewController, PlaylistDataManager playlistDataManager)
 		{
 			_siraHttpService = siraHttpService;
 			_mainFlowCoordinator = mainFlowCoordinator;
@@ -35,8 +37,11 @@ namespace Hitbloq.Other
 			_soloFreePlayFlowCoordinator = soloFreePlayFlowCoordinator;
 			_levelFilteringNavigationController = levelFilteringNavigationController;
 			_selectLevelCategoryViewController = selectLevelCategoryViewController;
+			_playlistDataManager = playlistDataManager;
 			_levelCategorySegmentedControl = selectLevelCategoryViewController.GetField<IconSegmentedControl, SelectLevelCategoryViewController>("_levelFilterCategoryIconSegmentedControl");
 		}
+
+		public IPlaylist? SelectedPlaylist => _playlistDataManager.selectedPlaylist;
 
 		public bool IsDownloading => _tokenSource is {IsCancellationRequested: false};
 
@@ -174,17 +179,27 @@ namespace Hitbloq.Other
 
 		private void OnPlaylistSelected(IPlaylist playlist, BeatSaberPlaylistsLib.PlaylistManager parentManager)
 		{
-			if (playlist.TryGetCustomData("syncURL", out var url) && url is string urlString)
+            var pool = GetPlaylistPool(playlist);
+			if (pool is not null)
 			{
-				if (urlString.Contains("https://hitbloq.com/static/hashlists/"))
-				{
-					var pool = urlString.Split('/').LastOrDefault()?.Split('.').FirstOrDefault();
-					if (!string.IsNullOrEmpty(pool))
-					{
-						HitbloqPlaylistSelected?.Invoke(pool!);
-					}
-				}
+				HitbloqPlaylistSelected?.Invoke(pool!);
 			}
+		}
+
+		public static string? GetPlaylistPool(IPlaylist playlist)
+		{
+			if (!playlist.TryGetCustomData("syncURL", out var url) || url is not string urlString)
+			{
+				return null;
+			}
+
+			if (!urlString.Contains("https://hitbloq.com/static/hashlists/"))
+			{
+				return null;
+			}
+
+			var pool = urlString.Split('/').LastOrDefault()?.Split('.').FirstOrDefault();
+			return !string.IsNullOrEmpty(pool) ? pool : null;
 		}
 	}
 }
