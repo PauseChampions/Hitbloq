@@ -127,12 +127,12 @@ namespace Hitbloq.UI.ViewControllers
 		private readonly Color _textSelectedColor = new(0, 0.7529412f, 1, 1);
 		private readonly Color _textColor = new(1, 1, 1, 0.7490196f);
 
-		protected override void SelectionDidChange(TransitionType transitionType)
+		public override void SelectionDidChange(TransitionType transitionType)
 		{
 			RefreshBackground();
 		}
 
-		protected override void HighlightDidChange(TransitionType transitionType)
+		public override void HighlightDidChange(TransitionType transitionType)
 		{
 			RefreshBackground();
 		}

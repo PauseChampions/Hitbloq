@@ -428,7 +428,7 @@ namespace Hitbloq.UI.ViewControllers
 				{
 					_addFriendButton.image.sprite = _friendAdded;
 					AddFriendInteractable = false;
-					AddFriendHoverHint = KAlreadyFriendPrompt + (await _platformUserModel.GetUserInfo()).platform;
+					AddFriendHoverHint = KAlreadyFriendPrompt + (await _platformUserModel.GetUserInfo(CancellationToken.None)).platform;
 				}
 				else
 				{

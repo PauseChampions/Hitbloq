@@ -27,7 +27,7 @@ namespace Hitbloq.Sources
 		{
 			if (_hitbloqUserID == null || RegistrationRequested)
 			{
-				var userInfo = await _platformUserModel.GetUserInfo();
+				var userInfo = await _platformUserModel.GetUserInfo(CancellationToken.None);
 				if (userInfo != null)
 				{
 					try
