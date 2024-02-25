@@ -19,10 +19,7 @@ namespace Hitbloq.UI
 
 		public void Dispose()
 		{
-			if (MenuButtons.IsSingletonAvailable)
-			{
 				MenuButtons.instance.UnregisterButton(_menuButton);
-			}
 		}
 
 		public void Initialize()

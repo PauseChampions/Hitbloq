@@ -197,12 +197,12 @@ namespace Hitbloq.UI.ViewControllers
 		private readonly Color _crColor = new(0.7254902f, 0.5294118f, 1, 0.7490196f);
 		private readonly Color _crHighlightedColor = new(0.7254902f, 0.5294118f, 1, 1f);
 
-		protected override void SelectionDidChange(TransitionType transitionType)
+		public override void SelectionDidChange(TransitionType transitionType)
 		{
 			RefreshBackground();
 		}
 
-		protected override void HighlightDidChange(TransitionType transitionType)
+		public override void HighlightDidChange(TransitionType transitionType)
 		{
 			RefreshBackground();
 		}

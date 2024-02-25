@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Threading;
 using System.Threading.Tasks;
 using Hitbloq.Entries;
 using Hitbloq.Sources;
@@ -46,7 +47,7 @@ namespace Hitbloq.Other
 			}
 
 			// If a valid platform id doesn't exist, return
-			var userInfo = await _platformUserModel.GetUserInfo();
+			var userInfo = await _platformUserModel.GetUserInfo(CancellationToken.None);
 			if (userInfo == null)
 			{
 				return;

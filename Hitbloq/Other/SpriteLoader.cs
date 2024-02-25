@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
+using BeatSaberPlaylistsLib;
 using IPA.Loader;
 using IPA.Utilities.Async;
 using SiraUtil.Web;

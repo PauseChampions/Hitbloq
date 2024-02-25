@@ -42,9 +42,15 @@
             <HintPath>$(BeatSaberDir)\Plugins\LeaderboardCore.dll</HintPath>
             <Private>False</Private>
         </Reference>
+        <Reference Include="PlatformUserModel">
+          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\PlatformUserModel.dll</HintPath>
+        </Reference>
         <Reference Include="PlaylistManager">
             <HintPath>$(BeatSaberDir)\Plugins\PlaylistManager.dll</HintPath>
             <Private>False</Private>
+        </Reference>
+        <Reference Include="Tweening">
+          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Tweening.dll</HintPath>
         </Reference>
         <Reference Include="Unity.TextMeshPro">
             <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Unity.TextMeshPro.dll</HintPath>
@@ -58,18 +64,12 @@
             <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.UI.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="Main">
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Main.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
+        <Reference Include="$(BeatSaberDir)\Beat Saber_Data\Managed\Main.dll" Publicize="True"/>
         <Reference Include="HMLib">
             <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMLib.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="HMUI">
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMUI.dll</HintPath>
-            <Private>False</Private>
-        </Reference>
+        <Reference Include="$(BeatSaberDir)\Beat Saber_Data\Managed\HMUI.dll" Publicize="True"/>
         <Reference Include="IPA.Loader">
             <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\IPA.Loader.dll</HintPath>
             <Private>False</Private>
@@ -105,15 +105,15 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="Directory.Build.props" Condition="Exists('Directory.Build.props')"/>
-        <None Include="Directory.Build.targets" Condition="Exists('Directory.Build.targets')"/>
-        <None Include="Hitbloq.csproj.user" Condition="Exists('Hitbloq.csproj.user')"/>
+        <None Include="Directory.Build.props" Condition="Exists('Directory.Build.props')" />
+        <None Include="Directory.Build.targets" Condition="Exists('Directory.Build.targets')" />
+        <None Include="Hitbloq.csproj.user" Condition="Exists('Hitbloq.csproj.user')" />
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="manifest.json"/>
-        <EmbeddedResource Include="Images\*.png"/>
-        <EmbeddedResource Include="UI\Views\*.bsml"/>
+        <EmbeddedResource Include="manifest.json" />
+        <EmbeddedResource Include="Images\*.png" />
+        <EmbeddedResource Include="UI\Views\*.bsml" />
         <EmbeddedResource Update="UI\Views\HitbloqPoolLeaderboardView.bsml">
             <SubType>Code</SubType>
         </EmbeddedResource>
@@ -123,13 +123,17 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Remove="UI\Views\HitbloqEventModal.bsml"/>
+        <None Remove="UI\Views\HitbloqEventModal.bsml" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="BeatSaberModdingTools.Tasks" Version="1.4.3">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="BepInEx.AssemblyPublicizer.MSBuild" Version="0.4.1">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
     </ItemGroup>
 </Project>
