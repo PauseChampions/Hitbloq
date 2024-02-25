@@ -158,7 +158,7 @@ namespace Hitbloq.UI.ViewControllers
 					{
 						if (_hitbloqProfile.ProfilePictureURL != null)
 						{
-							_ = _spriteLoader.DownloadSpriteAsync(_hitbloqProfile.ProfilePictureURL, sprite => _modalProfilePic.sprite = sprite, _modalTokenSource.Token);
+							_modalProfilePic.SetImage(_hitbloqProfile.ProfilePictureURL);
 						}
 						else
 						{
