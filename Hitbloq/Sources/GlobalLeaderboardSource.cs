@@ -13,7 +13,6 @@ namespace Hitbloq.Sources
 	{
 		private readonly List<List<HitbloqMapLeaderboardEntry>> _cachedEntries = new();
 		private readonly IHttpService _siraHttpService;
-		private Sprite? _icon;
 
 		public GlobalLeaderboardSource(IHttpService siraHttpService)
 		{
@@ -21,19 +20,9 @@ namespace Hitbloq.Sources
 		}
 
 		public string HoverHint => "Global";
-
-		public Sprite Icon
-		{
-			get
-			{
-				if (_icon == null)
-				{
-					_icon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.GlobalIcon.png");
-				}
-
-				return _icon;
-			}
-		}
+		
+		public Task<Sprite> Icon { get; } =
+			BeatSaberMarkupLanguage.Utilities.LoadSpriteFromAssemblyAsync("Hitbloq.Images.GlobalIcon.png");
 
 		public bool Scrollable => true;
 

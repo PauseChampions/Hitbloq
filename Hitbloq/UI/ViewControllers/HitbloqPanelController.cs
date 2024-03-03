@@ -187,7 +187,7 @@ namespace Hitbloq.UI.ViewControllers
 		}
 
 		public void LeaderboardEntriesUpdated(List<HitbloqMapLeaderboardEntry>? leaderboardEntries)
-		{
+		{		
 			CuteMode = leaderboardEntries != null && leaderboardEntries.Exists(u => u.UserID == 726);
 		}
 
@@ -208,9 +208,9 @@ namespace Hitbloq.UI.ViewControllers
 		public event Action? EventClickedEvent;
 
 		[UIAction("#post-parse")]
-		private void PostParse()
+		private async Task PostParse()
 		{
-			// Backround related stuff
+			// Background related stuff
 			if (_container!.background is ImageView background)
 			{
 				background.material = BeatSaberMarkupLanguage.Utilities.ImageResources.NoGlowMat;
@@ -222,9 +222,9 @@ namespace Hitbloq.UI.ViewControllers
 			}
 
 			// Loading up logos
-			_logoSprite = _logo!.sprite;
-			_flushedSprite = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.LogoFlushed.png");
-			_logo.sprite = CuteMode ? _flushedSprite : _logoSprite;
+			_logoSprite = await BeatSaberMarkupLanguage.Utilities.LoadSpriteFromAssemblyAsync("Hitbloq.Images.Logo.png");
+			_flushedSprite = await BeatSaberMarkupLanguage.Utilities.LoadSpriteFromAssemblyAsync("Hitbloq.Images.LogoFlushed.png");
+			_logo!.sprite = CuteMode ? _flushedSprite : _logoSprite;
 
 			Accessors.SkewAccessor(ref _logo) = 0.18f;
 			_logo.SetVerticesDirty();

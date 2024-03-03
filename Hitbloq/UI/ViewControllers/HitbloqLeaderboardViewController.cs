@@ -20,6 +20,9 @@ namespace Hitbloq.UI.ViewControllers
 	[ViewDefinition("Hitbloq.UI.Views.HitbloqLeaderboardView.bsml")]
 	internal class HitbloqLeaderboardViewController : BSMLAutomaticViewController, IDifficultyBeatmapUpdater, ILeaderboardEntriesUpdater, IPoolUpdater
 	{
+		[UIComponent("vertical-icon-segments")]
+		private readonly IconSegmentedControl? _iconSegmentedControl = null!;
+		
 		[UIComponent("leaderboard")]
 		private readonly LeaderboardTableView? _leaderboard = null!;
 
@@ -207,8 +210,16 @@ namespace Hitbloq.UI.ViewControllers
 		}
 
 		[UIAction("#post-parse")]
-		private void PostParse()
+		private async Task PostParse()
 		{
+			var list = new List<IconSegmentedControl.DataItem>();
+			foreach (var leaderboardSource in _leaderboardSources)
+			{
+				list.Add(new IconSegmentedControl.DataItem(await leaderboardSource.Icon, leaderboardSource.HoverHint));
+			}
+			
+			_iconSegmentedControl!.SetData(list.ToArray());
+			
 			// To set rich text, I have to iterate through all cells, set each cell to allow rich text and next time they will have it
 			var leaderboardTableCells = _leaderboardTransform!.GetComponentsInChildren<LeaderboardTableCell>(true);
 
@@ -382,21 +393,6 @@ namespace Hitbloq.UI.ViewControllers
 		private void OnCellSelected(SegmentedControl _, int index)
 		{
 			SelectedCellIndex = index;
-		}
-
-		[UIValue("cell-data")]
-		private List<IconSegmentedControl.DataItem> CellData
-		{
-			get
-			{
-				var list = new List<IconSegmentedControl.DataItem>();
-				foreach (var leaderboardSource in _leaderboardSources)
-				{
-					list.Add(new IconSegmentedControl.DataItem(leaderboardSource.Icon, leaderboardSource.HoverHint));
-				}
-
-				return list;
-			}
 		}
 
 		#endregion

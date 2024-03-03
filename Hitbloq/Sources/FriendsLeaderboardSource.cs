@@ -17,7 +17,6 @@ namespace Hitbloq.Sources
 		private readonly UserIDSource _userIDSource;
 
 		private List<List<HitbloqMapLeaderboardEntry>>? _cachedEntries;
-		private Sprite? _icon;
 
 		public FriendsLeaderboardSource(IHttpService siraHttpService, UserIDSource userIDSource, FriendIDSource friendIDSource)
 		{
@@ -27,19 +26,9 @@ namespace Hitbloq.Sources
 		}
 
 		public string HoverHint => "Friends";
-
-		public Sprite Icon
-		{
-			get
-			{
-				if (_icon == null)
-				{
-					_icon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.FriendsIcon.png");
-				}
-
-				return _icon;
-			}
-		}
+		
+		public Task<Sprite> Icon { get; } =
+			BeatSaberMarkupLanguage.Utilities.LoadSpriteFromAssemblyAsync("Hitbloq.Images.FriendsIcon.png");
 
 		public bool Scrollable => true;
 

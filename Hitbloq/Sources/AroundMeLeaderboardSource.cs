@@ -15,7 +15,6 @@ namespace Hitbloq.Sources
 		private readonly UserIDSource _userIDSource;
 
 		private List<HitbloqMapLeaderboardEntry>? _cachedEntries;
-		private Sprite? _icon;
 
 		public AroundMeLeaderboardSource(IHttpService siraHttpService, UserIDSource userIDSource)
 		{
@@ -24,19 +23,9 @@ namespace Hitbloq.Sources
 		}
 
 		public string HoverHint => "Around Me";
-
-		public Sprite Icon
-		{
-			get
-			{
-				if (_icon == null)
-				{
-					_icon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.PlayerIcon.png");
-				}
-
-				return _icon;
-			}
-		}
+		
+		public Task<Sprite> Icon { get; } =
+			BeatSaberMarkupLanguage.Utilities.LoadSpriteFromAssemblyAsync("Hitbloq.Images.PlayerIcon.png");
 
 		public bool Scrollable => false;
 

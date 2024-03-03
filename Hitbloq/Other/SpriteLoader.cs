@@ -108,11 +108,11 @@ namespace Hitbloq.Other
 
 		private void QueueLoadSprite(string key, byte[] imageBytes, Action<Sprite> onCompletion, CancellationToken cancellationToken)
 		{
-			_spriteQueue.Enqueue(() =>
+			_spriteQueue.Enqueue(async () =>
 			{
 				try
 				{
-					var sprite = BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(imageBytes);
+					var sprite = await BeatSaberMarkupLanguage.Utilities.LoadSpriteAsync(imageBytes);
 					sprite.texture.wrapMode = TextureWrapMode.Clamp;
 					_cachedSprites.TryAdd(key, sprite);
 					if (!cancellationToken.IsCancellationRequested)

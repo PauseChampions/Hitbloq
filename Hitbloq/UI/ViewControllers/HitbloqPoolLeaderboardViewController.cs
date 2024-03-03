@@ -25,6 +25,10 @@ namespace Hitbloq.UI.ViewControllers
 	{
 		[UIComponent("list")]
 		private readonly CustomListTableData? _customListTableData = null!;
+		
+		[UIComponent("vertical-icon-segments")]
+
+		private readonly IconSegmentedControl? _iconSegmentedControl = null!;
 
 		private readonly List<HitbloqPoolLeaderboardEntry> _leaderboardEntries = new();
 
@@ -106,8 +110,16 @@ namespace Hitbloq.UI.ViewControllers
 		}
 
 		[UIAction("#post-parse")]
-		private void PostParse()
+		private async Task PostParse()
 		{
+			var list = new List<IconSegmentedControl.DataItem>();
+			foreach (var leaderboardSource in _leaderboardSources)
+			{
+				list.Add(new IconSegmentedControl.DataItem(await leaderboardSource.Icon, leaderboardSource.HoverHint));
+			}
+
+			_iconSegmentedControl!.SetData(list.ToArray());
+			
 			if (_customListTableData != null)
 			{
 				_customListTableData.tableView.SetDataSource(this, true);
@@ -216,21 +228,6 @@ namespace Hitbloq.UI.ViewControllers
 		private void OnCellSelected(SegmentedControl _, int index)
 		{
 			SelectedCellIndex = index;
-		}
-
-		[UIValue("cell-data")]
-		private List<IconSegmentedControl.DataItem> CellData
-		{
-			get
-			{
-				var list = new List<IconSegmentedControl.DataItem>();
-				foreach (var leaderboardSource in _leaderboardSources)
-				{
-					list.Add(new IconSegmentedControl.DataItem(leaderboardSource.Icon, leaderboardSource.HoverHint));
-				}
-
-				return list;
-			}
 		}
 
 		#endregion

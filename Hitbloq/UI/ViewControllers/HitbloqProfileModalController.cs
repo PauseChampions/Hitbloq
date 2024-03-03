@@ -158,7 +158,7 @@ namespace Hitbloq.UI.ViewControllers
 					{
 						if (_hitbloqProfile.ProfilePictureURL != null)
 						{
-							_modalProfilePic.SetImage(_hitbloqProfile.ProfilePictureURL);
+							_ = _modalProfilePic.SetImageAsync(_hitbloqProfile.ProfilePictureURL);
 						}
 						else
 						{
@@ -263,7 +263,7 @@ namespace Hitbloq.UI.ViewControllers
 		public event PropertyChangedEventHandler? PropertyChanged;
 
 		[UIAction("#post-parse")]
-		private void PostParse()
+		private async Task PostParse()
 		{
 			_parsed = true;
 			_modalView!.gameObject.name = "HitbloqProfileModal";
@@ -276,8 +276,8 @@ namespace Hitbloq.UI.ViewControllers
 			_modalProfilePic!.material = _materialGrabber.NoGlowRoundEdge;
 
 			_addFriendButton!.transform.localScale = new Vector3(0.3f, 0.3f, 1f);
-			_addFriend = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.AddFriend.png");
-			_friendAdded = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.FriendAdded.png");
+			_addFriend = await BeatSaberMarkupLanguage.Utilities.LoadSpriteFromAssemblyAsync("Hitbloq.Images.AddFriend.png");
+			_friendAdded = await BeatSaberMarkupLanguage.Utilities.LoadSpriteFromAssemblyAsync("Hitbloq.Images.FriendAdded.png");
 
 			if (_modalInfoVertical!.background is ImageView verticalBackground)
 			{

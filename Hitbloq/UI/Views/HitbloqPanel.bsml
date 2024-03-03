@@ -8,7 +8,7 @@
     <horizontal id='container' pref-width='91' horizontal-fit='PreferredSize' vertical-fit='PreferredSize' spacing='3'
                 bg='round-rect-panel' bg-color='#0078B9' pad='2'>
         <vertical pref-width='10' pref-height='10'>
-            <clickable-image id='hitbloq-logo' src='Hitbloq.Images.Logo.png' on-click="logo-click"
+            <clickable-image id='hitbloq-logo' on-click="logo-click"
                              hover-hint='Open Hitbloq Menu' preserve-aspect='true' pref-width='10' pref-height='10'/>
         </vertical>
         <vertical pref-width='0.5' pref-height='10'>

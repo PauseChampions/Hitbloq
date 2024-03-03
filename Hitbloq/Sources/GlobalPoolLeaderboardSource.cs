@@ -11,7 +11,6 @@ namespace Hitbloq.Sources
 	internal class GlobalPoolLeaderboardSource : IPoolLeaderboardSource
 	{
 		private readonly IHttpService _siraHttpService;
-		private Sprite? _icon;
 
 		public GlobalPoolLeaderboardSource(IHttpService siraHttpService)
 		{
@@ -20,18 +19,8 @@ namespace Hitbloq.Sources
 
 		public string HoverHint => "Global";
 
-		public Sprite Icon
-		{
-			get
-			{
-				if (_icon == null)
-				{
-					_icon = BeatSaberMarkupLanguage.Utilities.FindSpriteInAssembly("Hitbloq.Images.GlobalIcon.png");
-				}
-
-				return _icon;
-			}
-		}
+		public Task<Sprite> Icon { get; } =
+			BeatSaberMarkupLanguage.Utilities.LoadSpriteFromAssemblyAsync("Hitbloq.Images.GlobalIcon.png");
 
 		public async Task<PoolLeaderboardPage?> GetScoresAsync(string poolID, CancellationToken cancellationToken = default, int page = 0)
 		{
