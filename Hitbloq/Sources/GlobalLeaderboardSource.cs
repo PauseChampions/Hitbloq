@@ -26,11 +26,11 @@ namespace Hitbloq.Sources
 
 		public bool Scrollable => true;
 
-		public async Task<List<HitbloqMapLeaderboardEntry>?> GetScoresAsync(BeatmapKey difficultyBeatmap, CancellationToken cancellationToken = default, int page = 0)
+		public async Task<List<HitbloqMapLeaderboardEntry>?> GetScoresAsync(BeatmapKey beatmapKey, CancellationToken cancellationToken = default, int page = 0)
 		{
 			if (_cachedEntries.Count < page + 1)
 			{
-				var beatmapString = Utils.DifficultyBeatmapToString(difficultyBeatmap);
+				var beatmapString = Utils.BeatmapKeyToString(beatmapKey);
 				if (beatmapString == null)
 				{
 					return null;

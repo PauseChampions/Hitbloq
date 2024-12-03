@@ -19,7 +19,7 @@ namespace Hitbloq.Managers
 {
 	internal class HitbloqManager : IInitializable, IDisposable, INotifyLeaderboardSet
 	{
-		private readonly List<IBeatmapKeyUpdater> _difficultyBeatmapUpdaters;
+		private readonly List<IBeatmapKeyUpdater> _beatmapKeyUpdaters;
 		private readonly HitbloqEventModalViewController _hitbloqEventModalViewController;
 		private readonly HitbloqFlowCoordinator _hitbloqFlowCoordinator;
 		private readonly HitbloqLeaderboardViewController _hitbloqLeaderboardViewController;
@@ -42,7 +42,7 @@ namespace Hitbloq.Managers
 
 		private BeatmapKey? _selectedBeatmapKey;
 
-		public HitbloqManager(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, HitbloqPanelController hitbloqPanelController, HitbloqProfileModalController hitbloqProfileModalController, HitbloqEventModalViewController hitbloqEventModalViewController, HitbloqFlowCoordinator hitbloqFlowCoordinator, UserIDSource userIDSource, LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher, List<INotifyUserRegistered> notifyUserRegistereds, List<IBeatmapKeyUpdater> difficultyBeatmapUpdaters, List<INotifyViewActivated> notifyViewActivateds, List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters, List<IPoolUpdater> poolUpdaters)
+		public HitbloqManager(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, HitbloqPanelController hitbloqPanelController, HitbloqProfileModalController hitbloqProfileModalController, HitbloqEventModalViewController hitbloqEventModalViewController, HitbloqFlowCoordinator hitbloqFlowCoordinator, UserIDSource userIDSource, LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher, List<INotifyUserRegistered> notifyUserRegistereds, List<IBeatmapKeyUpdater> beatmapKeyUpdaters, List<INotifyViewActivated> notifyViewActivateds, List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters, List<IPoolUpdater> poolUpdaters)
 		{
 			_hitbloqLeaderboardViewController = hitbloqLeaderboardViewController;
 			_hitbloqPanelController = hitbloqPanelController;
@@ -55,7 +55,7 @@ namespace Hitbloq.Managers
 			_leaderboardRefresher = leaderboardRefresher;
 
 			_notifyUserRegistereds = notifyUserRegistereds;
-			_difficultyBeatmapUpdaters = difficultyBeatmapUpdaters;
+			_beatmapKeyUpdaters = beatmapKeyUpdaters;
 			_notifyViewActivateds = notifyViewActivateds;
 			_leaderboardEntriesUpdaters = leaderboardEntriesUpdaters;
 			_poolUpdaters = poolUpdaters;
@@ -133,9 +133,9 @@ namespace Hitbloq.Managers
 					}
 				}
 				
-				foreach (var difficultyBeatmapUpdater in _difficultyBeatmapUpdaters)
+				foreach (var beatmapKeyUpdater in _beatmapKeyUpdaters)
 				{
-					await UnityMainThreadTaskScheduler.Factory.StartNew(() => difficultyBeatmapUpdater.BeatmapKeyUpdated(beatmapKey.Value, levelInfoEntry));
+					await UnityMainThreadTaskScheduler.Factory.StartNew(() => beatmapKeyUpdater.BeatmapKeyUpdated(beatmapKey.Value, levelInfoEntry));
 				}
 			}
 		}

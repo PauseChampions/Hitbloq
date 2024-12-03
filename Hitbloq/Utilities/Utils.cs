@@ -39,13 +39,13 @@ namespace Hitbloq.Utilities
 
 		public static bool IsDependencyLeaderboardInstalled => IsScoreSaberInstalled || IsBeatLeaderInstalled;
 
-		public static string? DifficultyBeatmapToString(BeatmapKey difficultyBeatmap)
+		public static string? BeatmapKeyToString(BeatmapKey beatmapKey)
 		{
-			if (difficultyBeatmap.levelId.StartsWith("custom_level_"))
+			if (beatmapKey.levelId.StartsWith("custom_level_"))
 			{
-				var hash = Collections.hashForLevelID(difficultyBeatmap.levelId);
-				var difficulty = difficultyBeatmap.difficulty.ToString();
-				var characteristic = difficultyBeatmap.beatmapCharacteristic.serializedName;
+				var hash = Collections.hashForLevelID(beatmapKey.levelId);
+				var difficulty = beatmapKey.difficulty.ToString();
+				var characteristic = beatmapKey.beatmapCharacteristic.serializedName;
 				return $"{hash}%7C_{difficulty}_Solo{characteristic}";
 			}
 

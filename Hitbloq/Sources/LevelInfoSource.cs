@@ -25,7 +25,7 @@ namespace Hitbloq.Sources
                 return cachedValue;
 			}
 
-			var beatmapString = Utils.DifficultyBeatmapToString(beatmapKey);
+			var beatmapString = Utils.BeatmapKeyToString(beatmapKey);
 			if (beatmapString == null)
 			{
 				return null;

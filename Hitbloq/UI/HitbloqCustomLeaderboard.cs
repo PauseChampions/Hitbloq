@@ -24,7 +24,7 @@ namespace Hitbloq.UI
 		protected override ViewController panelViewController { get; }
 		protected override ViewController leaderboardViewController => _hitbloqLeaderboardViewController;
 
-		public void BeatmapKeyUpdated(BeatmapKey difficultyBeatmap, HitbloqLevelInfo? levelInfoEntry)
+		public void BeatmapKeyUpdated(BeatmapKey beatmapKey, HitbloqLevelInfo? levelInfoEntry)
 		{
 			if (levelInfoEntry != null)
 			{

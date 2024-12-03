@@ -165,7 +165,7 @@ namespace Hitbloq.UI.ViewControllers
 			}
 		}
 
-		public void BeatmapKeyUpdated(BeatmapKey difficultyBeatmap, HitbloqLevelInfo? levelInfoEntry)
+		public void BeatmapKeyUpdated(BeatmapKey beatmapKey, HitbloqLevelInfo? levelInfoEntry)
 		{
 			_ = BeatmapKeyUpdatedAsync(levelInfoEntry);
 		}
