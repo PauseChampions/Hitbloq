@@ -18,7 +18,7 @@ namespace Hitbloq.UI.ViewControllers
 {
 	[HotReload(RelativePathToLayout = @"..\Views\HitbloqLeaderboardView.bsml")]
 	[ViewDefinition("Hitbloq.UI.Views.HitbloqLeaderboardView.bsml")]
-	internal class HitbloqLeaderboardViewController : BSMLAutomaticViewController, IDifficultyBeatmapUpdater, ILeaderboardEntriesUpdater, IPoolUpdater
+	internal class HitbloqLeaderboardViewController : BSMLAutomaticViewController, IBeatmapKeyUpdater, ILeaderboardEntriesUpdater, IPoolUpdater
 	{
 		[UIComponent("vertical-icon-segments")]
 		private readonly IconSegmentedControl? _iconSegmentedControl = null!;
@@ -38,7 +38,7 @@ namespace Hitbloq.UI.ViewControllers
 		[Inject]
 		private readonly UserIDSource _userIDSource = null!;
 
-		private IDifficultyBeatmap? _difficultyBeatmap;
+		private BeatmapKey? _beatmapKey;
 
 		private List<Button>? _infoButtons;
 		private List<HitbloqMapLeaderboardEntry>? _leaderboardEntries;
@@ -55,11 +55,11 @@ namespace Hitbloq.UI.ViewControllers
 			{
 				_pageNumber = value;
 				NotifyPropertyChanged(nameof(UpEnabled));
-				if (_leaderboard != null && _loadingControl != null && _difficultyBeatmap != null && Utils.IsDependencyLeaderboardInstalled)
+				if (_leaderboard != null && _loadingControl != null && _beatmapKey != null && Utils.IsDependencyLeaderboardInstalled)
 				{
 					_leaderboard.SetScores(new List<LeaderboardTableView.ScoreData>(), 0);
 					_loadingControl.ShowLoading();
-					PageRequested?.Invoke(_difficultyBeatmap, _leaderboardSources[SelectedCellIndex], value);
+					PageRequested?.Invoke(_beatmapKey.Value, _leaderboardSources[SelectedCellIndex], value);
 				}
 			}
 		}
@@ -70,11 +70,11 @@ namespace Hitbloq.UI.ViewControllers
 		[UIValue("down-enabled")]
 		private bool DownEnabled => _leaderboardEntries is {Count: 10} && _leaderboardSources[SelectedCellIndex].Scrollable;
 
-		public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo? levelInfoEntry)
+		public void BeatmapKeyUpdated(BeatmapKey beatmapKey, HitbloqLevelInfo? levelInfoEntry)
 		{
 			if (levelInfoEntry != null)
 			{
-				_difficultyBeatmap = difficultyBeatmap;
+				_beatmapKey = beatmapKey;
 				if (isActiveAndEnabled)
 				{
 					foreach (var leaderboardSource in _leaderboardSources)
@@ -103,7 +103,7 @@ namespace Hitbloq.UI.ViewControllers
 			}
 		}
 
-		public event Action<IDifficultyBeatmap, IMapLeaderboardSource, int>? PageRequested;
+		public event Action<BeatmapKey, IMapLeaderboardSource, int>? PageRequested;
 
 		protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
 		{
@@ -225,7 +225,7 @@ namespace Hitbloq.UI.ViewControllers
 
 			foreach (var leaderboardTableCell in leaderboardTableCells)
 			{
-				leaderboardTableCell.transform.Find("PlayerName").GetComponent<CurvedTextMeshPro>().richText = true;
+				leaderboardTableCell._playerNameText.richText = true;
 			}
 
 			_loadingControl = _leaderboardTransform.GetComponentInChildren<LoadingControl>(true);

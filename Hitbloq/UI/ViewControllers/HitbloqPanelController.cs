@@ -23,7 +23,7 @@ namespace Hitbloq.UI.ViewControllers
 {
 	[HotReload(RelativePathToLayout = @"..\Views\HitbloqPanel.bsml")]
 	[ViewDefinition("Hitbloq.UI.Views.HitbloqPanel.bsml")]
-	internal class HitbloqPanelController : BSMLAutomaticViewController, IInitializable, IDisposable, INotifyUserRegistered, IDifficultyBeatmapUpdater, IPoolUpdater, ILeaderboardEntriesUpdater
+	internal class HitbloqPanelController : BSMLAutomaticViewController, IInitializable, IDisposable, INotifyUserRegistered, IBeatmapKeyUpdater, IPoolUpdater, ILeaderboardEntriesUpdater
 	{
 		private readonly Color _cancelHighlightColor = Color.red;
 
@@ -165,9 +165,9 @@ namespace Hitbloq.UI.ViewControllers
 			}
 		}
 
-		public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo? levelInfoEntry)
+		public void BeatmapKeyUpdated(BeatmapKey difficultyBeatmap, HitbloqLevelInfo? levelInfoEntry)
 		{
-			_ = DifficultyBeatmapUpdatedAsync(levelInfoEntry);
+			_ = BeatmapKeyUpdatedAsync(levelInfoEntry);
 		}
 
 		public void Dispose()
@@ -211,7 +211,7 @@ namespace Hitbloq.UI.ViewControllers
 		private async Task PostParse()
 		{
 			// Background related stuff
-			if (_container!.background is ImageView background)
+			if (_container!.Background is ImageView background)
 			{
 				background.material = BeatSaberMarkupLanguage.Utilities.ImageResources.NoGlowMat;
 				background.color0 = Color.white;
@@ -240,13 +240,13 @@ namespace Hitbloq.UI.ViewControllers
 			// A bit of explanation of what is going on
 			// I want to make a maximum of 2 cells visible, however I first need to parse exactly 2 cells and clean them up
 			// After that I populate the current pool options
-			(_dropDownListSetting!.dropdown as DropdownWithTableView).SetField("_numberOfVisibleCells", 2);
-			_dropDownListSetting.values = new List<object> {"1", "2"};
+			(_dropDownListSetting!.Dropdown as DropdownWithTableView).SetField("_numberOfVisibleCells", 2);
+			_dropDownListSetting.Values = new List<object> {"1", "2"};
 			_dropDownListSetting.UpdateChoices();
-			_dropDownListSetting.values = _pools.Count != 0 ? _pools : new List<object> {"None"};
+			_dropDownListSetting.Values = _pools.Count != 0 ? _pools : new List<object> {"None"};
 			_dropDownListSetting.UpdateChoices();
 			var poolIndex = _poolNames?.IndexOf(_selectedPool ?? "") ?? 0;
-			_dropDownListSetting.dropdown.SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
+			_dropDownListSetting.Dropdown.SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
 
 			_defaultHighlightColour = _playlistManagerImage!.HighlightColor;
 
@@ -273,7 +273,7 @@ namespace Hitbloq.UI.ViewControllers
 		{
 			if (_dropDownListSetting != null)
 			{
-				_dropDownListSetting.dropdown.Hide(false);
+				_dropDownListSetting.Dropdown.Hide(false);
 			}
 
 			base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
@@ -284,7 +284,7 @@ namespace Hitbloq.UI.ViewControllers
 		{
 			if (_dropDownListSetting != null && _poolNames != null)
 			{
-				PoolChangedEvent?.Invoke(_poolNames[_dropDownListSetting.dropdown.selectedIndex]);
+				PoolChangedEvent?.Invoke(_poolNames[_dropDownListSetting.Dropdown.selectedIndex]);
 			}
 		}
 
@@ -293,7 +293,7 @@ namespace Hitbloq.UI.ViewControllers
 		{
 			if (_dropDownListSetting != null && _rankInfo != null && _poolNames != null)
 			{
-				RankTextClickedEvent?.Invoke(_rankInfo, _poolNames[_dropDownListSetting.dropdown.selectedIndex]);
+				RankTextClickedEvent?.Invoke(_rankInfo, _poolNames[_dropDownListSetting.Dropdown.selectedIndex]);
 			}
 		}
 
@@ -333,7 +333,7 @@ namespace Hitbloq.UI.ViewControllers
 			_selectedPool = pool;
 		}
 
-		private async Task DifficultyBeatmapUpdatedAsync(HitbloqLevelInfo? levelInfoEntry)
+		private async Task BeatmapKeyUpdatedAsync(HitbloqLevelInfo? levelInfoEntry)
 		{
 			_poolInfoTokenSource?.Cancel();
 			_poolInfoTokenSource?.Dispose();
@@ -386,9 +386,9 @@ namespace Hitbloq.UI.ViewControllers
 
 				if (_dropDownListSetting != null)
 				{
-					_dropDownListSetting.values = _pools.Count != 0 ? _pools : new List<object> {"None"};
+					_dropDownListSetting.Values = _pools.Count != 0 ? _pools : new List<object> {"None"};
 					_dropDownListSetting.UpdateChoices();
-					_dropDownListSetting.dropdown.SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
+					_dropDownListSetting.Dropdown.SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
 
 					if (!LoadingActive && !PromptText.Contains("<color=red>"))
 					{

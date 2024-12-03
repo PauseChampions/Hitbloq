@@ -85,9 +85,9 @@ namespace Hitbloq.Other
 				return false;
 			}
 
-			if (_beatmapListener.LastPlayedDifficultyBeatmap != null)
+			if (_beatmapListener.LastPlayedBeatmapKey.HasValue)
 			{
-				var levelInfo = await _levelInfoSource.GetLevelInfoAsync(_beatmapListener.LastPlayedDifficultyBeatmap);
+				var levelInfo = await _levelInfoSource.GetLevelInfoAsync(_beatmapListener.LastPlayedBeatmapKey.Value);
 				if (levelInfo != null)
 				{
 					return true;

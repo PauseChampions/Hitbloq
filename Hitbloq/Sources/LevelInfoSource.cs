@@ -10,7 +10,7 @@ namespace Hitbloq.Sources
 {
 	internal class LevelInfoSource
 	{
-		private readonly Dictionary<IDifficultyBeatmap, HitbloqLevelInfo?> _cache = new();
+		private readonly Dictionary<BeatmapKey, HitbloqLevelInfo?> _cache = new();
 		private readonly IHttpService _siraHttpService;
 
 		public LevelInfoSource(IHttpService siraHttpService)
@@ -18,14 +18,14 @@ namespace Hitbloq.Sources
 			_siraHttpService = siraHttpService;
 		}
 
-		public async Task<HitbloqLevelInfo?> GetLevelInfoAsync(IDifficultyBeatmap difficultyBeatmap, CancellationToken cancellationToken = default)
+		public async Task<HitbloqLevelInfo?> GetLevelInfoAsync(BeatmapKey beatmapKey, CancellationToken cancellationToken = default)
 		{
-			if (_cache.TryGetValue(difficultyBeatmap, out var cachedValue))
+			if (_cache.TryGetValue(beatmapKey, out var cachedValue))
 			{
                 return cachedValue;
 			}
 
-			var beatmapString = Utils.DifficultyBeatmapToString(difficultyBeatmap);
+			var beatmapString = Utils.DifficultyBeatmapToString(beatmapKey);
 			if (beatmapString == null)
 			{
 				return null;
@@ -41,7 +41,7 @@ namespace Hitbloq.Sources
 					return null;
 				}
 
-				_cache[difficultyBeatmap] = levelInfo;
+				_cache[beatmapKey] = levelInfo;
 				return levelInfo;
 			}
 			catch (TaskCanceledException)

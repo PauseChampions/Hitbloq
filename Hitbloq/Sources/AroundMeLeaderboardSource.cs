@@ -29,7 +29,7 @@ namespace Hitbloq.Sources
 
 		public bool Scrollable => false;
 
-		public async Task<List<HitbloqMapLeaderboardEntry>?> GetScoresAsync(IDifficultyBeatmap difficultyBeatmap, CancellationToken cancellationToken = default, int page = 0)
+		public async Task<List<HitbloqMapLeaderboardEntry>?> GetScoresAsync(BeatmapKey difficultyBeatmap, CancellationToken cancellationToken = default, int page = 0)
 		{
 			if (_cachedEntries == null)
 			{

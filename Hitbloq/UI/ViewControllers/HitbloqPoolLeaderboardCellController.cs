@@ -56,9 +56,9 @@ namespace Hitbloq.UI.ViewControllers
 		{
 			_profilePicture.material = _materialGrabber.NoGlowRoundEdge;
 
-			_fogBg = _background.background.material;
-			_roundRectSmall = _background.background.sprite;
-			_originalBackgroundColour = _background.background.color;
+			_fogBg = _background.Background.material;
+			_roundRectSmall = _background.Background.sprite;
+			_originalBackgroundColour = _background.Background.color;
 		}
 
 		public void SetRequiredUtils(UserIDSource userIDSource, SpriteLoader spriteLoader, MaterialGrabber materialGrabber, TweeningManager uwuTweenyManager)
@@ -153,7 +153,7 @@ namespace Hitbloq.UI.ViewControllers
 
 		private async Task FetchBackground()
 		{
-			if (_background.background is not ImageView bgImageView)
+			if (_background.Background is not ImageView bgImageView)
 			{
 				return;
 			}
@@ -218,9 +218,9 @@ namespace Hitbloq.UI.ViewControllers
 
 			if (highlighted)
 			{
-				var currentColor = _background.background.color;
+				var currentColor = _background.Background.color;
 
-				var tween = new FloatTween(0, 1, val => { _background.background.color = Color.Lerp(currentColor, _backgroundHighlightedColor, val); }, 0.25f, EaseType.Linear);
+				var tween = new FloatTween(0, 1, val => { _background.Background.color = Color.Lerp(currentColor, _backgroundHighlightedColor, val); }, 0.25f, EaseType.Linear);
 
 				_uwuTweenyManager.AddTween(tween, this);
 
@@ -232,11 +232,11 @@ namespace Hitbloq.UI.ViewControllers
 			{
 				if (_poolLeaderboardEntry is {BannerImageURL: { }})
 				{
-					_background.background.color = _customBackgroundColour;
+					_background.Background.color = _customBackgroundColour;
 				}
 				else
 				{
-					_background.background.color = _originalBackgroundColour!.Value;
+					_background.Background.color = _originalBackgroundColour!.Value;
 				}
 
 				_rankText.color = _isSelf ? _selfTextColor : _textColor;

@@ -122,8 +122,8 @@ namespace Hitbloq.UI.ViewControllers
 			
 			if (_customListTableData != null)
 			{
-				_customListTableData.tableView.SetDataSource(this, true);
-				_scrollView = Accessors.ScrollViewAccessor(ref _customListTableData.tableView);
+				_customListTableData.TableView.SetDataSource(this, true);
+				_scrollView = _customListTableData.TableView.scrollView;
 			}
 		}
 
@@ -157,8 +157,8 @@ namespace Hitbloq.UI.ViewControllers
 					await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
 					{
 						_leaderboardEntries.Clear();
-						_customListTableData.tableView.ClearSelection();
-						_customListTableData.tableView.ReloadData();
+						_customListTableData.TableView.ClearSelection();
+						_customListTableData.TableView.ReloadData();
 						Loaded = false;
 					});
 				}
@@ -193,7 +193,7 @@ namespace Hitbloq.UI.ViewControllers
 			{
 				Loaded = true;
 				await SiraUtil.Extras.Utilities.PauseChamp;
-				await UnityMainThreadTaskScheduler.Factory.StartNew(() => { _customListTableData.tableView.ReloadDataKeepingPosition(); });
+				await UnityMainThreadTaskScheduler.Factory.StartNew(() => { _customListTableData.TableView.ReloadDataKeepingPosition(); });
 				_leaderboardLoadSemaphore.Release();
 
 				if (firstPage && _currentPage is {ExhaustedPages: false})
@@ -259,7 +259,7 @@ namespace Hitbloq.UI.ViewControllers
 
 		private HitbloqPoolLeaderboardCellController GetCell()
 		{
-			var tableCell = _customListTableData!.tableView.DequeueReusableCellForIdentifier(KReuseIdentifier);
+			var tableCell = _customListTableData!.TableView.DequeueReusableCellForIdentifier(KReuseIdentifier);
 
 			if (tableCell == null)
 			{
@@ -269,13 +269,13 @@ namespace Hitbloq.UI.ViewControllers
 				tableCell.interactable = true;
 
 				tableCell.reuseIdentifier = KReuseIdentifier;
-				BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqPoolLeaderboardCell.bsml"), tableCell.gameObject, tableCell);
+				BSMLParser.Instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqPoolLeaderboardCell.bsml"), tableCell.gameObject, tableCell);
 			}
 
 			return (HitbloqPoolLeaderboardCellController) tableCell;
 		}
 
-		public float CellSize()
+		public float CellSize(int size)
 		{
 			return 7;
 		}

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
+using BeatSaberPlaylistsLib.Types;
 using Hitbloq.Entries;
 using Hitbloq.Other;
 using HMUI;
@@ -38,7 +39,7 @@ namespace Hitbloq.UI.ViewControllers
 
 		private HitbloqPoolCellController? _hitbloqPoolCell;
 		private HitbloqPoolListEntry? _hitbloqPoolListEntry;
-		private IBeatmapLevelPack? _localPlaylist;
+		private IPlaylist? _localPlaylist;
 		private CancellationTokenSource? _playlistSearchTokenSource;
 
 		public event Action? FlowDismissRequested;
@@ -54,7 +55,7 @@ namespace Hitbloq.UI.ViewControllers
 			_hitbloqPoolCell.transform.SetSiblingIndex(0);
 			_hitbloqPoolCell.SetRequiredUtils(_spriteLoader, _materialGrabber, _uwuTweenyManager);
 			_hitbloqPoolCell.interactable = false;
-			BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqPoolCell.bsml"), _hitbloqPoolCell.gameObject, _hitbloqPoolCell);
+			BSMLParser.Instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqPoolCell.bsml"), _hitbloqPoolCell.gameObject, _hitbloqPoolCell);
 		}
 
 		[UIAction("download-click")]
@@ -90,7 +91,7 @@ namespace Hitbloq.UI.ViewControllers
 			if (_playlistManagerIHardlyKnowHer != null && _localPlaylist != null)
 			{
 				FlowDismissRequested?.Invoke();
-				_playlistManagerIHardlyKnowHer.OpenPlaylist(_localPlaylist);
+				_playlistManagerIHardlyKnowHer.OpenPlaylist(_localPlaylist.PlaylistLevelPack);
 			}
 		}
 

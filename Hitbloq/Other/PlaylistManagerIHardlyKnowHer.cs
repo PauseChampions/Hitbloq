@@ -87,7 +87,7 @@ namespace Hitbloq.Other
 			await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
 			{
 				onDownloadComplete?.Invoke();
-				OpenPlaylist(playlistToSelect);
+				OpenPlaylist(playlistToSelect.PlaylistLevelPack);
 			});
 
 			_tokenSource.Dispose();
@@ -99,7 +99,7 @@ namespace Hitbloq.Other
 			_tokenSource?.Cancel();
 		}
 
-		private async Task<IBeatmapLevelPack?> GetPlaylist(string poolID, CancellationToken token = default)
+		private async Task<IPlaylist?> GetPlaylist(string poolID, CancellationToken token = default)
 		{
 			var localPlaylist = await FindLocalPlaylistFromPoolID(poolID, token);
 			if (localPlaylist != null)
@@ -110,7 +110,7 @@ namespace Hitbloq.Other
 			return await DownloadPlaylistFromPoolID(poolID, token).ConfigureAwait(false);
 		}
 
-		public async Task<IBeatmapLevelPack?> FindLocalPlaylistFromPoolID(string poolID, CancellationToken token = default)
+		public async Task<IPlaylist?> FindLocalPlaylistFromPoolID(string poolID, CancellationToken token = default)
 		{
 			try
 			{
@@ -139,7 +139,7 @@ namespace Hitbloq.Other
 			}
 		}
 
-		public async Task<IBeatmapLevelPack?> DownloadPlaylistFromPoolID(string poolID, CancellationToken token = default)
+		public async Task<IPlaylist?> DownloadPlaylistFromPoolID(string poolID, CancellationToken token = default)
 		{
 			try
 			{
@@ -162,17 +162,17 @@ namespace Hitbloq.Other
 			}
 		}
 
-		public void OpenPlaylist(IBeatmapLevelPack playlist)
+		public void OpenPlaylist(BeatmapLevelPack beatmapLevelPack)
 		{
 			if (_mainFlowCoordinator.YoungestChildFlowCoordinatorOrSelf() is LevelSelectionFlowCoordinator)
 			{
 				_levelCategorySegmentedControl.SelectCellWithNumber(1);
 				_selectLevelCategoryViewController.LevelFilterCategoryIconSegmentedControlDidSelectCell(_levelCategorySegmentedControl, 1);
-				_levelFilteringNavigationController.SelectAnnotatedBeatmapLevelCollection(playlist);
+				_levelFilteringNavigationController.SelectAnnotatedBeatmapLevelCollection(beatmapLevelPack);
 			}
 			else
 			{
-				_soloFreePlayFlowCoordinator.Setup(Utils.GetStateForPlaylist(playlist));
+				_soloFreePlayFlowCoordinator.Setup(Utils.GetStateForPlaylist(beatmapLevelPack));
 				_mainMenuViewController.HandleMenuButton(MainMenuViewController.MenuButton.SoloFreePlay);
 			}
 		}

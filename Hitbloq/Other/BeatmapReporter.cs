@@ -5,17 +5,17 @@ namespace Hitbloq.Other
 	internal class BeatmapReporter : IInitializable
 	{
 		private readonly BeatmapListener _beatmapListener;
-		private readonly IDifficultyBeatmap _difficultyBeatmap;
+		private readonly BeatmapKey _beatmapKey;
 
-		public BeatmapReporter(IDifficultyBeatmap difficultyBeatmap, BeatmapListener beatmapListener)
+		public BeatmapReporter(BeatmapKey beatmapKey, BeatmapListener beatmapListener)
 		{
-			_difficultyBeatmap = difficultyBeatmap;
+			_beatmapKey = beatmapKey;
 			_beatmapListener = beatmapListener;
 		}
 
 		public void Initialize()
 		{
-			_beatmapListener.LastPlayedDifficultyBeatmap = _difficultyBeatmap;
+			_beatmapListener.LastPlayedBeatmapKey = _beatmapKey;
 		}
 	}
 }

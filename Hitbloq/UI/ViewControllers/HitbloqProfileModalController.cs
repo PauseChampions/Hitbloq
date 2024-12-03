@@ -105,12 +105,12 @@ namespace Hitbloq.UI.ViewControllers
 				{
 					if (value)
 					{
-						_addFriendButton.image.sprite = _friendAdded;
+						_addFriendButton.Image.sprite = _friendAdded;
 						AddFriendHoverHint = KRemoveFriendPrompt;
 					}
 					else
 					{
-						_addFriendButton.image.sprite = _addFriend;
+						_addFriendButton.Image.sprite = _addFriend;
 						AddFriendHoverHint = KAddFriendPrompt;
 					}
 				}
@@ -279,7 +279,7 @@ namespace Hitbloq.UI.ViewControllers
 			_addFriend = await BeatSaberMarkupLanguage.Utilities.LoadSpriteFromAssemblyAsync("Hitbloq.Images.AddFriend.png");
 			_friendAdded = await BeatSaberMarkupLanguage.Utilities.LoadSpriteFromAssemblyAsync("Hitbloq.Images.FriendAdded.png");
 
-			if (_modalInfoVertical!.background is ImageView verticalBackground)
+			if (_modalInfoVertical!.Background is ImageView verticalBackground)
 			{
 				verticalBackground.color = new Color(0f, 0f, 0f, 0.75f);
 			}
@@ -289,7 +289,7 @@ namespace Hitbloq.UI.ViewControllers
 		{
 			if (!_parsed)
 			{
-				BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqProfileModal.bsml"), parentTransform.gameObject, this);
+				BSMLParser.Instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqProfileModal.bsml"), parentTransform.gameObject, this);
 				_modalPosition = _modalTransform!.localPosition;
 			}
 
@@ -426,7 +426,7 @@ namespace Hitbloq.UI.ViewControllers
 
 				if (platformFriends != null && platformFriends.Contains(userID))
 				{
-					_addFriendButton.image.sprite = _friendAdded;
+					_addFriendButton.Image.sprite = _friendAdded;
 					AddFriendInteractable = false;
 					AddFriendHoverHint = KAlreadyFriendPrompt + (await _platformUserModel.GetUserInfo(CancellationToken.None)).platform;
 				}
