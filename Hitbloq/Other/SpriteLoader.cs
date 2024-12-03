@@ -130,7 +130,7 @@ namespace Hitbloq.Other
 			});
 			if (!_coroutineRunning)
 			{
-				SharedCoroutineStarter.instance.StartCoroutine(SpriteLoadCoroutine());
+				SharedCoroutineStarter.instance?.StartCoroutine(SpriteLoadCoroutine());
 			}
 		}
 
@@ -161,7 +161,7 @@ namespace Hitbloq.Other
 			_coroutineRunning = false;
 			if (_spriteQueue.Count > 0)
 			{
-				SharedCoroutineStarter.instance.StartCoroutine(SpriteLoadCoroutine());
+				SharedCoroutineStarter.instance?.StartCoroutine(SpriteLoadCoroutine());
 			}
 		}
 	}

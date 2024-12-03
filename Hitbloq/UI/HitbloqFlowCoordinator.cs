@@ -104,7 +104,7 @@ namespace Hitbloq.UI
 
 		private void OnFlowDismissRequested()
 		{
-			_parentFlowCoordinator.DismissFlowCoordinator(this, immediately: true);
+			_parentFlowCoordinator?.DismissFlowCoordinator(this, immediately: true);
 		}
 
 		private void OnURLOpenRequested(string url)
@@ -117,7 +117,7 @@ namespace Hitbloq.UI
 			_hitbloqRankedListViewController.gameObject.SetActive(false);
 			_hitbloqPoolLeaderboardViewController.gameObject.SetActive(false);
 			_hitbloqInfoViewController.gameObject.SetActive(false);
-			_parentFlowCoordinator.DismissFlowCoordinator(this);
+			_parentFlowCoordinator?.DismissFlowCoordinator(this);
 		}
 
 		internal void Show()
