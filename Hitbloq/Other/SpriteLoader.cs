@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
-using BeatSaberPlaylistsLib;
 using IPA.Loader;
 using IPA.Utilities.Async;
 using SiraUtil.Web;
@@ -21,12 +20,14 @@ namespace Hitbloq.Other
 		private readonly object _queueLock;
 		private readonly IHttpService _siraHttpService;
 		private readonly Queue<Action> _spriteQueue;
+		private readonly ICoroutineStarter _coroutineStarter;
 		private bool _coroutineRunning;
 
-		public SpriteLoader(UBinder<Plugin, PluginMetadata> pluginMetadata, IHttpService siraHttpService)
+		public SpriteLoader(UBinder<Plugin, PluginMetadata> pluginMetadata, IHttpService siraHttpService, ICoroutineStarter coroutineStarter)
 		{
 			_pluginMetadata = pluginMetadata.Value;
 			_siraHttpService = siraHttpService;
+			_coroutineStarter = coroutineStarter;
 			_cachedSprites = new ConcurrentDictionary<string, Sprite>();
 			_spriteQueue = new Queue<Action>();
 			_queueLock = new object();
@@ -130,7 +131,7 @@ namespace Hitbloq.Other
 			});
 			if (!_coroutineRunning)
 			{
-				SharedCoroutineStarter.instance?.StartCoroutine(SpriteLoadCoroutine());
+				_coroutineStarter.StartCoroutine(SpriteLoadCoroutine());
 			}
 		}
 
@@ -161,7 +162,7 @@ namespace Hitbloq.Other
 			_coroutineRunning = false;
 			if (_spriteQueue.Count > 0)
 			{
-				SharedCoroutineStarter.instance?.StartCoroutine(SpriteLoadCoroutine());
+				_coroutineStarter.StartCoroutine(SpriteLoadCoroutine());
 			}
 		}
 	}
