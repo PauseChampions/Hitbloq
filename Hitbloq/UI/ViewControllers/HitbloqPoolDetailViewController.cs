@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
-using BeatSaberPlaylistsLib.Types;
 using Hitbloq.Entries;
 using Hitbloq.Other;
 using HMUI;
@@ -39,7 +38,7 @@ namespace Hitbloq.UI.ViewControllers
 
 		private HitbloqPoolCellController? _hitbloqPoolCell;
 		private HitbloqPoolListEntry? _hitbloqPoolListEntry;
-		private IPlaylist? _localPlaylist;
+		private BeatmapLevelPack? _localPlaylist;
 		private CancellationTokenSource? _playlistSearchTokenSource;
 
 		public event Action? FlowDismissRequested;
@@ -91,7 +90,7 @@ namespace Hitbloq.UI.ViewControllers
 			if (_playlistManagerIHardlyKnowHer != null && _localPlaylist != null)
 			{
 				FlowDismissRequested?.Invoke();
-				_playlistManagerIHardlyKnowHer.OpenPlaylist(_localPlaylist.PlaylistLevelPack);
+				_playlistManagerIHardlyKnowHer.OpenPlaylist(_localPlaylist);
 			}
 		}
 

@@ -255,7 +255,7 @@ namespace Hitbloq.UI.ViewControllers
 			return (HitbloqPoolCellController) tableCell;
 		}
 
-		public float CellSize(int size)
+		public float CellSize(int idx)
 		{
 			return 23;
 		}
