@@ -3,19 +3,19 @@
   "id": "Hitbloq",
   "name": "Hitbloq",
   "author": "PauseChampions & DaFluffyPotato",
-  "version": "1.4.2",
+  "version": "1.4.3",
   "description": [
     "#![Hitbloq.Description.md]",
     "Hitbloq offers a unique competitive experience for Beat Saber through its use of map pools and the relative ranking algorithm."
   ],
-  "gameVersion": "1.34.2",
+  "gameVersion": "1.39.1",
   "icon": "Hitbloq.Images.Logo.png",
   "dependsOn": {
-    "BSIPA": "^4.2.1",
-    "BeatSaberMarkupLanguage": "^1.8.0",
-    "SiraUtil": "^3.0.0",
-    "LeaderboardCore": "^1.3.2",
-    "SongCore": "^3.9.5"
+    "BSIPA": "^4.3.5",
+    "BeatSaberMarkupLanguage": "^1.12.4",
+    "SiraUtil": "^3.1.14",
+    "LeaderboardCore": "^1.7.0",
+    "SongCore": "^3.14.15"
   },
   "loadAfter": [
     "ScoreSaber",

@@ -43,7 +43,7 @@ namespace Hitbloq.UI.ViewControllers
 		{
 			if (!_parsed)
 			{
-				BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.PopupModals.bsml"), _mainMenuViewController.gameObject, this);
+				BSMLParser.Instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.PopupModals.bsml"), _mainMenuViewController.gameObject, this);
 				_yesNoModalPosition = _yesNoModalTransform.localPosition;
 				_parsed = true;
 			}

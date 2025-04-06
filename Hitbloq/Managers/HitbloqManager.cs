@@ -11,6 +11,7 @@ using Hitbloq.UI.ViewControllers;
 using Hitbloq.Utilities;
 using IPA.Utilities.Async;
 using LeaderboardCore.Interfaces;
+using LeaderboardCore.Utilities;
 using UnityEngine.SceneManagement;
 using Zenject;
 
@@ -18,7 +19,7 @@ namespace Hitbloq.Managers
 {
 	internal class HitbloqManager : IInitializable, IDisposable, INotifyLeaderboardSet
 	{
-		private readonly List<IDifficultyBeatmapUpdater> _difficultyBeatmapUpdaters;
+		private readonly List<IBeatmapKeyUpdater> _beatmapKeyUpdaters;
 		private readonly HitbloqEventModalViewController _hitbloqEventModalViewController;
 		private readonly HitbloqFlowCoordinator _hitbloqFlowCoordinator;
 		private readonly HitbloqLeaderboardViewController _hitbloqLeaderboardViewController;
@@ -39,9 +40,9 @@ namespace Hitbloq.Managers
 		private CancellationTokenSource? _levelInfoTokenSource;
 		private bool _scoreAlreadyUploaded;
 
-		private IDifficultyBeatmap? _selectedDifficultyBeatmap;
+		private BeatmapKey? _selectedBeatmapKey;
 
-		public HitbloqManager(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, HitbloqPanelController hitbloqPanelController, HitbloqProfileModalController hitbloqProfileModalController, HitbloqEventModalViewController hitbloqEventModalViewController, HitbloqFlowCoordinator hitbloqFlowCoordinator, UserIDSource userIDSource, LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher, List<INotifyUserRegistered> notifyUserRegistereds, List<IDifficultyBeatmapUpdater> difficultyBeatmapUpdaters, List<INotifyViewActivated> notifyViewActivateds, List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters, List<IPoolUpdater> poolUpdaters)
+		public HitbloqManager(HitbloqLeaderboardViewController hitbloqLeaderboardViewController, HitbloqPanelController hitbloqPanelController, HitbloqProfileModalController hitbloqProfileModalController, HitbloqEventModalViewController hitbloqEventModalViewController, HitbloqFlowCoordinator hitbloqFlowCoordinator, UserIDSource userIDSource, LevelInfoSource levelInfoSource, LeaderboardRefresher leaderboardRefresher, List<INotifyUserRegistered> notifyUserRegistereds, List<IBeatmapKeyUpdater> beatmapKeyUpdaters, List<INotifyViewActivated> notifyViewActivateds, List<ILeaderboardEntriesUpdater> leaderboardEntriesUpdaters, List<IPoolUpdater> poolUpdaters)
 		{
 			_hitbloqLeaderboardViewController = hitbloqLeaderboardViewController;
 			_hitbloqPanelController = hitbloqPanelController;
@@ -54,7 +55,7 @@ namespace Hitbloq.Managers
 			_leaderboardRefresher = leaderboardRefresher;
 
 			_notifyUserRegistereds = notifyUserRegistereds;
-			_difficultyBeatmapUpdaters = difficultyBeatmapUpdaters;
+			_beatmapKeyUpdaters = beatmapKeyUpdaters;
 			_notifyViewActivateds = notifyViewActivateds;
 			_leaderboardEntriesUpdaters = leaderboardEntriesUpdaters;
 			_poolUpdaters = poolUpdaters;
@@ -90,9 +91,9 @@ namespace Hitbloq.Managers
 			SceneManager.activeSceneChanged += SceneManagerOnactiveSceneChanged;
 		}
 
-		public void OnLeaderboardSet(IDifficultyBeatmap? difficultyBeatmap)
+		public void OnLeaderboardSet(BeatmapKey beatmapKey)
 		{
-			_ = OnLeaderboardSetAsync(difficultyBeatmap);
+			_ = OnLeaderboardSetAsync(beatmapKey);
 		}
 
 		public void OnScoreUploaded()
@@ -105,23 +106,23 @@ namespace Hitbloq.Managers
 			if (!_scoreAlreadyUploaded && await _leaderboardRefresher.Refresh())
 			{
 				_scoreAlreadyUploaded = true;
-				await OnLeaderboardSetAsync(_selectedDifficultyBeatmap);
+				await OnLeaderboardSetAsync(_selectedBeatmapKey);
 			}
 		}
 
-		private async Task OnLeaderboardSetAsync(IDifficultyBeatmap? difficultyBeatmap)
+		private async Task OnLeaderboardSetAsync(BeatmapKey? beatmapKey)
 		{
-			if (difficultyBeatmap != null)
+			if (beatmapKey != null)
 			{
-				_selectedDifficultyBeatmap = difficultyBeatmap;
+				_selectedBeatmapKey = beatmapKey;
 				HitbloqLevelInfo? levelInfoEntry = null;
 
-				if (difficultyBeatmap.level is CustomPreviewBeatmapLevel)
+				if (beatmapKey.Value.levelId.Contains(Constants.CustomLevelPrefix))
 				{
 					_levelInfoTokenSource?.Cancel();
 					_levelInfoTokenSource?.Dispose();
 					_levelInfoTokenSource = new CancellationTokenSource();
-					levelInfoEntry = await _levelInfoSource.GetLevelInfoAsync(difficultyBeatmap, _levelInfoTokenSource.Token);
+					levelInfoEntry = await _levelInfoSource.GetLevelInfoAsync(beatmapKey.Value, _levelInfoTokenSource.Token);
 				}
 
 				if (levelInfoEntry != null)
@@ -131,10 +132,10 @@ namespace Hitbloq.Managers
 						levelInfoEntry = null;
 					}
 				}
-
-				foreach (var difficultyBeatmapUpdater in _difficultyBeatmapUpdaters)
+				
+				foreach (var beatmapKeyUpdater in _beatmapKeyUpdaters)
 				{
-					await UnityMainThreadTaskScheduler.Factory.StartNew(() => difficultyBeatmapUpdater.DifficultyBeatmapUpdated(difficultyBeatmap, levelInfoEntry));
+					await UnityMainThreadTaskScheduler.Factory.StartNew(() => beatmapKeyUpdater.BeatmapKeyUpdated(beatmapKey.Value, levelInfoEntry));
 				}
 			}
 		}
@@ -155,12 +156,12 @@ namespace Hitbloq.Managers
 			}
 		}
 
-		private void OnPageRequested(IDifficultyBeatmap difficultyBeatmap, IMapLeaderboardSource leaderboardSource, int page)
+		private void OnPageRequested(BeatmapKey beatmapKey, IMapLeaderboardSource leaderboardSource, int page)
 		{
-			_ = OnPageRequestedAsync(difficultyBeatmap, leaderboardSource, page);
+			_ = OnPageRequestedAsync(beatmapKey, leaderboardSource, page);
 		}
 
-		private async Task OnPageRequestedAsync(IDifficultyBeatmap difficultyBeatmap, IMapLeaderboardSource leaderboardSource, int page)
+		private async Task OnPageRequestedAsync(BeatmapKey beatmapKey, IMapLeaderboardSource leaderboardSource, int page)
 		{
 			if (!Utils.IsDependencyLeaderboardInstalled)
 			{
@@ -170,7 +171,7 @@ namespace Hitbloq.Managers
 			_leaderboardTokenSource?.Cancel();
 			_leaderboardTokenSource?.Dispose();
 			_leaderboardTokenSource = new CancellationTokenSource();
-			var leaderboardEntries = await leaderboardSource.GetScoresAsync(difficultyBeatmap, _leaderboardTokenSource.Token, page);
+			var leaderboardEntries = await leaderboardSource.GetScoresAsync(beatmapKey, _leaderboardTokenSource.Token, page);
 
 			if (leaderboardEntries != null)
 			{

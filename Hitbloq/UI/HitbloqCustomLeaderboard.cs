@@ -8,7 +8,7 @@ using LeaderboardCore.Models;
 
 namespace Hitbloq.UI
 {
-	internal class HitbloqCustomLeaderboard : CustomLeaderboard, IDisposable, IDifficultyBeatmapUpdater
+	internal class HitbloqCustomLeaderboard : CustomLeaderboard, IDisposable, IBeatmapKeyUpdater
 	{
 		private readonly CustomLeaderboardManager _customLeaderboardManager;
 
@@ -24,7 +24,7 @@ namespace Hitbloq.UI
 		protected override ViewController panelViewController { get; }
 		protected override ViewController leaderboardViewController => _hitbloqLeaderboardViewController;
 
-		public void DifficultyBeatmapUpdated(IDifficultyBeatmap difficultyBeatmap, HitbloqLevelInfo? levelInfoEntry)
+		public void BeatmapKeyUpdated(BeatmapKey beatmapKey, HitbloqLevelInfo? levelInfoEntry)
 		{
 			if (levelInfoEntry != null)
 			{

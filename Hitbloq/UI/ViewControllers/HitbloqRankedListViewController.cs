@@ -89,13 +89,13 @@ namespace Hitbloq.UI.ViewControllers
 		[UIAction("#post-parse")]
 		private void PostParse()
 		{
-			_scrollView = Accessors.ScrollViewAccessor(ref _customListTableData!.tableView);
+			_scrollView = _customListTableData!.TableView.scrollView;
 		}
 
 		[UIAction("list-select")]
 		private void Select(TableView _, int __)
 		{
-			_customListTableData!.tableView.ClearSelection();
+			_customListTableData!.TableView.ClearSelection();
 		}
 
 		private async Task InitSongList(string poolID, CancellationToken cancellationToken, bool firstPage)
@@ -117,8 +117,8 @@ namespace Hitbloq.UI.ViewControllers
 				{
 					await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
 					{
-						_customListTableData.data.Clear();
-						_customListTableData.tableView.ReloadData();
+						_customListTableData.Data.Clear();
+						_customListTableData.TableView.ReloadData();
 						Loaded = false;
 					});
 				}
@@ -154,11 +154,11 @@ namespace Hitbloq.UI.ViewControllers
 
 					_ = _spriteLoader.DownloadSpriteAsync(song.CoverURL, sprite =>
 					{
-						customCellInfo.icon = sprite;
-						_customListTableData.tableView.ReloadDataKeepingPosition();
+						customCellInfo.Icon = sprite;
+						_customListTableData.TableView.ReloadDataKeepingPosition();
 					}, cancellationToken);
 
-					_customListTableData.data.Add(customCellInfo);
+					_customListTableData.Data.Add(customCellInfo);
 
 					if (cancellationToken.IsCancellationRequested)
 					{
@@ -170,7 +170,7 @@ namespace Hitbloq.UI.ViewControllers
 			{
 				Loaded = true;
 				await SiraUtil.Extras.Utilities.PauseChamp;
-				await UnityMainThreadTaskScheduler.Factory.StartNew(() => { _customListTableData.tableView.ReloadDataKeepingPosition(); });
+				await UnityMainThreadTaskScheduler.Factory.StartNew(() => { _customListTableData.TableView.ReloadDataKeepingPosition(); });
 				_songLoadSemaphore.Release();
 
 				if (firstPage)

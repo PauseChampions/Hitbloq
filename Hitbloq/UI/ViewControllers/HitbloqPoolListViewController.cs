@@ -55,7 +55,7 @@ namespace Hitbloq.UI.ViewControllers
 
 			if (_customListTableData != null)
 			{
-				_customListTableData.tableView.ClearSelection();
+				_customListTableData.TableView.ClearSelection();
 			}
 
 			if (_pools.Count == 0)
@@ -88,7 +88,7 @@ namespace Hitbloq.UI.ViewControllers
 			{
 				await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
 				{
-					_customListTableData.tableView.ClearSelection();
+					_customListTableData.TableView.ClearSelection();
 					Loaded = false;
 				});
 
@@ -131,7 +131,7 @@ namespace Hitbloq.UI.ViewControllers
 			{
 				Loaded = true;
 				await SiraUtil.Extras.Utilities.PauseChamp;
-				await UnityMainThreadTaskScheduler.Factory.StartNew(() => { _customListTableData.tableView.ReloadData(); });
+				await UnityMainThreadTaskScheduler.Factory.StartNew(() => { _customListTableData.TableView.ReloadData(); });
 				DetailDismissRequested?.Invoke();
 				_poolLoadSemaphore.Release();
 				OpenPoolToSelect();
@@ -148,8 +148,8 @@ namespace Hitbloq.UI.ViewControllers
 					{
 						_ = UnityMainThreadTaskScheduler.Factory.StartNew(() =>
 						{
-							_customListTableData.tableView.SelectCellWithIdx(i);
-							_customListTableData.tableView.ScrollToCellWithIdx(i, TableView.ScrollPositionType.Center, true);
+							_customListTableData.TableView.SelectCellWithIdx(i);
+							_customListTableData.TableView.ScrollToCellWithIdx(i, TableView.ScrollPositionType.Center, true);
 							PoolSelectedEvent?.Invoke(_pools[i]);
 						});
 						break;
@@ -167,7 +167,7 @@ namespace Hitbloq.UI.ViewControllers
 			rectTransform.localPosition = Vector3.zero;
 			if (_customListTableData != null)
 			{
-				_customListTableData.tableView.SetDataSource(this, true);
+				_customListTableData.TableView.SetDataSource(this, true);
 			}
 		}
 
@@ -239,7 +239,7 @@ namespace Hitbloq.UI.ViewControllers
 
 		private HitbloqPoolCellController GetCell()
 		{
-			var tableCell = _customListTableData!.tableView.DequeueReusableCellForIdentifier(KReuseIdentifier);
+			var tableCell = _customListTableData!.TableView.DequeueReusableCellForIdentifier(KReuseIdentifier);
 
 			if (tableCell == null)
 			{
@@ -249,13 +249,13 @@ namespace Hitbloq.UI.ViewControllers
 				tableCell.interactable = true;
 
 				tableCell.reuseIdentifier = KReuseIdentifier;
-				BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqPoolCell.bsml"), tableCell.gameObject, tableCell);
+				BSMLParser.Instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqPoolCell.bsml"), tableCell.gameObject, tableCell);
 			}
 
 			return (HitbloqPoolCellController) tableCell;
 		}
 
-		public float CellSize()
+		public float CellSize(int idx)
 		{
 			return 23;
 		}

@@ -1,11 +1,10 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using IPA.Loader;
 using Newtonsoft.Json;
 using SiraUtil.Web;
-using SongCore.Utilities;
+using SongCore;
 using Version = Hive.Versioning.Version;
 
 namespace Hitbloq.Utilities
@@ -40,13 +39,13 @@ namespace Hitbloq.Utilities
 
 		public static bool IsDependencyLeaderboardInstalled => IsScoreSaberInstalled || IsBeatLeaderInstalled;
 
-		public static string? DifficultyBeatmapToString(IDifficultyBeatmap difficultyBeatmap)
+		public static string? BeatmapKeyToString(BeatmapKey beatmapKey)
 		{
-			if (difficultyBeatmap.level is CustomPreviewBeatmapLevel customLevel)
+			if (beatmapKey.levelId.StartsWith("custom_level_"))
 			{
-				var hash = Hashing.GetCustomLevelHash(customLevel);
-				var difficulty = difficultyBeatmap.difficulty.ToString();
-				var characteristic = difficultyBeatmap.parentDifficultyBeatmapSet.beatmapCharacteristic.serializedName;
+				var hash = Collections.hashForLevelID(beatmapKey.levelId);
+				var difficulty = beatmapKey.difficulty.ToString();
+				var characteristic = beatmapKey.beatmapCharacteristic.serializedName;
 				return $"{hash}%7C_{difficulty}_Solo{characteristic}";
 			}
 
@@ -99,7 +98,7 @@ namespace Hitbloq.Utilities
 			return sb.ToString();
 		}
 
-		public static LevelSelectionFlowCoordinator.State GetStateForPlaylist(IBeatmapLevelPack beatmapLevelPack)
+		public static LevelSelectionFlowCoordinator.State GetStateForPlaylist(BeatmapLevelPack beatmapLevelPack)
 		{
 			var state = new LevelSelectionFlowCoordinator.State(beatmapLevelPack);
 			Accessors.LevelCategoryAccessor(ref state) = SelectLevelCategoryViewController.LevelCategory.CustomSongs;

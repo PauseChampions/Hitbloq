@@ -38,7 +38,7 @@ namespace Hitbloq.UI.ViewControllers
 
 		private HitbloqPoolCellController? _hitbloqPoolCell;
 		private HitbloqPoolListEntry? _hitbloqPoolListEntry;
-		private IBeatmapLevelPack? _localPlaylist;
+		private BeatmapLevelPack? _localPlaylist;
 		private CancellationTokenSource? _playlistSearchTokenSource;
 
 		public event Action? FlowDismissRequested;
@@ -54,7 +54,7 @@ namespace Hitbloq.UI.ViewControllers
 			_hitbloqPoolCell.transform.SetSiblingIndex(0);
 			_hitbloqPoolCell.SetRequiredUtils(_spriteLoader, _materialGrabber, _uwuTweenyManager);
 			_hitbloqPoolCell.interactable = false;
-			BSMLParser.instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqPoolCell.bsml"), _hitbloqPoolCell.gameObject, _hitbloqPoolCell);
+			BSMLParser.Instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqPoolCell.bsml"), _hitbloqPoolCell.gameObject, _hitbloqPoolCell);
 		}
 
 		[UIAction("download-click")]
