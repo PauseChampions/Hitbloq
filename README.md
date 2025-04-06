@@ -14,7 +14,7 @@ An ingame leaderboard for Hitbloq. To learn more about Hitbloq, visit [https://h
 Trailer: https://youtu.be/wG4_4I9-4yA
 
 ## Download
-Download the latest version of the Hitbloq mod (v1.4.0) [here](https://github.com/PauseChampions/Hitbloq/releases/tag/1.4.0 "here").
+Download the latest version of the Hitbloq mod [here](https://github.com/PauseChampions/Hitbloq/releases).
 
 **BeatSaberMarkupLanguage (BSML)**, **SiraUtil** and **SongCore** are required for this mod, so please download the latest version from ModAssistant.
 **LeaderboardCore** (bundled in zip) is also required so make sure you extract the zip properly.
