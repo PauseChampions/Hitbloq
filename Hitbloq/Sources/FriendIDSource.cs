@@ -11,15 +11,15 @@ namespace Hitbloq.Sources
 {
 	internal class FriendIDSource
 	{
-		private readonly IPlatformUserModel _platformUserModel;
+		private readonly PlatformUserAccessor _platformUserAccessor;
 		private readonly IHttpService _siraHttpService;
 
 		private HashSet<int>? _hitbloqPlatformFriendIds;
 
-		public FriendIDSource(IHttpService siraHttpService, IPlatformUserModel platformUserModel)
+		public FriendIDSource(IHttpService siraHttpService, PlatformUserAccessor platformUserAccessor)
 		{
 			_siraHttpService = siraHttpService;
-			_platformUserModel = platformUserModel;
+			_platformUserAccessor = platformUserAccessor;
 		}
 
 		public async Task<List<int>> GetFriendIDsAsync(CancellationToken cancellationToken = default)
@@ -32,7 +32,7 @@ namespace Hitbloq.Sources
 		{
 			if (_hitbloqPlatformFriendIds == null)
 			{
-				var friendIDs = await _platformUserModel.GetUserFriendsUserIds(true);
+				var friendIDs = await _platformUserAccessor.GetUserFriendsUserIds(true);
 				if (friendIDs != null)
 				{
 					try

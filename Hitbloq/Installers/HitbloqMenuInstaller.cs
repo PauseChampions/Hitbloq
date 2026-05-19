@@ -63,6 +63,7 @@ namespace Hitbloq.Installers
 #endif
 			Container.Bind<SpriteLoader>().AsSingle();
 			Container.Bind<MaterialGrabber>().AsSingle();
+			Container.Bind<PlatformUserAccessor>().AsSingle();
 			Container.Bind<LeaderboardRefresher>().AsSingle();
 
 			var playlistManager = PluginManager.GetPluginFromId("PlaylistManager");

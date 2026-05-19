@@ -1,7 +1,7 @@
-﻿using System;
+using System;
 using BeatLeader.API;
-using BeatLeader.API.Methods;
 using BeatLeader.Models;
+using BeatLeader.WebRequests;
 using Zenject;
 
 namespace Hitbloq.Managers
@@ -17,15 +17,15 @@ namespace Hitbloq.Managers
 
 		public void Dispose()
 		{
-			UploadReplayRequest.RemoveStateListener(OnUploadReplayRequestStateChange);
+			UploadReplayRequest.StateChangedEvent -= OnUploadReplayRequestStateChange;
 		}
 
 		public void Initialize()
 		{
-			UploadReplayRequest.AddStateListener(OnUploadReplayRequestStateChange);
+			UploadReplayRequest.StateChangedEvent += OnUploadReplayRequestStateChange;
 		}
 
-		private void OnUploadReplayRequestStateChange(RequestState state, Score result, string failReason)
+		private void OnUploadReplayRequestStateChange(IWebRequest<ScoreUploadResponse> request, RequestState state, string? failReason)
 		{
 			if (state is RequestState.Finished)
 			{
