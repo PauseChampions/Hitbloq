@@ -24,7 +24,7 @@ Download the latest version of the Hitbloq mod [here](https://github.com/PauseCh
 **Note**: The leaderboard will only appear for Hitbloq ranked maps. Select a Hitbloq map and click the arrow to the right of the leaderboard to use it.
 
 ## Issues and Support
-If you encounter any issues with this mod, DM me on Discord PixelBoom#0001 or file an Issue on GitHub and I'll fix it as soon as I can For support with the mod, DM me or ask a question on the #mod-support channel on the [Hitbloq Discord](https://discord.com/invite/pxWwtWJ)
+If you encounter any issues with this mod, file an Issue on GitHub and I'll fix it as soon as I can For support with the mod, DM me or ask a question on the #mod-support channel on the [Hitbloq Discord](https://discord.com/invite/pxWwtWJ)
 Alternatively you can also ask on the #pc-help channel on the BSMG Discord
 
 ## Contribution
