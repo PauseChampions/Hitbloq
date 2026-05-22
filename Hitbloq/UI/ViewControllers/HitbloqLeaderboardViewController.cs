@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using Hitbloq.Entries;
 using Hitbloq.Interfaces;
+using Hitbloq.Other;
 using Hitbloq.Sources;
 using Hitbloq.Utilities;
 using HMUI;
 using IPA.Utilities.Async;
 using UnityEngine;
-using UnityEngine.UI;
 using Zenject;
 
 namespace Hitbloq.UI.ViewControllers
@@ -35,18 +36,36 @@ namespace Hitbloq.UI.ViewControllers
 		[Inject]
 		private readonly HitbloqProfileModalController _profileModalController = null!;
 
+		[UIValue("cell-clicker-holders")]
+		private readonly List<HitbloqLeaderboardCellClickingView> _cellClickingHolders = Enumerable.Range(0, 10).Select(_ => new HitbloqLeaderboardCellClickingView()).ToList();
+
+		[Inject]
+		private readonly MaterialGrabber _materialGrabber = null!;
+
+		[UIValue("profile-image-holders")]
+		private readonly List<HitbloqLeaderboardProfilePictureView> _profileImageHolders = Enumerable.Range(0, 10).Select(_ => new HitbloqLeaderboardProfilePictureView()).ToList();
+
+		[Inject]
+		private readonly ProfileSource _profileSource = null!;
+
+		[Inject]
+		private readonly SpriteLoader _spriteLoader = null!;
+
 		[Inject]
 		private readonly UserIDSource _userIDSource = null!;
 
 		private BeatmapKey? _beatmapKey;
 
-		private List<Button>? _infoButtons;
 		private List<HitbloqMapLeaderboardEntry>? _leaderboardEntries;
+		private bool _mapRankedOnAnyPool;
 
 		private LoadingControl? _loadingControl;
 
 		private int _pageNumber;
+		private int _renderVersion;
+		private CancellationTokenSource? _profilePictureTokenSource;
 		private string? _selectedPool;
+		private Vector2? _scoreSaberPlayerNamePosition;
 
 		private int PageNumber
 		{
@@ -72,17 +91,24 @@ namespace Hitbloq.UI.ViewControllers
 
 		public void BeatmapKeyUpdated(BeatmapKey beatmapKey, HitbloqLevelInfo? levelInfoEntry)
 		{
-			if (levelInfoEntry != null)
-			{
-				_beatmapKey = beatmapKey;
-				if (isActiveAndEnabled)
-				{
-					foreach (var leaderboardSource in _leaderboardSources)
-					{
-						leaderboardSource.ClearCache();
-					}
+			_beatmapKey = beatmapKey;
+			_mapRankedOnAnyPool = levelInfoEntry != null;
 
+			if (isActiveAndEnabled)
+			{
+				foreach (var leaderboardSource in _leaderboardSources)
+				{
+					leaderboardSource.ClearCache();
+				}
+
+				if (_mapRankedOnAnyPool)
+				{
 					PageNumber = 0;
+				}
+				else
+				{
+					_leaderboardEntries = null;
+					_ = SetScores(null);
 				}
 			}
 		}
@@ -126,72 +152,151 @@ namespace Hitbloq.UI.ViewControllers
 			if (Utils.IsDependencyLeaderboardInstalled is false)
 				return;
 
+			var renderVersion = ++_renderVersion;
 			var scores = new List<LeaderboardTableView.ScoreData>();
 			var myScorePos = -1;
 
-			if (_infoButtons != null)
+			_profilePictureTokenSource?.Cancel();
+			_profilePictureTokenSource?.Dispose();
+			_profilePictureTokenSource = new CancellationTokenSource();
+
+			await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
 			{
-				await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+				foreach (var profileImageHolder in _profileImageHolders)
 				{
-					foreach (var button in _infoButtons)
-					{
-						button.gameObject.SetActive(false);
-					}
-				});
-			}
+					profileImageHolder.ClearSprite();
+				}
+
+				foreach (var cellClickingHolder in _cellClickingHolders)
+				{
+					cellClickingHolder.ClearClicker();
+				}
+			});
 
 			if (leaderboardEntries == null || leaderboardEntries.Count == 0)
 			{
-				scores.Add(new LeaderboardTableView.ScoreData(0, "You haven't set a score on this leaderboard - <size=75%>(<color=#FFD42A>0%</color>)</size>", 0, false));
+				scores.Add(new LeaderboardTableView.ScoreData(0, _mapRankedOnAnyPool ? "You haven't set a score on this leaderboard - <size=75%>(<color=#FFD42A>0%</color>)</size>" : "<color=red>This map is not ranked on any pools</color>", 0, false));
 			}
 			else
 			{
 				if (_selectedPool == null || !leaderboardEntries.First().CR.ContainsKey(_selectedPool))
 				{
-					return;
+					scores.Add(new LeaderboardTableView.ScoreData(0, "<color=red>This map is not ranked on any pools</color>", 0, false));
 				}
-
-				var userID = await _userIDSource.GetUserIDAsync();
-				var id = userID?.ID ?? -1;
-
-				await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+				else
 				{
-					for (var i = 0; i < (leaderboardEntries.Count > 10 ? 10 : leaderboardEntries.Count); i++)
+					var userID = await _userIDSource.GetUserIDAsync();
+					var id = userID?.ID ?? -1;
+
+					await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
 					{
-						scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].Score, $"<color={leaderboardEntries[i].CustomColor ?? "#ffffff"}><size=85%>{leaderboardEntries[i].Username}</color> - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].Accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#aa6eff>{leaderboardEntries[i].CR[_selectedPool].ToString("F2")}<size=55%>cr</size></color>)</size>", leaderboardEntries[i].Rank, false));
-
-						if (_infoButtons != null)
+						for (var i = 0; i < (leaderboardEntries.Count > 10 ? 10 : leaderboardEntries.Count); i++)
 						{
-							_infoButtons[i].gameObject.SetActive(true);
-							var hoverHint = _infoButtons[i].GetComponent<HoverHint>();
-							hoverHint.text = $"Score Set: {leaderboardEntries[i].DateSet}";
-						}
+							scores.Add(new LeaderboardTableView.ScoreData(leaderboardEntries[i].Score, $"<color={leaderboardEntries[i].CustomColor ?? "#ffffff"}><size=85%>{leaderboardEntries[i].Username}</color> - <size=75%>(<color=#FFD42A>{leaderboardEntries[i].Accuracy.ToString("F2")}%</color>)</size></size> - <size=75%> (<color=#aa6eff>{leaderboardEntries[i].CR[_selectedPool].ToString("F2")}<size=55%>cr</size></color>)</size>", leaderboardEntries[i].Rank, false));
 
-						if (leaderboardEntries[i].UserID == id)
-						{
-							myScorePos = i;
+							if (leaderboardEntries[i].UserID == id)
+							{
+								myScorePos = i;
+							}
 						}
-					}
-				});
+					});
+
+					_ = SetProfilePictures(leaderboardEntries, renderVersion, _profilePictureTokenSource.Token);
+				}
+			}
+
+			if (renderVersion != _renderVersion)
+			{
+				return;
 			}
 
 			if (_loadingControl != null && _leaderboard != null)
 			{
 				await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
 				{
+					if (renderVersion != _renderVersion)
+					{
+						return;
+					}
+
 					_loadingControl.Hide();
 					_leaderboard.SetScores(scores, myScorePos);
+					var leaderboardTableCells = _leaderboardTransform!.GetComponentsInChildren<LeaderboardTableCell>(true);
+					for (var i = 0; i < leaderboardTableCells.Length; i++)
+					{
+						ApplyScoreSaberCellStyle(leaderboardTableCells[i]);
+
+						if (i < scores.Count && i < _cellClickingHolders.Count && leaderboardEntries != null && i < leaderboardEntries.Count)
+						{
+							var separatorIndex = Math.Min(i + 1, leaderboardTableCells.Length - 1);
+							var leaderboardTableCell = leaderboardTableCells[separatorIndex];
+							var separator = Accessors.LeaderboardCellSeparatorAccessor(ref leaderboardTableCell);
+							_cellClickingHolders[i].SetClicker(i, InfoButtonClicked, separator);
+						}
+					}
 				});
 			}
 		}
 
-		private void ChangeButtonScale(Button button, float scale)
+		private async Task SetProfilePictures(IReadOnlyList<HitbloqMapLeaderboardEntry> leaderboardEntries, int renderVersion, CancellationToken cancellationToken)
 		{
-			var transform = button.transform;
-			var localScale = transform.localScale;
-			transform.localScale = localScale * scale;
-			_infoButtons?.Add(button);
+			try
+			{
+				var count = Math.Min(leaderboardEntries.Count, _profileImageHolders.Count);
+				var profileTasks = Enumerable.Range(0, count)
+					.Select(index => FetchProfilePictureAsync(leaderboardEntries[index].UserID, cancellationToken))
+					.ToArray();
+
+				var profilePictures = await Task.WhenAll(profileTasks);
+
+				if (renderVersion != _renderVersion)
+				{
+					return;
+				}
+
+				await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+				{
+					if (renderVersion != _renderVersion)
+					{
+						return;
+					}
+
+					for (var i = 0; i < profilePictures.Length; i++)
+					{
+						if (cancellationToken.IsCancellationRequested)
+						{
+							return;
+						}
+
+						if (profilePictures[i] != null)
+						{
+							_profileImageHolders[i].SetProfilePicture(profilePictures[i]!, cancellationToken);
+						}
+						else
+						{
+							_profileImageHolders[i].ClearSprite();
+						}
+					}
+				});
+			}
+			catch (TaskCanceledException)
+			{
+			}
 		}
+
+		private async Task<string?> FetchProfilePictureAsync(int userID, CancellationToken cancellationToken)
+		{
+			try
+			{
+				var profile = await _profileSource.GetProfileAsync(userID, cancellationToken);
+				return cancellationToken.IsCancellationRequested ? null : profile?.ProfilePictureURL;
+			}
+			catch (Exception)
+			{
+				return null;
+			}
+		}
+
 
 		public void InfoButtonClicked(int index)
 		{
@@ -225,7 +330,12 @@ namespace Hitbloq.UI.ViewControllers
 
 			foreach (var leaderboardTableCell in leaderboardTableCells)
 			{
-				leaderboardTableCell._playerNameText.richText = true;
+				ApplyScoreSaberCellStyle(leaderboardTableCell);
+			}
+
+			foreach (var profileImageHolder in _profileImageHolders)
+			{
+				profileImageHolder.SetRequiredUtils(_spriteLoader, _materialGrabber);
 			}
 
 			_loadingControl = _leaderboardTransform.GetComponentInChildren<LoadingControl>(true);
@@ -234,29 +344,23 @@ namespace Hitbloq.UI.ViewControllers
 			loadingContainer.gameObject.SetActive(true);
 			_loadingControl.ShowLoading();
 
-			_infoButtons = new List<Button>();
-
-			// Change info button scales
-			ChangeButtonScale(_button1!, 0.425f);
-			ChangeButtonScale(_button2!, 0.425f);
-			ChangeButtonScale(_button3!, 0.425f);
-			ChangeButtonScale(_button4!, 0.425f);
-			ChangeButtonScale(_button5!, 0.425f);
-			ChangeButtonScale(_button6!, 0.425f);
-			ChangeButtonScale(_button7!, 0.425f);
-			ChangeButtonScale(_button8!, 0.425f);
-			ChangeButtonScale(_button9!, 0.425f);
-			ChangeButtonScale(_button10!, 0.425f);
-			
 			if (Utils.IsDependencyLeaderboardInstalled is false)
 			{
 				SetNoDependenciesInstalledText();
-				
-				foreach (var button in _infoButtons)
-				{
-					button.gameObject.SetActive(false);
-				}
 			}
+		}
+
+		private void ApplyScoreSaberCellStyle(LeaderboardTableCell leaderboardTableCell)
+		{
+			leaderboardTableCell._playerNameText.richText = true;
+			leaderboardTableCell.showSeparator = true;
+
+			if (_scoreSaberPlayerNamePosition == null)
+			{
+				_scoreSaberPlayerNamePosition = leaderboardTableCell._playerNameText.rectTransform.anchoredPosition;
+			}
+
+			leaderboardTableCell._playerNameText.rectTransform.anchoredPosition = new Vector2(_scoreSaberPlayerNamePosition.Value.x + 2.5f, 0f);
 		}
 
 		[UIAction("up-clicked")]
@@ -276,104 +380,6 @@ namespace Hitbloq.UI.ViewControllers
 				PageNumber++;
 			}
 		}
-
-		#region Info Buttons
-
-		[UIComponent("button1")]
-		private readonly Button? _button1 = null!;
-
-		[UIComponent("button2")]
-		private readonly Button? _button2 = null!;
-
-		[UIComponent("button3")]
-		private readonly Button? _button3 = null!;
-
-		[UIComponent("button4")]
-		private readonly Button? _button4 = null!;
-
-		[UIComponent("button5")]
-		private readonly Button? _button5 = null!;
-
-		[UIComponent("button6")]
-		private readonly Button? _button6 = null!;
-
-		[UIComponent("button7")]
-		private readonly Button? _button7 = null!;
-
-		[UIComponent("button8")]
-		private readonly Button? _button8 = null!;
-
-		[UIComponent("button9")]
-		private readonly Button? _button9 = null!;
-
-		[UIComponent("button10")]
-		private readonly Button? _button10 = null!;
-
-		#endregion
-
-		#region Info Buttons Clicked
-
-		[UIAction("b-1-click")]
-		private void B1Clicked()
-		{
-			InfoButtonClicked(0);
-		}
-
-		[UIAction("b-2-click")]
-		private void B2Clicked()
-		{
-			InfoButtonClicked(1);
-		}
-
-		[UIAction("b-3-click")]
-		private void B3Clicked()
-		{
-			InfoButtonClicked(2);
-		}
-
-		[UIAction("b-4-click")]
-		private void B4Clicked()
-		{
-			InfoButtonClicked(3);
-		}
-
-		[UIAction("b-5-click")]
-		private void B5Clicked()
-		{
-			InfoButtonClicked(4);
-		}
-
-		[UIAction("b-6-click")]
-		private void B6Clicked()
-		{
-			InfoButtonClicked(5);
-		}
-
-		[UIAction("b-7-click")]
-		private void B7Clicked()
-		{
-			InfoButtonClicked(6);
-		}
-
-		[UIAction("b-8-click")]
-		private void B8Clicked()
-		{
-			InfoButtonClicked(7);
-		}
-
-		[UIAction("b-9-click")]
-		private void B9Clicked()
-		{
-			InfoButtonClicked(8);
-		}
-
-		[UIAction("b-10-click")]
-		private void B10Clicked()
-		{
-			InfoButtonClicked(9);
-		}
-
-		#endregion
 
 		#region Segmented Control
 

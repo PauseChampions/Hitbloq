@@ -56,10 +56,10 @@ namespace Hitbloq.Installers
 			Container.BindInterfacesTo<AroundMePoolLeaderboardSource>().AsSingle();
 			Container.BindInterfacesTo<FriendsPoolLeaderboardSource>().AsSingle();
 
-#if DEBUG
+#if HITBLOQ_TEST_EVENT
 			Container.BindInterfacesTo<DebugEventSource>().AsSingle();
 #else
-            Container.BindInterfacesTo<EventSource>().AsSingle();
+			Container.BindInterfacesTo<EventSource>().AsSingle();
 #endif
 			Container.Bind<SpriteLoader>().AsSingle();
 			Container.Bind<MaterialGrabber>().AsSingle();

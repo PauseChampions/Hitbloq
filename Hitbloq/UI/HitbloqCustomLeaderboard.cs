@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Hitbloq.Entries;
 using Hitbloq.Interfaces;
 using Hitbloq.UI.ViewControllers;
@@ -13,6 +13,7 @@ namespace Hitbloq.UI
 		private readonly CustomLeaderboardManager _customLeaderboardManager;
 
 		private readonly HitbloqLeaderboardViewController _hitbloqLeaderboardViewController;
+		private bool _registered;
 
 		internal HitbloqCustomLeaderboard(CustomLeaderboardManager customLeaderboardManager, HitbloqPanelController hitbloqPanelController, HitbloqLeaderboardViewController mainLeaderboardViewController)
 		{
@@ -26,14 +27,13 @@ namespace Hitbloq.UI
 
 		public void BeatmapKeyUpdated(BeatmapKey beatmapKey, HitbloqLevelInfo? levelInfoEntry)
 		{
-			if (levelInfoEntry != null)
+			if (_registered)
 			{
-				_customLeaderboardManager.Register(this);
+				return;
 			}
-			else if (levelInfoEntry == null)
-			{
-				_customLeaderboardManager.Unregister(this);
-			}
+
+			_customLeaderboardManager.Register(this);
+			_registered = true;
 		}
 
 		public void Dispose()

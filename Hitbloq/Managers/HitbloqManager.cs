@@ -19,12 +19,15 @@ namespace Hitbloq.Managers
 {
 	internal class HitbloqManager : IInitializable, IDisposable, INotifyLeaderboardSet
 	{
+		private const int ScoreUploadRefreshDelayMilliseconds = 3000;
+
 		private readonly List<IBeatmapKeyUpdater> _beatmapKeyUpdaters;
 		private readonly HitbloqEventModalViewController _hitbloqEventModalViewController;
 		private readonly HitbloqFlowCoordinator _hitbloqFlowCoordinator;
 		private readonly HitbloqLeaderboardViewController _hitbloqLeaderboardViewController;
 		private readonly HitbloqPanelController _hitbloqPanelController;
 		private readonly HitbloqProfileModalController _hitbloqProfileModalController;
+		private readonly object _scoreUploadRefreshLock = new();
 		private readonly List<ILeaderboardEntriesUpdater> _leaderboardEntriesUpdaters;
 		private readonly LeaderboardRefresher _leaderboardRefresher;
 		private readonly LevelInfoSource _levelInfoSource;
@@ -38,7 +41,10 @@ namespace Hitbloq.Managers
 		private string? _currentPool;
 		private CancellationTokenSource? _leaderboardTokenSource;
 		private CancellationTokenSource? _levelInfoTokenSource;
+		private CancellationTokenSource? _scoreUploadRefreshTokenSource;
 		private bool _scoreAlreadyUploaded;
+		private bool _scoreUploadRefreshInProgress;
+		private int _scoreUploadRefreshVersion;
 
 		private BeatmapKey? _selectedBeatmapKey;
 
@@ -74,6 +80,9 @@ namespace Hitbloq.Managers
 			_hitbloqPanelController.EventClickedEvent -= OnEventClicked;
 
 			SceneManager.activeSceneChanged -= SceneManagerOnactiveSceneChanged;
+
+			_scoreUploadRefreshTokenSource?.Cancel();
+			_scoreUploadRefreshTokenSource?.Dispose();
 		}
 
 		public void Initialize()
@@ -98,15 +107,58 @@ namespace Hitbloq.Managers
 
 		public void OnScoreUploaded()
 		{
-			_ = OnScoreUploadAsync();
+			CancellationToken cancellationToken;
+			int scoreUploadRefreshVersion;
+
+			lock (_scoreUploadRefreshLock)
+			{
+				if (_scoreAlreadyUploaded || _scoreUploadRefreshInProgress)
+				{
+					return;
+				}
+
+				_scoreUploadRefreshInProgress = true;
+				_scoreUploadRefreshTokenSource?.Cancel();
+				_scoreUploadRefreshTokenSource?.Dispose();
+				_scoreUploadRefreshTokenSource = new CancellationTokenSource();
+				cancellationToken = _scoreUploadRefreshTokenSource.Token;
+				scoreUploadRefreshVersion = _scoreUploadRefreshVersion;
+			}
+
+			_ = OnScoreUploadAsync(scoreUploadRefreshVersion, cancellationToken);
 		}
 
-		private async Task OnScoreUploadAsync()
+		private async Task OnScoreUploadAsync(int scoreUploadRefreshVersion, CancellationToken cancellationToken)
 		{
-			if (!_scoreAlreadyUploaded && await _leaderboardRefresher.Refresh())
+			try
 			{
-				_scoreAlreadyUploaded = true;
-				await OnLeaderboardSetAsync(_selectedBeatmapKey);
+				await Task.Delay(ScoreUploadRefreshDelayMilliseconds, cancellationToken);
+
+				if (cancellationToken.IsCancellationRequested || scoreUploadRefreshVersion != _scoreUploadRefreshVersion)
+				{
+					return;
+				}
+
+				var refreshSuccessful = await _leaderboardRefresher.Refresh();
+
+				if (!cancellationToken.IsCancellationRequested && scoreUploadRefreshVersion == _scoreUploadRefreshVersion && !_scoreAlreadyUploaded && refreshSuccessful)
+				{
+					_scoreAlreadyUploaded = true;
+					await OnLeaderboardSetAsync(_selectedBeatmapKey);
+				}
+			}
+			catch (TaskCanceledException)
+			{
+			}
+			finally
+			{
+				lock (_scoreUploadRefreshLock)
+				{
+					if (scoreUploadRefreshVersion == _scoreUploadRefreshVersion)
+					{
+						_scoreUploadRefreshInProgress = false;
+					}
+				}
 			}
 		}
 
@@ -216,7 +268,13 @@ namespace Hitbloq.Managers
 		{
 			if (currentScene.name == "MainMenu")
 			{
-				_scoreAlreadyUploaded = false;
+				lock (_scoreUploadRefreshLock)
+				{
+					_scoreUploadRefreshVersion++;
+					_scoreUploadRefreshTokenSource?.Cancel();
+					_scoreAlreadyUploaded = false;
+					_scoreUploadRefreshInProgress = false;
+				}
 			}
 		}
 	}

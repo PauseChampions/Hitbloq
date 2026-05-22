@@ -52,6 +52,9 @@ namespace Hitbloq.UI.ViewControllers
 		private readonly PoolInfoSource _poolInfoSource = null!;
 
 		[Inject]
+		private readonly PoolListSource _poolListSource = null!;
+
+		[Inject]
 		private readonly RankInfoSource _rankInfoSource = null!;
 
 		private bool _cuteMode;
@@ -344,7 +347,19 @@ namespace Hitbloq.UI.ViewControllers
 
 			if (levelInfoEntry != null)
 			{
-				foreach (var pool in levelInfoEntry.Pools)
+				var pools = levelInfoEntry.Pools.ToList();
+				var detailedPools = await _poolListSource.GetAsync(_poolInfoTokenSource.Token);
+
+				if (detailedPools != null)
+				{
+					var popularityByPool = detailedPools.ToDictionary(pool => pool.ID, pool => pool.Popularity);
+					pools = pools
+						.OrderByDescending(pool => popularityByPool.TryGetValue(pool.Key, out var popularity) ? popularity : int.MinValue)
+						.ThenBy(pool => pool.Key, StringComparer.Ordinal)
+						.ToList();
+				}
+
+				foreach (var pool in pools)
 				{
 					var poolInfo = await _poolInfoSource.GetPoolInfoAsync(pool.Key, _poolInfoTokenSource.Token);
 
@@ -362,7 +377,7 @@ namespace Hitbloq.UI.ViewControllers
 					_pools.Add($"{poolName} - {pool.Value}⭐");
 				}
 
-				_poolNames = levelInfoEntry.Pools.Keys.ToList();
+				_poolNames = pools.Select(pool => pool.Key).ToList();
 			}
 			else
 			{

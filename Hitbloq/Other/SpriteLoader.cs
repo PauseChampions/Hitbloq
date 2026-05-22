@@ -109,27 +109,38 @@ namespace Hitbloq.Other
 
 		private void QueueLoadSprite(string key, byte[] imageBytes, Action<Sprite> onCompletion, CancellationToken cancellationToken)
 		{
-			_spriteQueue.Enqueue(async () =>
+			var shouldStartCoroutine = false;
+			lock (_queueLock)
 			{
-				try
+				_spriteQueue.Enqueue(async () =>
 				{
-					var sprite = await BeatSaberMarkupLanguage.Utilities.LoadSpriteAsync(imageBytes);
-					sprite.texture.wrapMode = TextureWrapMode.Clamp;
-					_cachedSprites.TryAdd(key, sprite);
-					if (!cancellationToken.IsCancellationRequested)
+					try
 					{
-						onCompletion?.Invoke(sprite);
+						var sprite = await BeatSaberMarkupLanguage.Utilities.LoadSpriteAsync(imageBytes);
+						sprite.texture.wrapMode = TextureWrapMode.Clamp;
+						_cachedSprites.TryAdd(key, sprite);
+						if (!cancellationToken.IsCancellationRequested)
+						{
+							onCompletion?.Invoke(sprite);
+						}
 					}
-				}
-				catch (Exception)
+					catch (Exception)
+					{
+						if (!cancellationToken.IsCancellationRequested)
+						{
+							onCompletion?.Invoke(BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
+						}
+					}
+				});
+
+				if (!_coroutineRunning)
 				{
-					if (!cancellationToken.IsCancellationRequested)
-					{
-						onCompletion?.Invoke(BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
-					}
+					_coroutineRunning = true;
+					shouldStartCoroutine = true;
 				}
-			});
-			if (!_coroutineRunning)
+			}
+
+			if (shouldStartCoroutine)
 			{
 				_coroutineStarter.StartCoroutine(SpriteLoadCoroutine());
 			}
@@ -137,32 +148,23 @@ namespace Hitbloq.Other
 
 		private IEnumerator<YieldInstruction> SpriteLoadCoroutine()
 		{
-			lock (_queueLock)
-			{
-				if (_coroutineRunning)
-				{
-					yield break;
-				}
-
-				_coroutineRunning = true;
-			}
-
-			while (_spriteQueue.Count > 0)
+			while (true)
 			{
 				yield return LoadWait;
-				if (_spriteQueue.Count == 0)
+
+				Action? loader = null;
+				lock (_queueLock)
 				{
-					break;
+					if (_spriteQueue.Count == 0)
+					{
+						_coroutineRunning = false;
+						yield break;
+					}
+
+					loader = _spriteQueue.Dequeue();
 				}
 
-				var loader = _spriteQueue.Dequeue();
 				_ = UnityMainThreadTaskScheduler.Factory.StartNew(() => loader?.Invoke());
-			}
-
-			_coroutineRunning = false;
-			if (_spriteQueue.Count > 0)
-			{
-				_coroutineStarter.StartCoroutine(SpriteLoadCoroutine());
 			}
 		}
 	}
