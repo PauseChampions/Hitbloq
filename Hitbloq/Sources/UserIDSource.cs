@@ -9,16 +9,16 @@ namespace Hitbloq.Sources
 {
 	internal class UserIDSource
 	{
-		private readonly IPlatformUserModel _platformUserModel;
+		private readonly PlatformUserAccessor _platformUserAccessor;
 		private readonly IHttpService _siraHttpService;
 
 		private HitbloqUserID? _hitbloqUserID;
 		public bool RegistrationRequested;
 
-		public UserIDSource(IHttpService siraHttpService, IPlatformUserModel platformUserModel)
+		public UserIDSource(IHttpService siraHttpService, PlatformUserAccessor platformUserAccessor)
 		{
 			_siraHttpService = siraHttpService;
-			_platformUserModel = platformUserModel;
+			_platformUserAccessor = platformUserAccessor;
 		}
 
 		public event Action? UserRegisteredEvent;
@@ -27,7 +27,7 @@ namespace Hitbloq.Sources
 		{
 			if (_hitbloqUserID == null || RegistrationRequested)
 			{
-				var userInfo = await _platformUserModel.GetUserInfo(CancellationToken.None);
+				var userInfo = await _platformUserAccessor.GetUserInfo(CancellationToken.None);
 				if (userInfo != null)
 				{
 					try

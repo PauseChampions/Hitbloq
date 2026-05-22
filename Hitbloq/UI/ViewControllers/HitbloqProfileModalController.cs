@@ -48,7 +48,7 @@ namespace Hitbloq.UI.ViewControllers
 		[UIParams]
 		private readonly BSMLParserParams? _parserParams = null!;
 
-		private readonly IPlatformUserModel _platformUserModel;
+		private readonly PlatformUserAccessor _platformUserAccessor;
 		private readonly PoolInfoSource _poolInfoSource;
 		private readonly ProfileSource _profileSource;
 		private readonly RankInfoSource _rankInfoSource;
@@ -81,9 +81,9 @@ namespace Hitbloq.UI.ViewControllers
 
 		private int _userID;
 
-		public HitbloqProfileModalController(IPlatformUserModel platformUserModel, UserIDSource userIDSource, ProfileSource profileSource, FriendIDSource friendIDSource, FriendsLeaderboardSource friendsLeaderboardSource, RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource, SpriteLoader spriteLoader, MaterialGrabber materialGrabber)
+		public HitbloqProfileModalController(PlatformUserAccessor platformUserAccessor, UserIDSource userIDSource, ProfileSource profileSource, FriendIDSource friendIDSource, FriendsLeaderboardSource friendsLeaderboardSource, RankInfoSource rankInfoSource, PoolInfoSource poolInfoSource, SpriteLoader spriteLoader, MaterialGrabber materialGrabber)
 		{
-			_platformUserModel = platformUserModel;
+			_platformUserAccessor = platformUserAccessor;
 			_userIDSource = userIDSource;
 			_profileSource = profileSource;
 			_friendIDSource = friendIDSource;
@@ -428,7 +428,7 @@ namespace Hitbloq.UI.ViewControllers
 				{
 					_addFriendButton.Image.sprite = _friendAdded;
 					AddFriendInteractable = false;
-					AddFriendHoverHint = KAlreadyFriendPrompt + (await _platformUserModel.GetUserInfo(CancellationToken.None)).platform;
+					AddFriendHoverHint = KAlreadyFriendPrompt + (await _platformUserAccessor.GetUserInfo(CancellationToken.None))?.platform;
 				}
 				else
 				{

@@ -14,15 +14,15 @@ namespace Hitbloq.Other
 	internal class AutomaticRegistration : IInitializable
 	{
 		private readonly HitbloqPanelController _hitbloqPanelController;
-		private readonly IPlatformUserModel _platformUserModel;
+		private readonly PlatformUserAccessor _platformUserAccessor;
 		private readonly IHttpService _siraHttpService;
 		private readonly UserIDSource _userIDSource;
 
-		public AutomaticRegistration(IHttpService siraHttpService, HitbloqPanelController hitbloqPanelController, IPlatformUserModel platformUserModel, UserIDSource userIDSource)
+		public AutomaticRegistration(IHttpService siraHttpService, HitbloqPanelController hitbloqPanelController, PlatformUserAccessor platformUserAccessor, UserIDSource userIDSource)
 		{
 			_siraHttpService = siraHttpService;
 			_hitbloqPanelController = hitbloqPanelController;
-			_platformUserModel = platformUserModel;
+			_platformUserAccessor = platformUserAccessor;
 			_userIDSource = userIDSource;
 		}
 
@@ -47,7 +47,7 @@ namespace Hitbloq.Other
 			}
 
 			// If a valid platform id doesn't exist, return
-			var userInfo = await _platformUserModel.GetUserInfo(CancellationToken.None);
+			var userInfo = await _platformUserAccessor.GetUserInfo(CancellationToken.None);
 			if (userInfo == null)
 			{
 				return;
