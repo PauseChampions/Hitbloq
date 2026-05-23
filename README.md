@@ -30,4 +30,5 @@ Alternatively you can also ask on the #pc-help channel on the BSMG Discord
 ## Contribution
 If you're a developer and would like to contribute to this mod, your contributions are welcome! Just submit a PR and I will take a look at it.
 
-<img width="735" height="659" alt="image" src="https://github.com/user-attachments/assets/0b3bb05f-c0fc-46c8-afd2-ce530226887b" />
+<img width="1007" height="969" alt="image" src="https://github.com/user-attachments/assets/bc11c909-e6d1-44eb-abff-aad750be55de" />
+
