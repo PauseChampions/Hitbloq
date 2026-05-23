@@ -45,11 +45,7 @@ namespace Hitbloq.Other
 		{
 			if (CachedSprites.TryGetValue(spriteURL, out var cachedSprite))
 			{
-				if (!cancellationToken.IsCancellationRequested)
-				{
-					onCompletion?.Invoke(cachedSprite);
-				}
-
+				await InvokeCompletionAsync(onCompletion, cachedSprite, cancellationToken).ConfigureAwait(false);
 				return;
 			}
 
@@ -65,18 +61,12 @@ namespace Hitbloq.Other
 				if (!cancellationToken.IsCancellationRequested)
 				{
 					var sprite = await QueueLoadSpriteAsync(spriteURL, ms.ToArray());
-					if (!cancellationToken.IsCancellationRequested)
-					{
-						onCompletion?.Invoke(sprite);
-					}
+					await InvokeCompletionAsync(onCompletion, sprite, cancellationToken).ConfigureAwait(false);
 				}
 			}
 			catch (Exception)
 			{
-				if (!cancellationToken.IsCancellationRequested)
-				{
-					onCompletion?.Invoke(BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
-				}
+				await InvokeCompletionAsync(onCompletion, BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite, cancellationToken).ConfigureAwait(false);
 			}
 		}
 
@@ -84,11 +74,7 @@ namespace Hitbloq.Other
 		{
 			if (CachedSprites.TryGetValue(spriteURL, out var cachedSprite))
 			{
-				if (!cancellationToken.IsCancellationRequested)
-				{
-					onCompletion?.Invoke(cachedSprite);
-				}
-
+				await InvokeCompletionAsync(onCompletion, cachedSprite, cancellationToken).ConfigureAwait(false);
 				return;
 			}
 
@@ -96,17 +82,11 @@ namespace Hitbloq.Other
 			{
 				var spriteTask = InFlightSprites.GetOrAdd(spriteURL, DownloadAndLoadSpriteAsync);
 				var sprite = await spriteTask.ConfigureAwait(false);
-				if (!cancellationToken.IsCancellationRequested)
-				{
-					onCompletion?.Invoke(sprite);
-				}
+				await InvokeCompletionAsync(onCompletion, sprite, cancellationToken).ConfigureAwait(false);
 			}
 			catch (Exception)
 			{
-				if (!cancellationToken.IsCancellationRequested)
-				{
-					onCompletion?.Invoke(BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
-				}
+				await InvokeCompletionAsync(onCompletion, BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite, cancellationToken).ConfigureAwait(false);
 			}
 		}
 
@@ -132,6 +112,29 @@ namespace Hitbloq.Other
 			{
 				InFlightSprites.TryRemove(spriteURL, out _);
 			}
+		}
+
+		private static async Task InvokeCompletionAsync(Action<Sprite> onCompletion, Sprite sprite, CancellationToken cancellationToken)
+		{
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return;
+			}
+
+			await SiraUtil.Extras.Utilities.PauseChamp.ConfigureAwait(false);
+
+			if (cancellationToken.IsCancellationRequested)
+			{
+				return;
+			}
+
+			await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+			{
+				if (!cancellationToken.IsCancellationRequested)
+				{
+					onCompletion?.Invoke(sprite);
+				}
+			}).ConfigureAwait(false);
 		}
 
 		private Task<Sprite> QueueLoadSpriteAsync(string key, byte[] imageBytes)
