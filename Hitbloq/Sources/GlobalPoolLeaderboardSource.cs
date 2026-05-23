@@ -20,7 +20,7 @@ namespace Hitbloq.Sources
 		public string HoverHint => "Global";
 
 		public Task<Sprite> Icon { get; } =
-			BeatSaberMarkupLanguage.Utilities.LoadSpriteFromAssemblyAsync("Hitbloq.Images.GlobalIcon.png");
+			BSMLCompat.LoadSpriteFromAssemblyAsync("Hitbloq.Images.GlobalIcon.png");
 
 		public async Task<PoolLeaderboardPage?> GetScoresAsync(string poolID, CancellationToken cancellationToken = default, int page = 0)
 		{

@@ -1,5 +1,6 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using BeatSaberMarkupLanguage;
 using BeatSaberMarkupLanguage.Attributes;
 using HMUI;
@@ -11,6 +12,7 @@ namespace Hitbloq.UI.ViewControllers
 {
 	internal sealed class HitbloqLeaderboardCellClickingView
 	{
+		private const string CellClickTargetName = "HitbloqCellClickTarget";
 		private readonly Sprite _blankSprite = BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite;
 		private CellClicker? _cellClicker;
 
@@ -49,9 +51,67 @@ namespace Hitbloq.UI.ViewControllers
 			_cellClicker.Separator = separator;
 		}
 
+		public Vector3 WorldPosition => _cellClickerImage != null ? _cellClickerImage.transform.position : Vector3.zero;
+
+		public static void ClearCellClickers(IEnumerable<LeaderboardTableCell> leaderboardTableCells)
+		{
+			foreach (var leaderboardTableCell in leaderboardTableCells)
+			{
+				foreach (var cellClicker in leaderboardTableCell.GetComponentsInChildren<CellClicker>(true))
+				{
+					UnityEngine.Object.Destroy(cellClicker);
+				}
+
+				var target = leaderboardTableCell.transform.Find(CellClickTargetName);
+				if (target != null)
+				{
+					UnityEngine.Object.Destroy(target.gameObject);
+				}
+			}
+		}
+
+		public static void SetCellClicker(LeaderboardTableCell leaderboardTableCell, int index, Action<int> onClick, Image? separator)
+		{
+			leaderboardTableCell.interactable = true;
+			if (leaderboardTableCell.GetComponent<Touchable>() == null)
+			{
+				leaderboardTableCell.gameObject.AddComponent<Touchable>();
+			}
+
+            var clickTarget = leaderboardTableCell.transform.Find(CellClickTargetName)?.gameObject;
+			if (clickTarget == null)
+			{
+				// Don't add Touchable on the same GameObject as an Image/Graphic: Unity disallows multiple Graphic
+				// components on the same GameObject. The parent leaderboardTableCell already receives a Touchable
+				// above, so only add RectTransform and Image here.
+				clickTarget = new GameObject(CellClickTargetName, typeof(RectTransform), typeof(Image));
+				clickTarget.transform.SetParent(leaderboardTableCell.transform, false);
+			}
+
+			var rectTransform = clickTarget.GetComponent<RectTransform>();
+			rectTransform.anchorMin = Vector2.zero;
+			rectTransform.anchorMax = Vector2.one;
+			rectTransform.offsetMin = Vector2.zero;
+			rectTransform.offsetMax = Vector2.zero;
+			rectTransform.localScale = Vector3.one;
+			rectTransform.SetAsLastSibling();
+
+			var image = clickTarget.GetComponent<Image>();
+			image.sprite = BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite;
+			image.color = new Color(1f, 1f, 1f, 0.001f);
+			image.raycastTarget = true;
+			clickTarget.SetActive(true);
+
+			var cellClicker = clickTarget.GetComponent<CellClicker>() ?? clickTarget.AddComponent<CellClicker>();
+			cellClicker.Index = index;
+			cellClicker.OnClick = onClick;
+			cellClicker.Separator = separator;
+		}
+
 		private sealed class CellClicker : MonoBehaviour, IPointerClickHandler, IPointerEnterHandler, IPointerExitHandler
 		{
 			private static readonly Color HighlightColor = Color.white;
+			private static CellClicker? _activeClicker;
 
 			private Color? _originalColor;
 			private Color? _originalColor0;
@@ -75,6 +135,12 @@ namespace Hitbloq.UI.ViewControllers
 					return;
 				}
 
+				if (_activeClicker != null && _activeClicker != this)
+				{
+					_activeClicker.ResetSeparator();
+				}
+
+				_activeClicker = this;
 				CacheOriginals();
 				StopAllCoroutines();
 				Separator.transform.localScale = _originalScale!.Value * 2f;
@@ -83,14 +149,12 @@ namespace Hitbloq.UI.ViewControllers
 
 			public void OnPointerExit(PointerEventData eventData)
 			{
-				if (Separator == null || _originalColor == null || _originalColor0 == null || _originalColor1 == null || _originalScale == null)
+				if (_activeClicker == this)
 				{
-					return;
+					_activeClicker = null;
 				}
 
-				StopAllCoroutines();
-				Separator.transform.localScale = _originalScale.Value;
-				StartCoroutine(LerpSeparator(Separator.color, _originalColor.Value, GetImageViewColor0(Separator), _originalColor0.Value, GetImageViewColor1(Separator), _originalColor1.Value, 0.05f));
+				ResetSeparator(0.05f);
 			}
 
 			private void CacheOriginals()
@@ -148,16 +212,34 @@ namespace Hitbloq.UI.ViewControllers
 				imageView.color1 = color1;
 			}
 
-			private void OnDestroy()
+			private void ResetSeparator(float duration = 0f)
 			{
+				if (Separator == null || _originalColor == null || _originalColor0 == null || _originalColor1 == null || _originalScale == null)
+				{
+					return;
+				}
+
 				StopAllCoroutines();
-				if (Separator != null && _originalColor != null && _originalColor0 != null && _originalColor1 != null && _originalScale != null)
+				Separator.transform.localScale = _originalScale.Value;
+				if (duration <= 0f)
 				{
 					Separator.color = _originalColor.Value;
 					SetImageViewColors(Separator, _originalColor0.Value, _originalColor1.Value);
-					Separator.transform.localScale = _originalScale.Value;
+					return;
 				}
 
+				StartCoroutine(LerpSeparator(Separator.color, _originalColor.Value, GetImageViewColor0(Separator), _originalColor0.Value, GetImageViewColor1(Separator), _originalColor1.Value, duration));
+			}
+
+			private void OnDestroy()
+			{
+				StopAllCoroutines();
+				if (_activeClicker == this)
+				{
+					_activeClicker = null;
+				}
+
+				ResetSeparator();
 				OnClick = null;
 				Separator = null;
 			}

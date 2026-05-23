@@ -7,6 +7,7 @@ using BeatSaberMarkupLanguage.Attributes;
 using BeatSaberMarkupLanguage.ViewControllers;
 using Hitbloq.Entries;
 using Hitbloq.Other;
+using Hitbloq.Utilities;
 using HMUI;
 using Tweening;
 using UnityEngine;
@@ -54,7 +55,7 @@ namespace Hitbloq.UI.ViewControllers
 			_hitbloqPoolCell.transform.SetSiblingIndex(0);
 			_hitbloqPoolCell.SetRequiredUtils(_spriteLoader, _materialGrabber, _uwuTweenyManager);
 			_hitbloqPoolCell.interactable = false;
-			BSMLParser.Instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqPoolCell.bsml"), _hitbloqPoolCell.gameObject, _hitbloqPoolCell);
+			BSMLCompat.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqPoolCell.bsml"), _hitbloqPoolCell.gameObject, _hitbloqPoolCell);
 		}
 
 		[UIAction("download-click")]

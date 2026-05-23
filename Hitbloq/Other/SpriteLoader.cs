@@ -15,28 +15,35 @@ namespace Hitbloq.Other
 	internal class SpriteLoader
 	{
 		private static readonly YieldInstruction LoadWait = new WaitForEndOfFrame();
-		private readonly ConcurrentDictionary<string, Sprite> _cachedSprites;
+		private static readonly ConcurrentDictionary<string, Sprite> CachedSprites = new ConcurrentDictionary<string, Sprite>();
+		private static readonly ConcurrentDictionary<string, Task<Sprite>> InFlightSprites = new ConcurrentDictionary<string, Task<Sprite>>();
 		private readonly PluginMetadata _pluginMetadata;
 		private readonly object _queueLock;
 		private readonly IHttpService _siraHttpService;
 		private readonly Queue<Action> _spriteQueue;
+#if !HITBLOQ_BS_1_29_1
 		private readonly ICoroutineStarter _coroutineStarter;
+#endif
 		private bool _coroutineRunning;
 
+#if HITBLOQ_BS_1_29_1
+		public SpriteLoader(UBinder<Plugin, PluginMetadata> pluginMetadata, IHttpService siraHttpService)
+#else
 		public SpriteLoader(UBinder<Plugin, PluginMetadata> pluginMetadata, IHttpService siraHttpService, ICoroutineStarter coroutineStarter)
+#endif
 		{
 			_pluginMetadata = pluginMetadata.Value;
 			_siraHttpService = siraHttpService;
+#if !HITBLOQ_BS_1_29_1
 			_coroutineStarter = coroutineStarter;
-			_cachedSprites = new ConcurrentDictionary<string, Sprite>();
+#endif
 			_spriteQueue = new Queue<Action>();
 			_queueLock = new object();
 		}
 
 		public async Task FetchSpriteFromResourcesAsync(string spriteURL, Action<Sprite> onCompletion, CancellationToken cancellationToken = default)
 		{
-			// Check Cache
-			if (_cachedSprites.TryGetValue(spriteURL, out var cachedSprite))
+			if (CachedSprites.TryGetValue(spriteURL, out var cachedSprite))
 			{
 				if (!cancellationToken.IsCancellationRequested)
 				{
@@ -57,7 +64,11 @@ namespace Hitbloq.Other
 
 				if (!cancellationToken.IsCancellationRequested)
 				{
-					QueueLoadSprite(spriteURL, ms.ToArray(), onCompletion, cancellationToken);
+					var sprite = await QueueLoadSpriteAsync(spriteURL, ms.ToArray());
+					if (!cancellationToken.IsCancellationRequested)
+					{
+						onCompletion?.Invoke(sprite);
+					}
 				}
 			}
 			catch (Exception)
@@ -71,8 +82,7 @@ namespace Hitbloq.Other
 
 		public async Task DownloadSpriteAsync(string spriteURL, Action<Sprite> onCompletion, CancellationToken cancellationToken = default)
 		{
-			// Check Cache
-			if (_cachedSprites.TryGetValue(spriteURL, out var cachedSprite))
+			if (CachedSprites.TryGetValue(spriteURL, out var cachedSprite))
 			{
 				if (!cancellationToken.IsCancellationRequested)
 				{
@@ -84,18 +94,11 @@ namespace Hitbloq.Other
 
 			try
 			{
-				var webResponse = await _siraHttpService.GetAsync(spriteURL, cancellationToken: cancellationToken).ConfigureAwait(false);
-				if (webResponse.Successful)
+				var spriteTask = InFlightSprites.GetOrAdd(spriteURL, DownloadAndLoadSpriteAsync);
+				var sprite = await spriteTask.ConfigureAwait(false);
+				if (!cancellationToken.IsCancellationRequested)
 				{
-					if (!cancellationToken.IsCancellationRequested)
-					{
-						var imageBytes = await webResponse.ReadAsByteArrayAsync();
-						QueueLoadSprite(spriteURL, imageBytes, onCompletion, cancellationToken);
-					}
-				}
-				else if (!cancellationToken.IsCancellationRequested)
-				{
-					onCompletion?.Invoke(BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
+					onCompletion?.Invoke(sprite);
 				}
 			}
 			catch (Exception)
@@ -107,8 +110,38 @@ namespace Hitbloq.Other
 			}
 		}
 
-		private void QueueLoadSprite(string key, byte[] imageBytes, Action<Sprite> onCompletion, CancellationToken cancellationToken)
+		public bool TryGetCachedSprite(string spriteURL, out Sprite sprite)
 		{
+			return CachedSprites.TryGetValue(spriteURL, out sprite);
+		}
+
+		private async Task<Sprite> DownloadAndLoadSpriteAsync(string spriteURL)
+		{
+			try
+			{
+				var webResponse = await _siraHttpService.GetAsync(spriteURL, cancellationToken: CancellationToken.None).ConfigureAwait(false);
+				if (!webResponse.Successful)
+				{
+					return BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite;
+				}
+
+				var imageBytes = await webResponse.ReadAsByteArrayAsync();
+				return await QueueLoadSpriteAsync(spriteURL, imageBytes).ConfigureAwait(false);
+			}
+			finally
+			{
+				InFlightSprites.TryRemove(spriteURL, out _);
+			}
+		}
+
+		private Task<Sprite> QueueLoadSpriteAsync(string key, byte[] imageBytes)
+		{
+			if (CachedSprites.TryGetValue(key, out var cachedSprite))
+			{
+				return Task.FromResult(cachedSprite);
+			}
+
+			var taskCompletionSource = new TaskCompletionSource<Sprite>();
 			var shouldStartCoroutine = false;
 			lock (_queueLock)
 			{
@@ -116,20 +149,18 @@ namespace Hitbloq.Other
 				{
 					try
 					{
+#if HITBLOQ_BS_1_29_1
+						var sprite = BeatSaberMarkupLanguage.Utilities.LoadSpriteRaw(imageBytes);
+#else
 						var sprite = await BeatSaberMarkupLanguage.Utilities.LoadSpriteAsync(imageBytes);
+#endif
 						sprite.texture.wrapMode = TextureWrapMode.Clamp;
-						_cachedSprites.TryAdd(key, sprite);
-						if (!cancellationToken.IsCancellationRequested)
-						{
-							onCompletion?.Invoke(sprite);
-						}
+						CachedSprites.TryAdd(key, sprite);
+						taskCompletionSource.TrySetResult(sprite);
 					}
 					catch (Exception)
 					{
-						if (!cancellationToken.IsCancellationRequested)
-						{
-							onCompletion?.Invoke(BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
-						}
+						taskCompletionSource.TrySetResult(BeatSaberMarkupLanguage.Utilities.ImageResources.BlankSprite);
 					}
 				});
 
@@ -142,10 +173,37 @@ namespace Hitbloq.Other
 
 			if (shouldStartCoroutine)
 			{
+#if HITBLOQ_BS_1_29_1
+				_ = UnityMainThreadTaskScheduler.Factory.StartNew(ProcessSpriteQueue);
+#else
 				_coroutineStarter.StartCoroutine(SpriteLoadCoroutine());
+#endif
 			}
+
+			return taskCompletionSource.Task;
 		}
 
+#if HITBLOQ_BS_1_29_1
+		private void ProcessSpriteQueue()
+		{
+			while (true)
+			{
+				Action? loader = null;
+				lock (_queueLock)
+				{
+					if (_spriteQueue.Count == 0)
+					{
+						_coroutineRunning = false;
+						return;
+					}
+
+					loader = _spriteQueue.Dequeue();
+				}
+
+				loader?.Invoke();
+			}
+		}
+#else
 		private IEnumerator<YieldInstruction> SpriteLoadCoroutine()
 		{
 			while (true)
@@ -167,5 +225,6 @@ namespace Hitbloq.Other
 				_ = UnityMainThreadTaskScheduler.Factory.StartNew(() => loader?.Invoke());
 			}
 		}
+#endif
 	}
 }

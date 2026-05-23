@@ -10,6 +10,7 @@ using BeatSaberMarkupLanguage.ViewControllers;
 using Hitbloq.Entries;
 using Hitbloq.Other;
 using Hitbloq.Sources;
+using Hitbloq.Utilities;
 using HMUI;
 using IPA.Utilities.Async;
 using Tweening;
@@ -55,7 +56,7 @@ namespace Hitbloq.UI.ViewControllers
 
 			if (_customListTableData != null)
 			{
-				_customListTableData.TableView.ClearSelection();
+				BSMLCompat.TableView(_customListTableData).ClearSelection();
 			}
 
 			if (_pools.Count == 0)
@@ -88,7 +89,7 @@ namespace Hitbloq.UI.ViewControllers
 			{
 				await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
 				{
-					_customListTableData.TableView.ClearSelection();
+					BSMLCompat.TableView(_customListTableData).ClearSelection();
 					Loaded = false;
 				});
 
@@ -131,7 +132,7 @@ namespace Hitbloq.UI.ViewControllers
 			{
 				Loaded = true;
 				await SiraUtil.Extras.Utilities.PauseChamp;
-				await UnityMainThreadTaskScheduler.Factory.StartNew(() => { _customListTableData.TableView.ReloadData(); });
+				await UnityMainThreadTaskScheduler.Factory.StartNew(() => { BSMLCompat.TableView(_customListTableData).ReloadData(); });
 				DetailDismissRequested?.Invoke();
 				_poolLoadSemaphore.Release();
 				OpenPoolToSelect();
@@ -148,8 +149,8 @@ namespace Hitbloq.UI.ViewControllers
 					{
 						_ = UnityMainThreadTaskScheduler.Factory.StartNew(() =>
 						{
-							_customListTableData.TableView.SelectCellWithIdx(i);
-							_customListTableData.TableView.ScrollToCellWithIdx(i, TableView.ScrollPositionType.Center, true);
+							BSMLCompat.TableView(_customListTableData).SelectCellWithIdx(i);
+							BSMLCompat.TableView(_customListTableData).ScrollToCellWithIdx(i, TableView.ScrollPositionType.Center, true);
 							PoolSelectedEvent?.Invoke(_pools[i]);
 						});
 						break;
@@ -167,7 +168,7 @@ namespace Hitbloq.UI.ViewControllers
 			rectTransform.localPosition = Vector3.zero;
 			if (_customListTableData != null)
 			{
-				_customListTableData.TableView.SetDataSource(this, true);
+				BSMLCompat.TableView(_customListTableData).SetDataSource(this, true);
 			}
 		}
 
@@ -239,7 +240,7 @@ namespace Hitbloq.UI.ViewControllers
 
 		private HitbloqPoolCellController GetCell()
 		{
-			var tableCell = _customListTableData!.TableView.DequeueReusableCellForIdentifier(KReuseIdentifier);
+			var tableCell = BSMLCompat.TableView(_customListTableData!).DequeueReusableCellForIdentifier(KReuseIdentifier);
 
 			if (tableCell == null)
 			{
@@ -249,7 +250,7 @@ namespace Hitbloq.UI.ViewControllers
 				tableCell.interactable = true;
 
 				tableCell.reuseIdentifier = KReuseIdentifier;
-				BSMLParser.Instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqPoolCell.bsml"), tableCell.gameObject, tableCell);
+				BSMLCompat.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqPoolCell.bsml"), tableCell.gameObject, tableCell);
 			}
 
 			return (HitbloqPoolCellController) tableCell;
@@ -259,6 +260,13 @@ namespace Hitbloq.UI.ViewControllers
 		{
 			return 23;
 		}
+
+#if HITBLOQ_BS_1_29_1
+		public float CellSize()
+		{
+			return 23;
+		}
+#endif
 
 		public int NumberOfCells()
 		{

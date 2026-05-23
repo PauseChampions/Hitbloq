@@ -41,7 +41,12 @@ namespace Hitbloq.Other
 			_levelCategorySegmentedControl = selectLevelCategoryViewController.GetField<IconSegmentedControl, SelectLevelCategoryViewController>("_levelFilterCategoryIconSegmentedControl");
 		}
 
-		public IPlaylist? SelectedPlaylist => _playlistDataManager.selectedPlaylist;
+		public IPlaylist? SelectedPlaylist =>
+#if HITBLOQ_BS_1_29_1
+			null;
+#else
+			_playlistDataManager.selectedPlaylist;
+#endif
 
 		public bool IsDownloading => _tokenSource is {IsCancellationRequested: false};
 
@@ -114,7 +119,7 @@ namespace Hitbloq.Other
 		{
 			try
 			{
-				return (await Task.Run(() =>
+				var playlist = await Task.Run(() =>
 				{
 					var syncURL = $"https://hitbloq.com/static/hashlists/{poolID}.bplist";
 
@@ -131,7 +136,12 @@ namespace Hitbloq.Other
 					}
 
 					return null;
-				}, token))?.PlaylistLevelPack;
+				}, token);
+#if HITBLOQ_BS_1_29_1
+				return null;
+#else
+				return playlist?.PlaylistLevelPack;
+#endif
 			}
 			catch (TaskCanceledException)
 			{
@@ -154,7 +164,11 @@ namespace Hitbloq.Other
 					playlistManager.StorePlaylist(newPlaylist);
 				}
 
+#if HITBLOQ_BS_1_29_1
+				return null;
+#else
 				return newPlaylist?.PlaylistLevelPack;
+#endif
 			}
 			catch (TaskCanceledException)
 			{

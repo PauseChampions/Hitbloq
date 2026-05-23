@@ -19,12 +19,23 @@ namespace Hitbloq.UI
 
 		public void Dispose()
 		{
-				MenuButtons.Instance.UnregisterButton(_menuButton);
+#if HITBLOQ_BS_1_29_1
+			if (MenuButtons.IsSingletonAvailable)
+			{
+				MenuButtons.instance.UnregisterButton(_menuButton);
+			}
+#else
+			MenuButtons.Instance.UnregisterButton(_menuButton);
+#endif
 		}
 
 		public void Initialize()
 		{
+#if HITBLOQ_BS_1_29_1
+			MenuButtons.instance.RegisterButton(_menuButton);
+#else
 			MenuButtons.Instance.RegisterButton(_menuButton);
+#endif
 		}
 
 		private void MenuButtonClicked()

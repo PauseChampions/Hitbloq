@@ -23,7 +23,7 @@ namespace Hitbloq.Sources
 		
 		
 		public Task<Sprite> Icon { get; } =
-			BeatSaberMarkupLanguage.Utilities.LoadSpriteFromAssemblyAsync("Hitbloq.Images.PlayerIcon.png");
+			BSMLCompat.LoadSpriteFromAssemblyAsync("Hitbloq.Images.PlayerIcon.png");
 
 		public async Task<PoolLeaderboardPage?> GetScoresAsync(string poolID, CancellationToken cancellationToken = default, int page = 0)
 		{

@@ -1,8 +1,14 @@
+#if !HITBLOQ_BS_1_29_1
 using System;
 using BeatLeader.API;
 using BeatLeader.Models;
 using BeatLeader.WebRequests;
 using Zenject;
+#if HITBLOQ_BS_1_40_8
+using BeatLeaderUploadResponse = BeatLeader.Models.Score;
+#else
+using BeatLeaderUploadResponse = BeatLeader.Models.ScoreUploadResponse;
+#endif
 
 namespace Hitbloq.Managers
 {
@@ -25,7 +31,7 @@ namespace Hitbloq.Managers
 			UploadReplayRequest.StateChangedEvent += OnUploadReplayRequestStateChange;
 		}
 
-		private void OnUploadReplayRequestStateChange(IWebRequest<ScoreUploadResponse> request, RequestState state, string? failReason)
+		private void OnUploadReplayRequestStateChange(IWebRequest<BeatLeaderUploadResponse> request, RequestState state, string? failReason)
 		{
 			if (state is RequestState.Finished)
 			{
@@ -34,3 +40,4 @@ namespace Hitbloq.Managers
 		}
 	}
 }
+#endif

@@ -85,7 +85,7 @@ namespace Hitbloq.UI.ViewControllers
 		{
 			if (!_parsed)
 			{
-				BSMLParser.Instance.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqEventModal.bsml"), parentTransform.gameObject, this);
+				BSMLCompat.Parse(BeatSaberMarkupLanguage.Utilities.GetResourceContent(Assembly.GetExecutingAssembly(), "Hitbloq.UI.Views.HitbloqEventModal.bsml"), parentTransform.gameObject, this);
 				_modalPosition = _modalTransform!.localPosition;
 			}
 

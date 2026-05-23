@@ -25,7 +25,7 @@ namespace Hitbloq.Sources
 		public string HoverHint => "Around Me";
 		
 		public Task<Sprite> Icon { get; } =
-			BeatSaberMarkupLanguage.Utilities.LoadSpriteFromAssemblyAsync("Hitbloq.Images.PlayerIcon.png");
+			BSMLCompat.LoadSpriteFromAssemblyAsync("Hitbloq.Images.PlayerIcon.png");
 
 		public bool Scrollable => false;
 

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
@@ -21,6 +22,8 @@ namespace Hitbloq.UI.ViewControllers
 	[ViewDefinition("Hitbloq.UI.Views.HitbloqLeaderboardView.bsml")]
 	internal class HitbloqLeaderboardViewController : BSMLAutomaticViewController, IBeatmapKeyUpdater, ILeaderboardEntriesUpdater, IPoolUpdater
 	{
+		private const int LeaderboardPageChangeLoadingDelayMilliseconds = 250;
+
 		[UIComponent("vertical-icon-segments")]
 		private readonly IconSegmentedControl? _iconSegmentedControl = null!;
 		
@@ -61,7 +64,11 @@ namespace Hitbloq.UI.ViewControllers
 
 		private LoadingControl? _loadingControl;
 
+		private readonly ConcurrentDictionary<int, string> _profilePictureUrlCache = new ConcurrentDictionary<int, string>();
+		private List<HitbloqMapLeaderboardEntry>? _lastSuccessfulLeaderboardEntries;
+		private int? _lastPageNumber;
 		private int _pageNumber;
+		private bool _pageRequestInFlight;
 		private int _renderVersion;
 		private CancellationTokenSource? _profilePictureTokenSource;
 		private string? _selectedPool;
@@ -72,10 +79,20 @@ namespace Hitbloq.UI.ViewControllers
 			get => _pageNumber;
 			set
 			{
+				if (value < 0 || (_lastPageNumber.HasValue && value > _lastPageNumber.Value) || _pageRequestInFlight)
+				{
+					return;
+				}
+
 				_pageNumber = value;
 				NotifyPropertyChanged(nameof(UpEnabled));
+				NotifyPropertyChanged(nameof(DownEnabled));
 				if (_leaderboard != null && _loadingControl != null && _beatmapKey != null && Utils.IsDependencyLeaderboardInstalled)
 				{
+					_pageRequestInFlight = true;
+					NotifyPropertyChanged(nameof(DownEnabled));
+					ClearProfilePictures();
+					ClearRowInteraction();
 					_leaderboard.SetScores(new List<LeaderboardTableView.ScoreData>(), 0);
 					_loadingControl.ShowLoading();
 					PageRequested?.Invoke(_beatmapKey.Value, _leaderboardSources[SelectedCellIndex], value);
@@ -87,7 +104,7 @@ namespace Hitbloq.UI.ViewControllers
 		private bool UpEnabled => PageNumber != 0 && _leaderboardSources[SelectedCellIndex].Scrollable;
 
 		[UIValue("down-enabled")]
-		private bool DownEnabled => _leaderboardEntries is {Count: 10} && _leaderboardSources[SelectedCellIndex].Scrollable;
+		private bool DownEnabled => !_pageRequestInFlight && (!_lastPageNumber.HasValue || PageNumber < _lastPageNumber.Value) && _leaderboardEntries is {Count: 10} && _leaderboardSources[SelectedCellIndex].Scrollable;
 
 		public void BeatmapKeyUpdated(BeatmapKey beatmapKey, HitbloqLevelInfo? levelInfoEntry)
 		{
@@ -103,11 +120,17 @@ namespace Hitbloq.UI.ViewControllers
 
 				if (_mapRankedOnAnyPool)
 				{
+					_lastSuccessfulLeaderboardEntries = null;
+					_lastPageNumber = null;
+					_pageRequestInFlight = false;
 					PageNumber = 0;
 				}
 				else
 				{
 					_leaderboardEntries = null;
+					_lastSuccessfulLeaderboardEntries = null;
+					_lastPageNumber = 0;
+					_pageRequestInFlight = false;
 					_ = SetScores(null);
 				}
 			}
@@ -115,7 +138,24 @@ namespace Hitbloq.UI.ViewControllers
 
 		public void LeaderboardEntriesUpdated(List<HitbloqMapLeaderboardEntry>? leaderboardEntries)
 		{
+			_pageRequestInFlight = false;
+			if (leaderboardEntries == null && PageNumber > 0)
+			{
+				_lastPageNumber = PageNumber - 1;
+				_pageNumber = _lastPageNumber.Value;
+				leaderboardEntries = _lastSuccessfulLeaderboardEntries;
+			}
+			else if (leaderboardEntries != null)
+			{
+				_lastSuccessfulLeaderboardEntries = leaderboardEntries;
+				if (leaderboardEntries.Count < 10)
+				{
+					_lastPageNumber = PageNumber;
+				}
+			}
+
 			_leaderboardEntries = leaderboardEntries;
+			NotifyPropertyChanged(nameof(UpEnabled));
 			NotifyPropertyChanged(nameof(DownEnabled));
 			_ = SetScores(leaderboardEntries);
 		}
@@ -147,6 +187,13 @@ namespace Hitbloq.UI.ViewControllers
 			PageNumber = 0;
 		}
 
+		protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
+		{
+			base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
+			_profilePictureTokenSource?.Cancel();
+			ClearRowInteraction();
+		}
+
 		private async Task SetScores(List<HitbloqMapLeaderboardEntry>? leaderboardEntries)
 		{
 			if (Utils.IsDependencyLeaderboardInstalled is false)
@@ -155,6 +202,7 @@ namespace Hitbloq.UI.ViewControllers
 			var renderVersion = ++_renderVersion;
 			var scores = new List<LeaderboardTableView.ScoreData>();
 			var myScorePos = -1;
+			var canOpenProfiles = false;
 
 			_profilePictureTokenSource?.Cancel();
 			_profilePictureTokenSource?.Dispose();
@@ -162,16 +210,26 @@ namespace Hitbloq.UI.ViewControllers
 
 			await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
 			{
-				foreach (var profileImageHolder in _profileImageHolders)
-				{
-					profileImageHolder.ClearSprite();
-				}
+				ClearProfilePictures();
 
 				foreach (var cellClickingHolder in _cellClickingHolders)
 				{
 					cellClickingHolder.ClearClicker();
 				}
+
+				if (_loadingControl != null && _leaderboard != null)
+				{
+					_leaderboard.SetScores(new List<LeaderboardTableView.ScoreData>(), 0);
+					_loadingControl.ShowLoading();
+				}
 			});
+
+			await Task.Delay(LeaderboardPageChangeLoadingDelayMilliseconds);
+
+			if (renderVersion != _renderVersion)
+			{
+				return;
+			}
 
 			if (leaderboardEntries == null || leaderboardEntries.Count == 0)
 			{
@@ -200,8 +258,7 @@ namespace Hitbloq.UI.ViewControllers
 							}
 						}
 					});
-
-					_ = SetProfilePictures(leaderboardEntries, renderVersion, _profilePictureTokenSource.Token);
+					canOpenProfiles = scores.Count > 0;
 				}
 			}
 
@@ -221,33 +278,9 @@ namespace Hitbloq.UI.ViewControllers
 
 					_loadingControl.Hide();
 					_leaderboard.SetScores(scores, myScorePos);
-					var leaderboardTableCells = _leaderboardTransform!.GetComponentsInChildren<LeaderboardTableCell>(true);
-					for (var i = 0; i < leaderboardTableCells.Length; i++)
-					{
-						ApplyScoreSaberCellStyle(leaderboardTableCells[i]);
-
-						if (i < scores.Count && i < _cellClickingHolders.Count && leaderboardEntries != null && i < leaderboardEntries.Count)
-						{
-							var separatorIndex = Math.Min(i + 1, leaderboardTableCells.Length - 1);
-							var leaderboardTableCell = leaderboardTableCells[separatorIndex];
-							var separator = Accessors.LeaderboardCellSeparatorAccessor(ref leaderboardTableCell);
-							_cellClickingHolders[i].SetClicker(i, InfoButtonClicked, separator);
-						}
-					}
 				});
-			}
-		}
 
-		private async Task SetProfilePictures(IReadOnlyList<HitbloqMapLeaderboardEntry> leaderboardEntries, int renderVersion, CancellationToken cancellationToken)
-		{
-			try
-			{
-				var count = Math.Min(leaderboardEntries.Count, _profileImageHolders.Count);
-				var profileTasks = Enumerable.Range(0, count)
-					.Select(index => FetchProfilePictureAsync(leaderboardEntries[index].UserID, cancellationToken))
-					.ToArray();
-
-				var profilePictures = await Task.WhenAll(profileTasks);
+				await SiraUtil.Extras.Utilities.PauseChamp;
 
 				if (renderVersion != _renderVersion)
 				{
@@ -261,23 +294,145 @@ namespace Hitbloq.UI.ViewControllers
 						return;
 					}
 
-					for (var i = 0; i < profilePictures.Length; i++)
+					var leaderboardTableCells = _leaderboardTransform!.GetComponentsInChildren<LeaderboardTableCell>(true);
+					HitbloqLeaderboardCellClickingView.ClearCellClickers(leaderboardTableCells);
+					for (var i = 0; i < leaderboardTableCells.Length; i++)
 					{
-						if (cancellationToken.IsCancellationRequested)
+						ApplyScoreSaberCellStyle(leaderboardTableCells[i]);
+					}
+
+					if (canOpenProfiles && leaderboardEntries != null)
+					{
+						var activeCells = leaderboardTableCells
+							.Where(cell => cell.gameObject.activeInHierarchy)
+							.OrderByDescending(cell => cell.transform.position.y)
+							.ToList();
+						var clickableRows = Math.Min(Math.Min(scores.Count, leaderboardEntries.Count), activeCells.Count);
+						for (var i = 0; i < clickableRows; i++)
+						{
+							var leaderboardTableCell = activeCells[i];
+							var separator = Accessors.LeaderboardCellSeparatorAccessor(ref leaderboardTableCell);
+							HitbloqLeaderboardCellClickingView.SetCellClicker(leaderboardTableCell, i, InfoButtonClicked, separator);
+						}
+					}
+				});
+
+				if (canOpenProfiles && leaderboardEntries != null)
+				{
+					_ = SetProfilePictures(leaderboardEntries, renderVersion, _profilePictureTokenSource.Token);
+				}
+			}
+		}
+
+		private void ClearRowInteraction()
+		{
+			_profilePictureTokenSource?.Cancel();
+			if (_leaderboardTransform != null)
+			{
+				HitbloqLeaderboardCellClickingView.ClearCellClickers(_leaderboardTransform.GetComponentsInChildren<LeaderboardTableCell>(true));
+			}
+
+			foreach (var cellClickingHolder in _cellClickingHolders)
+			{
+				cellClickingHolder.ClearClicker();
+			}
+		}
+
+		private void ClearProfilePictures()
+		{
+			foreach (var profileImageHolder in _profileImageHolders)
+			{
+				profileImageHolder.ClearSprite();
+			}
+		}
+
+		private async Task SetProfilePictures(IReadOnlyList<HitbloqMapLeaderboardEntry> leaderboardEntries, int renderVersion, CancellationToken cancellationToken)
+		{
+			try
+			{
+				var count = Math.Min(leaderboardEntries.Count, _profileImageHolders.Count);
+				var profilePictureUrls = new string?[count];
+				var uncachedIndexes = new List<int>();
+				var cachedSprites = new List<(int Index, Sprite Sprite)>();
+
+				for (var i = 0; i < count; i++)
+				{
+					if (cancellationToken.IsCancellationRequested || renderVersion != _renderVersion)
+					{
+						return;
+					}
+
+					if (_profilePictureUrlCache.TryGetValue(leaderboardEntries[i].UserID, out var cachedProfilePictureURL))
+					{
+						profilePictureUrls[i] = cachedProfilePictureURL;
+						if (_spriteLoader.TryGetCachedSprite(cachedProfilePictureURL, out var cachedSprite))
+						{
+							cachedSprites.Add((i, cachedSprite));
+						}
+						else
+						{
+							uncachedIndexes.Add(i);
+						}
+					}
+					else
+					{
+						uncachedIndexes.Add(i);
+					}
+				}
+
+				if (cachedSprites.Count > 0)
+				{
+					await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+					{
+						if (cancellationToken.IsCancellationRequested || renderVersion != _renderVersion)
 						{
 							return;
 						}
 
-						if (profilePictures[i] != null)
+						foreach (var cachedSprite in cachedSprites)
 						{
-							_profileImageHolders[i].SetProfilePicture(profilePictures[i]!, cancellationToken);
+							_profileImageHolders[cachedSprite.Index].SetCachedProfilePicture(cachedSprite.Sprite);
+						}
+					});
+				}
+
+				for (var i = 0; i < uncachedIndexes.Count; i++)
+				{
+					if (cancellationToken.IsCancellationRequested || renderVersion != _renderVersion)
+					{
+						return;
+					}
+
+					var index = uncachedIndexes[i];
+					var profilePicture = profilePictureUrls[index] ?? await FetchProfilePictureAsync(leaderboardEntries[index].UserID, cancellationToken);
+
+					if (cancellationToken.IsCancellationRequested || renderVersion != _renderVersion)
+					{
+						return;
+					}
+
+					await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+					{
+						if (cancellationToken.IsCancellationRequested || renderVersion != _renderVersion)
+						{
+							return;
+						}
+
+						if (profilePicture != null)
+						{
+							_profileImageHolders[index].SetProfilePicture(profilePicture, cancellationToken);
 						}
 						else
 						{
-							_profileImageHolders[i].ClearSprite();
+							_profileImageHolders[index].ClearSprite();
 						}
+					});
+
+					if (profilePictureUrls[index] == null && i + 1 < uncachedIndexes.Count)
+					{
+						await Task.Delay(75, cancellationToken);
 					}
-				});
+				}
 			}
 			catch (TaskCanceledException)
 			{
@@ -288,8 +443,25 @@ namespace Hitbloq.UI.ViewControllers
 		{
 			try
 			{
+				if (_profilePictureUrlCache.TryGetValue(userID, out var cachedProfilePictureURL))
+				{
+					return cachedProfilePictureURL;
+				}
+
 				var profile = await _profileSource.GetProfileAsync(userID, cancellationToken);
-				return cancellationToken.IsCancellationRequested ? null : profile?.ProfilePictureURL;
+				if (cancellationToken.IsCancellationRequested || profile == null)
+				{
+					return null;
+				}
+
+				var profilePictureURL = profile.ProfilePictureURL;
+				if (string.IsNullOrWhiteSpace(profilePictureURL))
+				{
+					return null;
+				}
+
+				_profilePictureUrlCache.TryAdd(userID, profilePictureURL!);
+				return profilePictureURL;
 			}
 			catch (Exception)
 			{
@@ -390,6 +562,12 @@ namespace Hitbloq.UI.ViewControllers
 			get => _selectedCellIndex;
 			set
 			{
+				ClearRowInteraction();
+				_leaderboardEntries = null;
+				_lastSuccessfulLeaderboardEntries = null;
+				_lastPageNumber = null;
+				_pageRequestInFlight = false;
+				NotifyPropertyChanged(nameof(DownEnabled));
 				_selectedCellIndex = value;
 				PageNumber = 0;
 			}

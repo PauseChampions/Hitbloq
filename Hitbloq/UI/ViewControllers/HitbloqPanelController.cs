@@ -214,7 +214,7 @@ namespace Hitbloq.UI.ViewControllers
 		private async Task PostParse()
 		{
 			// Background related stuff
-			if (_container!.Background is ImageView background)
+			if (BSMLCompat.Background(_container!) is ImageView background)
 			{
 				background.material = BeatSaberMarkupLanguage.Utilities.ImageResources.NoGlowMat;
 				background.color0 = Color.white;
@@ -225,8 +225,8 @@ namespace Hitbloq.UI.ViewControllers
 			}
 
 			// Loading up logos
-			_logoSprite = await BeatSaberMarkupLanguage.Utilities.LoadSpriteFromAssemblyAsync("Hitbloq.Images.Logo.png");
-			_flushedSprite = await BeatSaberMarkupLanguage.Utilities.LoadSpriteFromAssemblyAsync("Hitbloq.Images.LogoFlushed.png");
+			_logoSprite = await BSMLCompat.LoadSpriteFromAssemblyAsync("Hitbloq.Images.Logo.png");
+			_flushedSprite = await BSMLCompat.LoadSpriteFromAssemblyAsync("Hitbloq.Images.LogoFlushed.png");
 			_logo!.sprite = CuteMode ? _flushedSprite : _logoSprite;
 
 			Accessors.SkewAccessor(ref _logo) = 0.18f;
@@ -243,13 +243,13 @@ namespace Hitbloq.UI.ViewControllers
 			// A bit of explanation of what is going on
 			// I want to make a maximum of 2 cells visible, however I first need to parse exactly 2 cells and clean them up
 			// After that I populate the current pool options
-			(_dropDownListSetting!.Dropdown as DropdownWithTableView).SetField("_numberOfVisibleCells", 2);
-			_dropDownListSetting.Values = new List<object> {"1", "2"};
+			BSMLCompat.Dropdown(_dropDownListSetting!).SetField("_numberOfVisibleCells", 2);
+			BSMLCompat.SetValues(_dropDownListSetting, new List<object> {"1", "2"});
 			_dropDownListSetting.UpdateChoices();
-			_dropDownListSetting.Values = _pools.Count != 0 ? _pools : new List<object> {"None"};
+			BSMLCompat.SetValues(_dropDownListSetting, _pools.Count != 0 ? _pools : new List<object> {"None"});
 			_dropDownListSetting.UpdateChoices();
 			var poolIndex = _poolNames?.IndexOf(_selectedPool ?? "") ?? 0;
-			_dropDownListSetting.Dropdown.SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
+			BSMLCompat.Dropdown(_dropDownListSetting).SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
 
 			_defaultHighlightColour = _playlistManagerImage!.HighlightColor;
 
@@ -276,7 +276,7 @@ namespace Hitbloq.UI.ViewControllers
 		{
 			if (_dropDownListSetting != null)
 			{
-				_dropDownListSetting.Dropdown.Hide(false);
+				BSMLCompat.Dropdown(_dropDownListSetting).Hide(false);
 			}
 
 			base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
@@ -287,7 +287,7 @@ namespace Hitbloq.UI.ViewControllers
 		{
 			if (_dropDownListSetting != null && _poolNames != null)
 			{
-				PoolChangedEvent?.Invoke(_poolNames[_dropDownListSetting.Dropdown.selectedIndex]);
+				PoolChangedEvent?.Invoke(_poolNames[BSMLCompat.Dropdown(_dropDownListSetting).selectedIndex]);
 			}
 		}
 
@@ -296,7 +296,7 @@ namespace Hitbloq.UI.ViewControllers
 		{
 			if (_dropDownListSetting != null && _rankInfo != null && _poolNames != null)
 			{
-				RankTextClickedEvent?.Invoke(_rankInfo, _poolNames[_dropDownListSetting.Dropdown.selectedIndex]);
+				RankTextClickedEvent?.Invoke(_rankInfo, _poolNames[BSMLCompat.Dropdown(_dropDownListSetting).selectedIndex]);
 			}
 		}
 
@@ -401,9 +401,9 @@ namespace Hitbloq.UI.ViewControllers
 
 				if (_dropDownListSetting != null)
 				{
-					_dropDownListSetting.Values = _pools.Count != 0 ? _pools : new List<object> {"None"};
+					BSMLCompat.SetValues(_dropDownListSetting, _pools.Count != 0 ? _pools : new List<object> {"None"});
 					_dropDownListSetting.UpdateChoices();
-					_dropDownListSetting.Dropdown.SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
+					BSMLCompat.Dropdown(_dropDownListSetting).SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
 
 					if (!LoadingActive && !PromptText.Contains("<color=red>"))
 					{

@@ -39,7 +39,12 @@ namespace Hitbloq.UI
 
 		private FlowCoordinator? _parentFlowCoordinator;
 
-		protected override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
+#if HITBLOQ_BS_1_29_1
+		public
+#else
+		protected
+#endif
+		override void DidActivate(bool firstActivation, bool addedToHierarchy, bool screenSystemEnabling)
 		{
 			SetTitle("Hitbloq");
 			showBackButton = true;
@@ -55,7 +60,12 @@ namespace Hitbloq.UI
 			_hitbloqInfoViewController.URLOpenRequested += OnURLOpenRequested;
 		}
 
-		protected override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
+#if HITBLOQ_BS_1_29_1
+		public
+#else
+		protected
+#endif
+		override void DidDeactivate(bool removedFromHierarchy, bool screenSystemDisabling)
 		{
 			base.DidDeactivate(removedFromHierarchy, screenSystemDisabling);
 			_hitbloqPoolListViewController.PoolSelectedEvent -= OnPoolSelected;
@@ -112,7 +122,12 @@ namespace Hitbloq.UI
 			_popupModalsController.ShowYesNoModal(_hitbloqPoolListViewController.rectTransform, $"Would you like to open\n{url}", () => { Application.OpenURL(url); });
 		}
 
-		protected override void BackButtonWasPressed(ViewController topViewController)
+#if HITBLOQ_BS_1_29_1
+		public
+#else
+		protected
+#endif
+		override void BackButtonWasPressed(ViewController topViewController)
 		{
 			_hitbloqRankedListViewController.gameObject.SetActive(false);
 			_hitbloqPoolLeaderboardViewController.gameObject.SetActive(false);

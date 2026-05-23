@@ -23,6 +23,23 @@ Download the latest version of the Hitbloq mod [here](https://github.com/PauseCh
 
 **Note**: The leaderboard will only appear for Hitbloq ranked maps. Select a Hitbloq map and click the arrow to the right of the leaderboard to use it.
 
+## Build Profiles
+Hitbloq has separate build configurations for supported Beat Saber releases:
+
+- `Debug-1.43.0` / `Release-1.43.0`
+- `Debug-1.40.8` / `Release-1.40.8`
+- `Debug-1.29.1` / `Release-1.29.1`
+
+By default, profiles resolve game installs from `D:\BSManager\BSInstances\<version>`. Override that base path with `BeatSaberBaseDir`, or override a single build with `HitbloqBeatSaberDirOverride`.
+
+Examples:
+
+```powershell
+dotnet build Hitbloq.sln -c Release-1.43.0
+dotnet build Hitbloq.sln -c Release-1.40.8 -p:BeatSaberBaseDir="E:\Beat Saber Instances"
+dotnet build Hitbloq.sln -c Release-1.29.1 -p:HitbloqBeatSaberDirOverride="E:\Beat Saber 1.29.1"
+```
+
 ## Issues and Support
 If you encounter any issues with this mod, file an Issue on GitHub and I'll fix it as soon as I can For support with the mod, DM me or ask a question on the #mod-support channel on the [Hitbloq Discord](https://discord.com/invite/pxWwtWJ)
 Alternatively you can also ask on the #pc-help channel on the BSMG Discord

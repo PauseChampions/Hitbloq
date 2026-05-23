@@ -43,7 +43,11 @@ namespace Hitbloq.Utilities
 		{
 			if (beatmapKey.levelId.StartsWith("custom_level_"))
 			{
+#if HITBLOQ_BS_1_29_1
+				var hash = Collections.hashForLevelID(beatmapKey.levelId);
+#else
 				var hash = Collections.GetCustomLevelHash(beatmapKey.levelId);
+#endif
 				var difficulty = beatmapKey.difficulty.ToString();
 				var characteristic = beatmapKey.beatmapCharacteristic.serializedName;
 				return $"{hash}%7C_{difficulty}_Solo{characteristic}";

@@ -10,7 +10,7 @@
         <OutputAssemblyName>$(OutputPath)$(AssemblyName)</OutputAssemblyName>
         <!--Path to folder to be zipped. Needs to be relative to the project directory to work without changes to the 'BuildForCI' target.-->
         <ArtifactDestination>$(OutputPath)Final</ArtifactDestination>
-        <ErrorOnMismatchedVersions Condition="'$(Configuration)' == 'Release'">True</ErrorOnMismatchedVersions>
+        <ErrorOnMismatchedVersions Condition="'$(ErrorOnMismatchedVersions)' == '' AND ('$(Configuration)' == 'Release' OR '$(HitbloqConfigurationType)' == 'Release')">True</ErrorOnMismatchedVersions>
     </PropertyGroup>
     <!--Build Targets-->
     <!--Displays a warning if BeatSaberModdingTools.Tasks is not installed.-->
@@ -43,6 +43,16 @@
             <ArtifactName Condition="'$(CommitHash)' != '' AND '$(CommitHash)' != 'local'">$(ArtifactName)-$(CommitHash)</ArtifactName>
         </PropertyGroup>
     </Target>
+    <Target Name="ApplyHitbloqBuildProfileInfo" AfterTargets="GetProjectInfo" Condition="'$(HitbloqGameVersion)' != ''">
+        <PropertyGroup>
+            <GameVersion>$(HitbloqGameVersion)</GameVersion>
+            <ArtifactName>$(AssemblyName)</ArtifactName>
+            <ArtifactName Condition="'$(PluginVersion)' != ''">$(ArtifactName)-$(PluginVersion)</ArtifactName>
+            <ArtifactName>$(ArtifactName)-bs$(GameVersion)</ArtifactName>
+            <ArtifactName Condition="'$(CommitHash)' != '' AND '$(CommitHash)' != 'local'">$(ArtifactName)-$(CommitHash)</ArtifactName>
+        </PropertyGroup>
+        <Message Text="Hitbloq build profile: $(HitbloqBuildProfile), BeatSaberDir: $(HitbloqBeatSaberDir), EmbeddedManifest: $(HitbloqManifestSource)" Importance="high"/>
+    </Target>
     <!--Build target for Continuous Integration builds. Set up for GitHub Actions.-->
     <Target Name="BuildForCI" AfterTargets="Build" DependsOnTargets="GetProjectInfo" Condition="'$(ContinuousIntegrationBuild)' == 'True' AND '$(BSMTTaskAssembly)' != ''">
         <PropertyGroup>
@@ -56,14 +66,15 @@
         <Message Text="::set-output name=artifactpath::$(ProjectDir)$(ArtifactDestination)" Importance="high"/>
         <Message Text="Copying '$(OutputAssemblyName).dll' to '$(ProjectDir)$(ArtifactDestination)\Plugins\$(AssemblyName).dll'" Importance="high"/>
         <Copy SourceFiles="$(OutputAssemblyName).dll" DestinationFiles="$(ProjectDir)$(ArtifactDestination)\Plugins\$(AssemblyName).dll"/>
-        <Copy SourceFiles="$(LocalRefsDir)\Plugins\LeaderboardCore.dll" DestinationFiles="$(ProjectDir)$(ArtifactDestination)\Plugins\LeaderboardCore.dll"/>
+        <Copy SourceFiles="$(HitbloqBeatSaberDir)\Plugins\LeaderboardCore.dll" DestinationFiles="$(ProjectDir)$(ArtifactDestination)\Plugins\LeaderboardCore.dll"/>
     </Target>
     <!--Creates a BeatMods compliant zip file with the release.-->
-    <Target Name="ZipRelease" AfterTargets="Build" Condition="'$(DisableZipRelease)' != 'True' AND '$(Configuration)' == 'Release' AND '$(BSMTTaskAssembly)' != ''">
+    <Target Name="ZipRelease" AfterTargets="Build" Condition="'$(DisableZipRelease)' != 'True' AND ('$(Configuration)' == 'Release' OR '$(HitbloqConfigurationType)' == 'Release') AND '$(BSMTTaskAssembly)' != ''">
         <PropertyGroup>
             <!--Set 'ArtifactName' if it failed before.-->
             <ArtifactName Condition="'$(ArtifactName)' == ''">$(AssemblyName)</ArtifactName>
             <DestinationDirectory>$(OutDir)zip\</DestinationDirectory>
+            <SharedZipReleaseDirectory>$(MSBuildProjectDirectory)\bin\zip-release\</SharedZipReleaseDirectory>
         </PropertyGroup>
         <ItemGroup>
             <OldZips Include="$(DestinationDirectory)$(AssemblyName)*.zip"/>
@@ -72,10 +83,13 @@
         <Message Text="PluginVersion: $(PluginVersion), AssemblyVersion: $(AssemblyVersion), GameVersion: $(GameVersion)" Importance="high"/>
         <Delete Files="@(OldZips)" TreatErrorsAsWarnings="true" ContinueOnError="true"/>
         <ZipDir SourceDirectory="$(ArtifactDestination)" DestinationFile="$(DestinationDirectory)$(ArtifactName).zip"/>
+        <MakeDir Directories="$(SharedZipReleaseDirectory)"/>
+        <Copy SourceFiles="$(DestinationDirectory)$(ArtifactName).zip" DestinationFiles="$(SharedZipReleaseDirectory)$(ArtifactName).zip"/>
     </Target>
     <!--Copies the assembly and pdb to the Beat Saber folder.-->
     <Target Name="CopyToPlugins" AfterTargets="Build" Condition="'$(DisableCopyToPlugins)' != 'True' AND '$(ContinuousIntegrationBuild)' != 'True'">
         <PropertyGroup>
+            <BeatSaberDir Condition="'$(HitbloqBeatSaberDir)' != ''">$(HitbloqBeatSaberDir)</BeatSaberDir>
             <PluginDir>$(BeatSaberDir)\Plugins</PluginDir>
             <CanCopyToPlugins>True</CanCopyToPlugins>
             <CopyToPluginsError Condition="!Exists('$(PluginDir)')">Unable to copy assembly to game folder, did you set 'BeatSaberDir' correctly in your 'csproj.user' file? Plugins folder doesn't exist: '$(PluginDir)'.</CopyToPluginsError>

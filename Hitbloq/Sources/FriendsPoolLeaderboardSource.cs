@@ -26,7 +26,7 @@ namespace Hitbloq.Sources
 		public string HoverHint => "Friends";
 		
 		public Task<Sprite> Icon { get; } =
-			BeatSaberMarkupLanguage.Utilities.LoadSpriteFromAssemblyAsync("Hitbloq.Images.FriendsIcon.png");
+			BSMLCompat.LoadSpriteFromAssemblyAsync("Hitbloq.Images.FriendsIcon.png");
 
 		public async Task<PoolLeaderboardPage?> GetScoresAsync(string poolID, CancellationToken cancellationToken = default, int page = 0)
 		{

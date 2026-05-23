@@ -28,7 +28,7 @@ namespace Hitbloq.Sources
 		public string HoverHint => "Friends";
 		
 		public Task<Sprite> Icon { get; } =
-			BeatSaberMarkupLanguage.Utilities.LoadSpriteFromAssemblyAsync("Hitbloq.Images.FriendsIcon.png");
+			BSMLCompat.LoadSpriteFromAssemblyAsync("Hitbloq.Images.FriendsIcon.png");
 
 		public bool Scrollable => true;
 

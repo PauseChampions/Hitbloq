@@ -6,10 +6,44 @@
         <LangVersion>9</LangVersion>
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+        <Configurations>Debug;Release;Debug-1.43.0;Release-1.43.0;Debug-1.40.8;Release-1.40.8;Debug-1.29.1;Release-1.29.1</Configurations>
         <LocalRefsDir Condition="Exists('..\Refs')">..\Refs</LocalRefsDir>
         <BeatSaberDir>$(LocalRefsDir)</BeatSaberDir>
         <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
+        <HitbloqBuildProfile Condition="'$(HitbloqBuildProfile)' == ''">1.43.0</HitbloqBuildProfile>
+        <BeatSaberBaseDir Condition="'$(BeatSaberBaseDir)' == ''">D:\BSManager\BSInstances</BeatSaberBaseDir>
         <DebugType>portable</DebugType>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug-1.43.0' OR '$(Configuration)' == 'Release-1.43.0'">
+        <HitbloqBuildProfile>1.43.0</HitbloqBuildProfile>
+        <HitbloqConfigurationType Condition="'$(Configuration)' == 'Debug-1.43.0'">Debug</HitbloqConfigurationType>
+        <HitbloqConfigurationType Condition="'$(Configuration)' == 'Release-1.43.0'">Release</HitbloqConfigurationType>
+        <DefineConstants>$(DefineConstants);HITBLOQ_BS_1_43_0</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug-1.40.8' OR '$(Configuration)' == 'Release-1.40.8'">
+        <HitbloqBuildProfile>1.40.8</HitbloqBuildProfile>
+        <HitbloqConfigurationType Condition="'$(Configuration)' == 'Debug-1.40.8'">Debug</HitbloqConfigurationType>
+        <HitbloqConfigurationType Condition="'$(Configuration)' == 'Release-1.40.8'">Release</HitbloqConfigurationType>
+        <DefineConstants>$(DefineConstants);HITBLOQ_BS_1_40_8</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug-1.29.1' OR '$(Configuration)' == 'Release-1.29.1'">
+        <HitbloqBuildProfile>1.29.1</HitbloqBuildProfile>
+        <HitbloqConfigurationType Condition="'$(Configuration)' == 'Debug-1.29.1'">Debug</HitbloqConfigurationType>
+        <HitbloqConfigurationType Condition="'$(Configuration)' == 'Release-1.29.1'">Release</HitbloqConfigurationType>
+        <DefineConstants>$(DefineConstants);HITBLOQ_BS_1_29_1</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup>
+        <HitbloqConfigurationType Condition="'$(HitbloqConfigurationType)' == ''">$(Configuration)</HitbloqConfigurationType>
+        <HitbloqGameVersion>$(HitbloqBuildProfile)</HitbloqGameVersion>
+        <HitbloqManifestSource>manifest.$(HitbloqBuildProfile).json</HitbloqManifestSource>
+        <HitbloqBeatSaberDir>$(BeatSaberBaseDir)\$(HitbloqBuildProfile)</HitbloqBeatSaberDir>
+        <HitbloqBeatSaberDir Condition="'$(HitbloqBeatSaberDirOverride)' != ''">$(HitbloqBeatSaberDirOverride)</HitbloqBeatSaberDir>
+        <OutputPath>bin\$(Configuration)\$(HitbloqBuildProfile)\</OutputPath>
+        <ErrorOnMismatchedVersions Condition="'$(HitbloqBuildProfile)' != '1.43.0'">False</ErrorOnMismatchedVersions>
     </PropertyGroup>
 
     <PropertyGroup Condition="$(DefineConstants.Contains('CIBuild')) OR '$(NCrunch)' == '1'">
@@ -22,106 +56,106 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <Reference Include="$(BeatSaberDir)\Beat Saber_Data\Managed\HMUI.dll" Publicize="True"/>
-        <Reference Include="$(BeatSaberDir)\Beat Saber_Data\Managed\Main.dll" Publicize="True"/>
+        <Reference Include="$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\HMUI.dll" Publicize="True"/>
+        <Reference Include="$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\Main.dll" Publicize="True"/>
         <Reference Include="0Harmony">
-            <HintPath>$(BeatSaberDir)\Libs\0Harmony.dll</HintPath>
+            <HintPath>$(HitbloqBeatSaberDir)\Libs\0Harmony.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="BeatLeader">
-            <HintPath>$(BeatSaberDir)\Plugins\BeatLeader.dll</HintPath>
+            <HintPath>$(HitbloqBeatSaberDir)\Plugins\BeatLeader.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="BeatmapCore">
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
+            <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\BeatmapCore.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="BeatSaber.ViewSystem">
-          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BeatSaber.ViewSystem.dll</HintPath>
+        <Reference Include="BeatSaber.ViewSystem" Condition="Exists('$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\BeatSaber.ViewSystem.dll')">
+          <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\BeatSaber.ViewSystem.dll</HintPath>
         </Reference>
         <Reference Include="BeatSaberPlaylistsLib">
-            <HintPath>$(BeatSaberDir)\Libs\BeatSaberPlaylistsLib.dll</HintPath>
+            <HintPath>$(HitbloqBeatSaberDir)\Libs\BeatSaberPlaylistsLib.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="BGLib.AppFlow">
-          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGLib.AppFlow.dll</HintPath>
+        <Reference Include="BGLib.AppFlow" Condition="Exists('$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\BGLib.AppFlow.dll')">
+          <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\BGLib.AppFlow.dll</HintPath>
         </Reference>
-        <Reference Include="BGLib.UnityExtension">
-          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\BGLib.UnityExtension.dll</HintPath>
+        <Reference Include="BGLib.UnityExtension" Condition="Exists('$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\BGLib.UnityExtension.dll')">
+          <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\BGLib.UnityExtension.dll</HintPath>
         </Reference>
         <Reference Include="BSML">
-            <HintPath>$(BeatSaberDir)\Plugins\BSML.dll</HintPath>
+            <HintPath>$(HitbloqBeatSaberDir)\Plugins\BSML.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="DataModels">
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\DataModels.dll</HintPath>
+        <Reference Include="DataModels" Condition="Exists('$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\DataModels.dll')">
+            <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\DataModels.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="Hive.Versioning">
-            <HintPath>$(BeatSaberDir)\Libs\Hive.Versioning.dll</HintPath>
+            <HintPath>$(HitbloqBeatSaberDir)\Libs\Hive.Versioning.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="HMLib">
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\HMLib.dll</HintPath>
+            <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\HMLib.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="Interactable">
-          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Interactable.dll</HintPath>
+        <Reference Include="Interactable" Condition="Exists('$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\Interactable.dll')">
+          <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\Interactable.dll</HintPath>
         </Reference>
         <Reference Include="IPA.Loader">
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\IPA.Loader.dll</HintPath>
+            <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\IPA.Loader.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="LeaderboardCore">
-            <HintPath>$(BeatSaberDir)\Plugins\LeaderboardCore.dll</HintPath>
+            <HintPath>$(HitbloqBeatSaberDir)\Plugins\LeaderboardCore.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="Newtonsoft.Json">
-            <HintPath>$(BeatSaberDir)\Libs\Newtonsoft.Json.dll</HintPath>
+            <HintPath>$(HitbloqBeatSaberDir)\Libs\Newtonsoft.Json.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="OculusStudios.Platform.Core">
-          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\OculusStudios.Platform.Core.dll</HintPath>
+        <Reference Include="OculusStudios.Platform.Core" Condition="'$(HitbloqBuildProfile)' == '1.43.0'">
+          <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\OculusStudios.Platform.Core.dll</HintPath>
         </Reference>
-        <Reference Include="PlatformUserModel">
-          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\PlatformUserModel.dll</HintPath>
+        <Reference Include="PlatformUserModel" Condition="Exists('$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\PlatformUserModel.dll')">
+          <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\PlatformUserModel.dll</HintPath>
         </Reference>
         <Reference Include="PlaylistManager">
-            <HintPath>$(BeatSaberDir)\Plugins\PlaylistManager.dll</HintPath>
+            <HintPath>$(HitbloqBeatSaberDir)\Plugins\PlaylistManager.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="SegmentedControl">
-          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\SegmentedControl.dll</HintPath>
+        <Reference Include="SegmentedControl" Condition="Exists('$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\SegmentedControl.dll')">
+          <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\SegmentedControl.dll</HintPath>
         </Reference>
         <Reference Include="SiraUtil">
-            <HintPath>$(BeatSaberDir)\Plugins\SiraUtil.dll</HintPath>
+            <HintPath>$(HitbloqBeatSaberDir)\Plugins\SiraUtil.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="SongCore">
-            <HintPath>$(BeatSaberDir)\Plugins\SongCore.dll</HintPath>
+            <HintPath>$(HitbloqBeatSaberDir)\Plugins\SongCore.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="Tweening">
-          <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Tweening.dll</HintPath>
+        <Reference Include="Tweening" Condition="Exists('$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\Tweening.dll')">
+          <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\Tweening.dll</HintPath>
         </Reference>
         <Reference Include="Unity.TextMeshPro">
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Unity.TextMeshPro.dll</HintPath>
+            <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\Unity.TextMeshPro.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.CoreModule">
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
+            <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="UnityEngine.UI">
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.UI.dll</HintPath>
+            <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\UnityEngine.UI.dll</HintPath>
             <Private>False</Private>
         </Reference>
         <Reference Include="Zenject">
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Zenject.dll</HintPath>
+            <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\Zenject.dll</HintPath>
             <Private>false</Private>
         </Reference>
         <Reference Include="Zenject-usage">
-            <HintPath>$(BeatSaberDir)\Beat Saber_Data\Managed\Zenject-usage.dll</HintPath>
+            <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\Zenject-usage.dll</HintPath>
             <Private>false</Private>
         </Reference>
     </ItemGroup>
@@ -133,7 +167,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <EmbeddedResource Include="manifest.json" />
+        <EmbeddedResource Include="$(HitbloqManifestSource)" Link="manifest.json" LogicalName="Hitbloq.manifest.json" />
         <EmbeddedResource Include="Images\*.png" />
         <EmbeddedResource Include="UI\Views\*.bsml" />
         <EmbeddedResource Update="UI\Views\HitbloqPoolLeaderboardView.bsml">

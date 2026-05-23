@@ -39,7 +39,13 @@ namespace Hitbloq.UI.ViewControllers
 		private void PostParse()
 		{
 			_profileImage.sprite = _blankSprite;
+			_profileImage.raycastTarget = false;
 			_profileImage.gameObject.SetActive(true);
+			foreach (var graphic in _loadingIndicator.GetComponentsInChildren<UnityEngine.UI.Graphic>(true))
+			{
+				graphic.raycastTarget = false;
+			}
+
 			_loadingIndicator.SetActive(false);
 		}
 
@@ -57,6 +63,12 @@ namespace Hitbloq.UI.ViewControllers
 				return;
 			}
 
+			if (_spriteLoader.TryGetCachedSprite(profilePictureURL, out var cachedSprite))
+			{
+				SetCachedProfilePicture(cachedSprite);
+				return;
+			}
+
 			var loadVersion = ++_loadVersion;
 			var timeoutTokenSource = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
 			timeoutTokenSource.CancelAfter(ProfilePictureTimeoutMilliseconds);
@@ -64,6 +76,18 @@ namespace Hitbloq.UI.ViewControllers
 			SetLoadingActive(true);
 			_ = HideLoadingAfterTimeout(loadVersion, timeoutTokenSource);
 			_ = DownloadSpriteAsync(profilePictureURL, loadVersion, timeoutTokenSource);
+		}
+
+		public void SetCachedProfilePicture(Sprite sprite)
+		{
+			_loadVersion++;
+			if (_profileImage == null || _loadingIndicator == null)
+			{
+				return;
+			}
+
+			_profileImage.sprite = sprite ?? _blankSprite;
+			_loadingIndicator.SetActive(false);
 		}
 
 		private async Task DownloadSpriteAsync(string profilePictureURL, int loadVersion, CancellationTokenSource timeoutTokenSource)

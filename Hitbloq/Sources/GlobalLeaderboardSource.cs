@@ -11,7 +11,7 @@ namespace Hitbloq.Sources
 {
 	internal class GlobalLeaderboardSource : IMapLeaderboardSource
 	{
-		private readonly List<List<HitbloqMapLeaderboardEntry>> _cachedEntries = new();
+		private readonly Dictionary<int, List<HitbloqMapLeaderboardEntry>> _cachedEntries = new();
 		private readonly IHttpService _siraHttpService;
 
 		public GlobalLeaderboardSource(IHttpService siraHttpService)
@@ -22,13 +22,13 @@ namespace Hitbloq.Sources
 		public string HoverHint => "Global";
 		
 		public Task<Sprite> Icon { get; } =
-			BeatSaberMarkupLanguage.Utilities.LoadSpriteFromAssemblyAsync("Hitbloq.Images.GlobalIcon.png");
+			BSMLCompat.LoadSpriteFromAssemblyAsync("Hitbloq.Images.GlobalIcon.png");
 
 		public bool Scrollable => true;
 
 		public async Task<List<HitbloqMapLeaderboardEntry>?> GetScoresAsync(BeatmapKey beatmapKey, CancellationToken cancellationToken = default, int page = 0)
 		{
-			if (_cachedEntries.Count < page + 1)
+			if (!_cachedEntries.ContainsKey(page))
 			{
 				var beatmapString = Utils.BeatmapKeyToString(beatmapKey);
 				if (beatmapString == null)
@@ -42,7 +42,7 @@ namespace Hitbloq.Sources
 					var scores = await Utils.ParseWebResponse<List<HitbloqMapLeaderboardEntry>>(webResponse);
 					if (scores != null)
 					{
-						_cachedEntries.Add(scores);
+						_cachedEntries[page] = scores;
 					}
 				}
 				catch (TaskCanceledException)
@@ -50,7 +50,7 @@ namespace Hitbloq.Sources
 				}
 			}
 
-			return page < _cachedEntries.Count ? _cachedEntries[page] : null;
+			return _cachedEntries.TryGetValue(page, out var cachedEntries) ? cachedEntries : null;
 		}
 
 		public void ClearCache()

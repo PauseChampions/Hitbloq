@@ -56,9 +56,9 @@ namespace Hitbloq.UI.ViewControllers
 		{
 			_profilePicture.material = _materialGrabber.NoGlowRoundEdge;
 
-			_fogBg = _background.Background.material;
-			_roundRectSmall = _background.Background.sprite;
-			_originalBackgroundColour = _background.Background.color;
+			_fogBg = BSMLCompat.Background(_background).material;
+			_roundRectSmall = BSMLCompat.Background(_background).sprite;
+			_originalBackgroundColour = BSMLCompat.Background(_background).color;
 		}
 
 		public void SetRequiredUtils(UserIDSource userIDSource, SpriteLoader spriteLoader, MaterialGrabber materialGrabber, TweeningManager uwuTweenyManager)
@@ -153,7 +153,7 @@ namespace Hitbloq.UI.ViewControllers
 
 		private async Task FetchBackground()
 		{
-			if (_background.Background is not ImageView bgImageView)
+			if (BSMLCompat.Background(_background) is not ImageView bgImageView)
 			{
 				return;
 			}
@@ -218,9 +218,9 @@ namespace Hitbloq.UI.ViewControllers
 
 			if (highlighted)
 			{
-				var currentColor = _background.Background.color;
+				var currentColor = BSMLCompat.Background(_background).color;
 
-				var tween = new FloatTween(0, 1, val => { _background.Background.color = Color.Lerp(currentColor, _backgroundHighlightedColor, val); }, 0.25f, EaseType.Linear);
+				var tween = new FloatTween(0, 1, val => { BSMLCompat.Background(_background).color = Color.Lerp(currentColor, _backgroundHighlightedColor, val); }, 0.25f, EaseType.Linear);
 
 				_uwuTweenyManager.AddTween(tween, this);
 
@@ -232,11 +232,11 @@ namespace Hitbloq.UI.ViewControllers
 			{
 				if (_poolLeaderboardEntry is {BannerImageURL: { }})
 				{
-					_background.Background.color = _customBackgroundColour;
+					BSMLCompat.Background(_background).color = _customBackgroundColour;
 				}
 				else
 				{
-					_background.Background.color = _originalBackgroundColour!.Value;
+					BSMLCompat.Background(_background).color = _originalBackgroundColour!.Value;
 				}
 
 				_rankText.color = _isSelf ? _selfTextColor : _textColor;

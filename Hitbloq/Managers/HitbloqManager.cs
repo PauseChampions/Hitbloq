@@ -42,6 +42,7 @@ namespace Hitbloq.Managers
 		private CancellationTokenSource? _leaderboardTokenSource;
 		private CancellationTokenSource? _levelInfoTokenSource;
 		private CancellationTokenSource? _scoreUploadRefreshTokenSource;
+		private int _leaderboardRequestVersion;
 		private bool _scoreAlreadyUploaded;
 		private bool _scoreUploadRefreshInProgress;
 		private int _scoreUploadRefreshVersion;
@@ -100,8 +101,17 @@ namespace Hitbloq.Managers
 			SceneManager.activeSceneChanged += SceneManagerOnactiveSceneChanged;
 		}
 
-		public void OnLeaderboardSet(BeatmapKey beatmapKey)
+		public void OnLeaderboardSet(
+#if HITBLOQ_BS_1_29_1
+			IDifficultyBeatmap difficultyBeatmap
+#else
+			BeatmapKey beatmapKey
+#endif
+		)
 		{
+#if HITBLOQ_BS_1_29_1
+			var beatmapKey = BeatmapKey.FromDifficultyBeatmap(difficultyBeatmap);
+#endif
 			_ = OnLeaderboardSetAsync(beatmapKey);
 		}
 
@@ -169,7 +179,7 @@ namespace Hitbloq.Managers
 				_selectedBeatmapKey = beatmapKey;
 				HitbloqLevelInfo? levelInfoEntry = null;
 
-				if (beatmapKey.Value.levelId.Contains(Constants.CustomLevelPrefix))
+				if (beatmapKey.Value.levelId.Contains("custom_level_"))
 				{
 					_levelInfoTokenSource?.Cancel();
 					_levelInfoTokenSource?.Dispose();
@@ -223,7 +233,14 @@ namespace Hitbloq.Managers
 			_leaderboardTokenSource?.Cancel();
 			_leaderboardTokenSource?.Dispose();
 			_leaderboardTokenSource = new CancellationTokenSource();
-			var leaderboardEntries = await leaderboardSource.GetScoresAsync(beatmapKey, _leaderboardTokenSource.Token, page);
+			var requestVersion = ++_leaderboardRequestVersion;
+			var leaderboardToken = _leaderboardTokenSource.Token;
+			var leaderboardEntries = await leaderboardSource.GetScoresAsync(beatmapKey, leaderboardToken, page);
+
+			if (leaderboardToken.IsCancellationRequested || requestVersion != _leaderboardRequestVersion)
+			{
+				return;
+			}
 
 			if (leaderboardEntries != null)
 			{
@@ -235,7 +252,15 @@ namespace Hitbloq.Managers
 
 			foreach (var leaderboardEntriesUpdater in _leaderboardEntriesUpdaters)
 			{
-				await UnityMainThreadTaskScheduler.Factory.StartNew(() => leaderboardEntriesUpdater.LeaderboardEntriesUpdated(leaderboardEntries));
+				await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+				{
+					if (leaderboardToken.IsCancellationRequested || requestVersion != _leaderboardRequestVersion)
+					{
+						return;
+					}
+
+					leaderboardEntriesUpdater.LeaderboardEntriesUpdated(leaderboardEntries);
+				});
 			}
 		}
 
