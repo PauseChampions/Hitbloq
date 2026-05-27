@@ -100,15 +100,24 @@ namespace Hitbloq.Managers
 		private Delegate CreateLegacyUploadEventHandler(Type eventHandlerType)
 		{
 			var invokeMethod = eventHandlerType.GetMethod("Invoke");
-			var replayParameterType = invokeMethod!.GetParameters()[0].ParameterType;
-			var replayParameter = Expression.Parameter(replayParameterType, "replay");
+			var parameters = invokeMethod!.GetParameters();
+			var replayParameter = Expression.Parameter(parameters[0].ParameterType, parameters[0].Name);
+			var lambdaParameters = new ParameterExpression[parameters.Length];
+			lambdaParameters[0] = replayParameter;
+			for (var i = 1; i < parameters.Length; i++)
+			{
+				lambdaParameters[i] = Expression.Parameter(parameters[i].ParameterType, parameters[i].Name);
+			}
+
+			Expression playEndDataExpression = parameters.Length > 1 ? Expression.Convert(lambdaParameters[1], typeof(object)) : Expression.Constant(null, typeof(object));
 			var body = Expression.Call(
 				Expression.Constant(this),
 				nameof(OnLegacyReplayUploadStarted),
 				null,
-				Expression.Convert(replayParameter, typeof(object)));
+				Expression.Convert(replayParameter, typeof(object)),
+				playEndDataExpression);
 
-			return Expression.Lambda(eventHandlerType, body, replayParameter).Compile();
+			return Expression.Lambda(eventHandlerType, body, lambdaParameters).Compile();
 		}
 
 		private void OnNewUploadStateChanged(object request, object state, string? failReason)
@@ -122,12 +131,12 @@ namespace Hitbloq.Managers
 			}
 		}
 
-		private void OnLegacyReplayUploadStarted(object replay)
+		private void OnLegacyReplayUploadStarted(object replay, object? playEndData)
 		{
 			// Edited by GPT-5 Codex 2026-05-27
 			// Old BeatLeader lacks the newer upload response, so use replay completion data.
 			// Only a cleared play can refresh Hitbloq; quits/fails/practice replays are ignored.
-			if (IsClearedReplay(replay))
+			if (IsClearedReplay(replay, playEndData))
 			{
 				_hitbloqManager.OnScoreUploaded();
 			}
@@ -140,8 +149,14 @@ namespace Hitbloq.Managers
 			return status?.ToString() == "Uploaded";
 		}
 
-		private static bool IsClearedReplay(object replay)
+		private static bool IsClearedReplay(object replay, object? playEndData)
 		{
+			var endType = playEndData?.GetType().GetProperty("EndType")?.GetValue(playEndData);
+			if (endType != null)
+			{
+				return endType.ToString() == "Clear";
+			}
+
 			var info = replay.GetType().GetField("info")?.GetValue(replay);
 			var levelEndType = info?.GetType().GetField("levelEndType")?.GetValue(info)
 			                   ?? info?.GetType().GetProperty("LevelEndType")?.GetValue(info);
