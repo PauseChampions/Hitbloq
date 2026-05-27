@@ -405,7 +405,10 @@ namespace Hitbloq.UI.ViewControllers
 					_dropDownListSetting.UpdateChoices();
 					BSMLCompat.Dropdown(_dropDownListSetting).SelectCellWithIdx(poolIndex == -1 ? 0 : poolIndex);
 
-					if (!LoadingActive && !PromptText.Contains("<color=red>"))
+					// Edited by GPT-5 Codex 2026-05-27
+					// Score-refresh success text has its own timed clear path.
+					// Beatmap reload should not erase it immediately after refresh succeeds.
+					if (!LoadingActive && !PromptText.Contains("<color=red>") && !PromptText.Contains("<color=green>"))
 					{
 						PromptText = "";
 					}

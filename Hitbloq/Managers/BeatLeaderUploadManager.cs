@@ -33,10 +33,24 @@ namespace Hitbloq.Managers
 
 		private void OnUploadReplayRequestStateChange(IWebRequest<BeatLeaderUploadResponse> request, RequestState state, string? failReason)
 		{
-			if (state is RequestState.Finished)
+			// Edited by GPT-5 Codex 2026-05-27
+			// BeatLeader can finish replay work for plays that did not become an uploaded score.
+			// Only completed uploads should ask Hitbloq to refresh leaderboard data.
+			if (state is RequestState.Finished && IsCompletedScoreUpload(request))
 			{
 				_hitbloqManager.OnScoreUploaded();
 			}
+		}
+
+		private static bool IsCompletedScoreUpload(IWebRequest<BeatLeaderUploadResponse> request)
+		{
+#if HITBLOQ_BS_1_40_8
+			// BeatLeader 1.40.8 exposes the uploaded score directly, so a missing score is ignored.
+			return request.Result != null;
+#else
+			// Newer BeatLeader responses expose upload status. Attempts and errors do not change scores.
+			return request.Result?.Status is ScoreUploadStatus.Uploaded;
+#endif
 		}
 	}
 }

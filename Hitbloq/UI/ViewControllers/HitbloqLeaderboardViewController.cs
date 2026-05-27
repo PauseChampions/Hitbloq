@@ -351,9 +351,7 @@ namespace Hitbloq.UI.ViewControllers
 			try
 			{
 				var count = Math.Min(leaderboardEntries.Count, _profileImageHolders.Count);
-				var profilePictureUrls = new string?[count];
-				var uncachedIndexes = new List<int>();
-				var cachedSprites = new List<(int Index, Sprite Sprite)>();
+				var profilePictureTasks = new List<Task>();
 
 				for (var i = 0; i < count; i++)
 				{
@@ -362,81 +360,45 @@ namespace Hitbloq.UI.ViewControllers
 						return;
 					}
 
-					if (_profilePictureUrlCache.TryGetValue(leaderboardEntries[i].UserID, out var cachedProfilePictureURL))
-					{
-						profilePictureUrls[i] = cachedProfilePictureURL;
-						if (_spriteLoader.TryGetCachedSprite(cachedProfilePictureURL, out var cachedSprite))
-						{
-							cachedSprites.Add((i, cachedSprite));
-						}
-						else
-						{
-							uncachedIndexes.Add(i);
-						}
-					}
-					else
-					{
-						uncachedIndexes.Add(i);
-					}
+					// Edited by GPT-5 Codex 2026-05-27
+					// Each visible row starts its own profile-picture lookup.
+					// Slow profile requests no longer block later rows from loading their images.
+					var index = i;
+					profilePictureTasks.Add(SetProfilePictureAsync(leaderboardEntries[index].UserID, index, renderVersion, cancellationToken));
 				}
 
-				if (cachedSprites.Count > 0)
-				{
-					await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
-					{
-						if (cancellationToken.IsCancellationRequested || renderVersion != _renderVersion)
-						{
-							return;
-						}
-
-						foreach (var cachedSprite in cachedSprites)
-						{
-							_profileImageHolders[cachedSprite.Index].SetCachedProfilePicture(cachedSprite.Sprite);
-						}
-					});
-				}
-
-				for (var i = 0; i < uncachedIndexes.Count; i++)
-				{
-					if (cancellationToken.IsCancellationRequested || renderVersion != _renderVersion)
-					{
-						return;
-					}
-
-					var index = uncachedIndexes[i];
-					var profilePicture = profilePictureUrls[index] ?? await FetchProfilePictureAsync(leaderboardEntries[index].UserID, cancellationToken);
-
-					if (cancellationToken.IsCancellationRequested || renderVersion != _renderVersion)
-					{
-						return;
-					}
-
-					await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
-					{
-						if (cancellationToken.IsCancellationRequested || renderVersion != _renderVersion)
-						{
-							return;
-						}
-
-						if (profilePicture != null)
-						{
-							_profileImageHolders[index].SetProfilePicture(profilePicture, cancellationToken);
-						}
-						else
-						{
-							_profileImageHolders[index].ClearSprite();
-						}
-					});
-
-					if (profilePictureUrls[index] == null && i + 1 < uncachedIndexes.Count)
-					{
-						await Task.Delay(75, cancellationToken);
-					}
-				}
+				await Task.WhenAll(profilePictureTasks);
 			}
 			catch (TaskCanceledException)
 			{
 			}
+		}
+
+		private async Task SetProfilePictureAsync(int userID, int index, int renderVersion, CancellationToken cancellationToken)
+		{
+			var profilePicture = await FetchProfilePictureAsync(userID, cancellationToken);
+
+			if (cancellationToken.IsCancellationRequested || renderVersion != _renderVersion)
+			{
+				return;
+			}
+
+			await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+			{
+				if (cancellationToken.IsCancellationRequested || renderVersion != _renderVersion)
+				{
+					return;
+				}
+
+				if (profilePicture != null)
+				{
+					_profileImageHolders[index].SetProfilePicture(profilePicture, cancellationToken);
+				}
+				else
+				{
+					_profileImageHolders[index].ClearSprite();
+				}
+			});
 		}
 
 		private async Task<string?> FetchProfilePictureAsync(int userID, CancellationToken cancellationToken)

@@ -31,17 +31,21 @@ namespace Hitbloq.Installers
 
 			Container.BindInterfacesTo<HitbloqCustomLeaderboard>().AsSingle();
 			Container.BindInterfacesAndSelfTo<HitbloqManager>().AsSingle();
-			if (Utils.IsScoreSaberInstalled)
-			{
-				Container.BindInterfacesTo<ScoreSaberUploadManager>().AsSingle();
-			}
-
+			// Edited by GPT-5 Codex 2026-05-27
+			// BeatLeader and ScoreSaber can both report an upload for the same play.
+			// Prefer BeatLeader when it is present so one score event reaches Hitbloq.
+			// The fallback keeps ScoreSaber support for installs without BeatLeader.
 #if !HITBLOQ_BS_1_29_1
 			if (Utils.IsBeatLeaderInstalled)
 			{
 				Container.BindInterfacesTo<BeatLeaderUploadManager>().AsSingle();
 			}
+			else
 #endif
+			if (Utils.IsScoreSaberInstalled)
+			{
+				Container.BindInterfacesTo<ScoreSaberUploadManager>().AsSingle();
+			}
 
 			Container.Bind<UserIDSource>().AsSingle();
 			Container.Bind<FriendIDSource>().AsSingle();

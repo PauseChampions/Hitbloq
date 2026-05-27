@@ -11,6 +11,12 @@ namespace Hitbloq.Other
 {
 	internal class LeaderboardRefresher
 	{
+		private const int RefreshCompletionMessageMilliseconds = 1000;
+		private const int RefreshQueueCheckCount = 7;
+		private const int RefreshQueueCheckDelayMilliseconds = 3000;
+		private const string RefreshRateLimitErrorText = "refreshed too fast";
+		private const string RefreshSuccessText = "<color=green>Score refreshed!</color>";
+
 		private readonly BeatmapListener _beatmapListener;
 		private readonly HitbloqPanelController _hitbloqPanelController;
 		private readonly LevelInfoSource _levelInfoSource;
@@ -31,7 +37,7 @@ namespace Hitbloq.Other
 			if (await RefreshNeeded())
 			{
 				_hitbloqPanelController.LoadingActive = true;
-				_hitbloqPanelController.PromptText = "Refreshing Score...";
+				_hitbloqPanelController.PromptText = "Refreshing...";
 
 				var userID = await _userIDSource.GetUserIDAsync();
 
@@ -45,10 +51,12 @@ namespace Hitbloq.Other
 
 				if (refreshEntry is {Error: null})
 				{
-					// Try checking action queue if our action is completed, timeout at 7 times
-					for (var i = 0; i < 7; i++)
+					// Edited by GPT-5 Codex 2026-05-27
+					// Queue polling now shows retry progress after the first missed check.
+					// A short success delay keeps the completed message visible before UI refresh work resumes.
+					for (var i = 0; i < RefreshQueueCheckCount; i++)
 					{
-						await Task.Delay(3000);
+						await Task.Delay(RefreshQueueCheckDelayMilliseconds);
 
 						webResponse = await _siraHttpService.GetAsync("https://hitbloq.com/api/actions").ConfigureAwait(false);
 						var actionQueueEntries = await Utils.ParseWebResponse<List<HitbloqActionQueueEntry>>(webResponse);
@@ -56,15 +64,27 @@ namespace Hitbloq.Other
 						if (actionQueueEntries == null || !actionQueueEntries.Exists(entry => entry.ID == refreshEntry.ID))
 						{
 							_hitbloqPanelController.LoadingActive = false;
-							_hitbloqPanelController.PromptText = "<color=green>Score refreshed!</color>";
+							_hitbloqPanelController.PromptText = RefreshSuccessText;
+							_ = ClearRefreshSuccessTextAfterDelay();
 							return true;
 						}
+
+						_hitbloqPanelController.PromptText = $"Refreshing... ({i + 1} of {RefreshQueueCheckCount} tries)";
 					}
 
 					_hitbloqPanelController.PromptText = "<color=red>The action queue is very busy, your score cannot be refreshed for now.</color>";
 				}
 				else if (refreshEntry is {Error: { }})
 				{
+					// Edited by GPT-5 Codex 2026-05-27
+					// Automatic refresh can collide with server cooldowns during quick menu changes.
+					// Treat cooldown as a quiet miss instead of showing a red error to the player.
+					if (IsRefreshRateLimitError(refreshEntry.Error))
+					{
+						_hitbloqPanelController.LoadingActive = false;
+						return false;
+					}
+
 					_hitbloqPanelController.PromptText = $"<color=red>Error: {refreshEntry.Error}</color>";
 				}
 				else
@@ -75,6 +95,24 @@ namespace Hitbloq.Other
 
 			_hitbloqPanelController.LoadingActive = false;
 			return false;
+		}
+
+		private static bool IsRefreshRateLimitError(string error)
+		{
+			return error.ToLowerInvariant().Contains(RefreshRateLimitErrorText);
+		}
+
+		private async Task ClearRefreshSuccessTextAfterDelay()
+		{
+			// Edited by GPT-5 Codex 2026-05-27
+			// Success text stays visible while the caller starts leaderboard reload immediately.
+			// Only clear the text if nothing else replaced it during that one-second hold.
+			await Task.Delay(RefreshCompletionMessageMilliseconds);
+
+			if (_hitbloqPanelController.PromptText == RefreshSuccessText)
+			{
+				_hitbloqPanelController.PromptText = "";
+			}
 		}
 
 		private async Task<bool> RefreshNeeded()

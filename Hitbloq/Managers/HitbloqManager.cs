@@ -19,7 +19,10 @@ namespace Hitbloq.Managers
 {
 	internal class HitbloqManager : IInitializable, IDisposable, INotifyLeaderboardSet
 	{
-		private const int ScoreUploadRefreshDelayMilliseconds = 3000;
+		// Edited by GPT-5 Codex 2026-05-27
+		// The refresh starts shortly after an upload event so the leaderboard updates faster.
+		// The later queue polling still handles server-side processing time.
+		private const int ScoreUploadRefreshDelayMilliseconds = 500;
 
 		private readonly List<IBeatmapKeyUpdater> _beatmapKeyUpdaters;
 		private readonly HitbloqEventModalViewController _hitbloqEventModalViewController;
