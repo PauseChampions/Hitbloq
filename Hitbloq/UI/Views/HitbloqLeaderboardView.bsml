@@ -1,5 +1,5 @@
 <bg>
-    <horizontal horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='100' pref-height='70'>
+    <horizontal active='~dependency-leaderboard-installed' horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='100' pref-height='70'>
         <vertical horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pref-width='9' pref-height='25'>
             <vertical-icon-segments id='vertical-icon-segments' select-cell='cell-selected'/>
         </vertical>
@@ -8,7 +8,40 @@
         </vertical>
     </horizontal>
 
-    <vertical anchor-pos-x='-23.5' anchor-pos-y='5' spacing='-20.15'>
+    <vertical active='~no-dependency-leaderboard-installed' anchor-pos-y='8' spacing='1' horizontal-fit='PreferredSize' vertical-fit='PreferredSize' pad='5' pref-width='82' child-align='MiddleCenter'>
+        <text text='Hitbloq requires one of the following mods to process scores.' align='Center'/>
+        <text text='Choose a leaderboard mod to install manually.' font-size='3.5' align='Center' color='#7F7F7F'/>
+
+        <vertical spacing='4' pad-top='2'>
+            <horizontal pref-height='15' pref-width='80'>
+                <horizontal pref-width='15' pref-height='15'>
+                    <image id='icon' src='Hitbloq.Images.BeatLeaderIcon.png' preserve-aspect='true'/>
+                </horizontal>
+                <vertical child-align='MiddleLeft' pref-width='35' horizontal-fit='PreferredSize'>
+                    <text text='BeatLeader' align='Left' font-size='6'/>
+                    <text rich-text='true' text='&lt;line-height=60%&gt;Open-source leaderboard with map voting, events, modifiers and detailed stats.' word-wrapping='true' font-size='2.75' align='Left' color='#7F7F7F' line-height='1'/>
+                </vertical>
+                <vertical child-align='MiddleRight'>
+                    <primary-button text='Open Releases' on-click='bl-info-click'/>
+                </vertical>
+            </horizontal>
+
+            <horizontal pref-height='15' pref-width='80'>
+                <horizontal pref-width='15' pref-height='15'>
+                    <image id='icon' src='Hitbloq.Images.ScoreSaberIcon.png' preserve-aspect='true'/>
+                </horizontal>
+                <vertical child-align='MiddleLeft' pref-width='35' horizontal-fit='PreferredSize'>
+                    <text text='ScoreSaber' align='Left' font-size='6'/>
+                    <text rich-text='true' text='&lt;line-height=60%&gt;Large leaderboard system for ranked maps, PP, score comparison and replays.' word-wrapping='true' font-size='2.75' align='Left' color='#7F7F7F' line-height='1'/>
+                </vertical>
+                <vertical child-align='MiddleRight'>
+                    <primary-button text='Open Releases' on-click='ss-info-click'/>
+                </vertical>
+            </horizontal>
+        </vertical>
+    </vertical>
+
+    <vertical active='~dependency-leaderboard-installed' anchor-pos-x='-23.5' anchor-pos-y='5' spacing='-20.15'>
         <macro.for-each hosts='profile-image-holders'>
             <horizontal child-expand-height='true' child-align='MiddleCenter'>
                 <stack>
@@ -20,7 +53,7 @@
         </macro.for-each>
     </vertical>
 
-    <vertical anchor-pos-x='5' anchor-pos-y='5' spacing='-20.25'>
+    <vertical active='~dependency-leaderboard-installed' anchor-pos-x='5' anchor-pos-y='5' spacing='-20.25'>
         <macro.for-each hosts='cell-clicker-holders'>
             <horizontal child-expand-height='true' child-align='MiddleCenter'>
                 <stack>

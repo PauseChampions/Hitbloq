@@ -106,6 +106,12 @@ namespace Hitbloq.UI.ViewControllers
 		[UIValue("down-enabled")]
 		private bool DownEnabled => !_pageRequestInFlight && (!_lastPageNumber.HasValue || PageNumber < _lastPageNumber.Value) && _leaderboardEntries is {Count: 10} && _leaderboardSources[SelectedCellIndex].Scrollable;
 
+		[UIValue("dependency-leaderboard-installed")]
+		private bool DependencyLeaderboardInstalled => Utils.IsDependencyLeaderboardInstalled;
+
+		[UIValue("no-dependency-leaderboard-installed")]
+		private bool NoDependencyLeaderboardInstalled => !Utils.IsDependencyLeaderboardInstalled;
+
 		public void BeatmapKeyUpdated(BeatmapKey beatmapKey, HitbloqLevelInfo? levelInfoEntry)
 		{
 			_beatmapKey = beatmapKey;
@@ -444,8 +450,34 @@ namespace Hitbloq.UI.ViewControllers
 		{
 			if (_loadingControl is not null)
 			{
-				_loadingControl.ShowText("<size=125%>Please install ScoreSaber or BeatLeader!</size>", false);
+				_loadingControl.Hide();
 			}
+		}
+
+		[UIAction("bl-info-click")]
+		private void BeatLeaderInfoClicked()
+		{
+			// Edited by GPT-5 Codex 2026-05-27
+			// The no-dependency panel links players to the matching BeatLeader release page.
+			// Older Beat Saber builds need the older BeatLeader release.
+#if HITBLOQ_BS_1_29_1
+			Application.OpenURL("https://github.com/BeatLeader/beatleader-mod/releases/tag/v0.9.32");
+#else
+			Application.OpenURL("https://github.com/BeatLeader/beatleader-mod/releases");
+#endif
+		}
+
+		[UIAction("ss-info-click")]
+		private void ScoreSaberInfoClicked()
+		{
+			// Edited by GPT-5 Codex 2026-05-27
+			// The no-dependency panel links players to the matching ScoreSaber release page.
+			// Older Beat Saber builds need the older ScoreSaber release.
+#if HITBLOQ_BS_1_29_1
+			Application.OpenURL("https://github.com/ScoreSaber/pc-mod/releases/tag/v3.3.0");
+#else
+			Application.OpenURL("https://github.com/ScoreSaber/pc-mod/releases/tag/v3.3.17");
+#endif
 		}
 
 		[UIAction("#post-parse")]
