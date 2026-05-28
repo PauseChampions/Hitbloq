@@ -59,13 +59,27 @@ namespace Hitbloq.UI.ViewControllers
 			{
 				foreach (var cellClicker in leaderboardTableCell.GetComponentsInChildren<CellClicker>(true))
 				{
-					UnityEngine.Object.Destroy(cellClicker);
+					// Edited by GPT-5 Codex 2026-05-27
+					// Unity also delays component destruction, so SetCellClicker can otherwise
+					// grab a CellClicker that is already scheduled to be destroyed.
+					// Reset and reuse the component so hover/click does not disappear later.
+					cellClicker.Clear();
 				}
 
 				var target = leaderboardTableCell.transform.Find(CellClickTargetName);
 				if (target != null)
 				{
-					UnityEngine.Object.Destroy(target.gameObject);
+					// Edited by GPT-5 Codex 2026-05-27
+					// Unity destroys objects at the end of the frame, so destroying this click target
+					// during a leaderboard rebuild can leave SetCellClicker reusing an object about to die.
+					// Disable and reuse the target instead; SetCellClicker re-enables raycasts below.
+					var image = target.GetComponent<Image>();
+					if (image != null)
+					{
+						image.raycastTarget = false;
+					}
+
+					target.gameObject.SetActive(false);
 				}
 			}
 		}
@@ -229,6 +243,22 @@ namespace Hitbloq.UI.ViewControllers
 				}
 
 				StartCoroutine(LerpSeparator(Separator.color, _originalColor.Value, GetImageViewColor0(Separator), _originalColor0.Value, GetImageViewColor1(Separator), _originalColor1.Value, duration));
+			}
+
+			public void Clear()
+			{
+				// Edited by GPT-5 Codex 2026-05-27
+				// Clearing replaces delayed Destroy during leaderboard rebuilds.
+				// It restores hover state and removes the callback until SetCellClicker assigns a new row.
+				StopAllCoroutines();
+				if (_activeClicker == this)
+				{
+					_activeClicker = null;
+				}
+
+				ResetSeparator();
+				OnClick = null;
+				Separator = null;
 			}
 
 			private void OnDestroy()
