@@ -6,7 +6,7 @@
         <LangVersion>9</LangVersion>
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-        <Configurations>Debug;Release;Debug-1.44.0;Release-1.44.0;Debug-1.40.8;Release-1.40.8;Debug-1.29.1;Release-1.29.1</Configurations>
+        <Configurations>Debug;Release;Debug-Latest;Release-Latest;Debug-1.40.8;Release-1.40.8;Debug-1.29.1;Release-1.29.1</Configurations>
         <LocalRefsDir Condition="Exists('..\Refs')">..\Refs</LocalRefsDir>
         <BeatSaberDir>$(LocalRefsDir)</BeatSaberDir>
         <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
@@ -15,10 +15,10 @@
         <DebugType>portable</DebugType>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)' == 'Debug-1.44.0' OR '$(Configuration)' == 'Release-1.44.0'">
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug-Latest' OR '$(Configuration)' == 'Release-Latest'">
         <HitbloqBuildProfile>1.44.0</HitbloqBuildProfile>
-        <HitbloqConfigurationType Condition="'$(Configuration)' == 'Debug-1.44.0'">Debug</HitbloqConfigurationType>
-        <HitbloqConfigurationType Condition="'$(Configuration)' == 'Release-1.44.0'">Release</HitbloqConfigurationType>
+        <HitbloqConfigurationType Condition="'$(Configuration)' == 'Debug-Latest'">Debug</HitbloqConfigurationType>
+        <HitbloqConfigurationType Condition="'$(Configuration)' == 'Release-Latest'">Release</HitbloqConfigurationType>
         <DefineConstants>$(DefineConstants);HITBLOQ_BS_1_44_0</DefineConstants>
     </PropertyGroup>
 
