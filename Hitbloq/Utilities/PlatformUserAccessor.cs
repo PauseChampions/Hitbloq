@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-#if HITBLOQ_BS_1_43_0
+#if HITBLOQ_BS_1_44_0
 using OculusStudios.Platform.Core;
 #endif
 
@@ -9,7 +9,7 @@ namespace Hitbloq.Utilities
 {
 	internal class PlatformUserAccessor
 	{
-#if HITBLOQ_BS_1_43_0
+#if HITBLOQ_BS_1_44_0
 		private readonly IPlatform _platform;
 
 		public PlatformUserAccessor(IPlatform platform)

@@ -26,7 +26,7 @@ Download the latest version of the Hitbloq mod [here](https://github.com/PauseCh
 ## Build Profiles
 Hitbloq has separate build configurations for supported Beat Saber releases:
 
-- `Debug-1.43.0` / `Release-1.43.0`
+- `Debug-1.44.0` / `Release-1.44.0`
 - `Debug-1.40.8` / `Release-1.40.8`
 - `Debug-1.29.1` / `Release-1.29.1`
 
@@ -35,7 +35,7 @@ By default, profiles resolve game installs from `D:\BSManager\BSInstances\<versi
 Examples:
 
 ```powershell
-dotnet build Hitbloq.sln -c Release-1.43.0
+dotnet build Hitbloq.sln -c Release-1.44.0
 dotnet build Hitbloq.sln -c Release-1.40.8 -p:BeatSaberBaseDir="E:\Beat Saber Instances"
 dotnet build Hitbloq.sln -c Release-1.29.1 -p:HitbloqBeatSaberDirOverride="E:\Beat Saber 1.29.1"
 ```

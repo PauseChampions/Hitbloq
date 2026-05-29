@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFramework>net48</TargetFramework>
@@ -6,20 +6,20 @@
         <LangVersion>9</LangVersion>
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-        <Configurations>Debug;Release;Debug-1.43.0;Release-1.43.0;Debug-1.40.8;Release-1.40.8;Debug-1.29.1;Release-1.29.1</Configurations>
+        <Configurations>Debug;Release;Debug-1.44.0;Release-1.44.0;Debug-1.40.8;Release-1.40.8;Debug-1.29.1;Release-1.29.1</Configurations>
         <LocalRefsDir Condition="Exists('..\Refs')">..\Refs</LocalRefsDir>
         <BeatSaberDir>$(LocalRefsDir)</BeatSaberDir>
         <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
-        <HitbloqBuildProfile Condition="'$(HitbloqBuildProfile)' == ''">1.43.0</HitbloqBuildProfile>
+        <HitbloqBuildProfile Condition="'$(HitbloqBuildProfile)' == ''">1.44.0</HitbloqBuildProfile>
         <BeatSaberBaseDir Condition="'$(BeatSaberBaseDir)' == ''">D:\BSManager\BSInstances</BeatSaberBaseDir>
         <DebugType>portable</DebugType>
     </PropertyGroup>
 
-    <PropertyGroup Condition="'$(Configuration)' == 'Debug-1.43.0' OR '$(Configuration)' == 'Release-1.43.0'">
-        <HitbloqBuildProfile>1.43.0</HitbloqBuildProfile>
-        <HitbloqConfigurationType Condition="'$(Configuration)' == 'Debug-1.43.0'">Debug</HitbloqConfigurationType>
-        <HitbloqConfigurationType Condition="'$(Configuration)' == 'Release-1.43.0'">Release</HitbloqConfigurationType>
-        <DefineConstants>$(DefineConstants);HITBLOQ_BS_1_43_0</DefineConstants>
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug-1.44.0' OR '$(Configuration)' == 'Release-1.44.0'">
+        <HitbloqBuildProfile>1.44.0</HitbloqBuildProfile>
+        <HitbloqConfigurationType Condition="'$(Configuration)' == 'Debug-1.44.0'">Debug</HitbloqConfigurationType>
+        <HitbloqConfigurationType Condition="'$(Configuration)' == 'Release-1.44.0'">Release</HitbloqConfigurationType>
+        <DefineConstants>$(DefineConstants);HITBLOQ_BS_1_44_0</DefineConstants>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'Debug-1.40.8' OR '$(Configuration)' == 'Release-1.40.8'">
@@ -43,7 +43,7 @@
         <HitbloqBeatSaberDir>$(BeatSaberBaseDir)\$(HitbloqBuildProfile)</HitbloqBeatSaberDir>
         <HitbloqBeatSaberDir Condition="'$(HitbloqBeatSaberDirOverride)' != ''">$(HitbloqBeatSaberDirOverride)</HitbloqBeatSaberDir>
         <OutputPath>bin\$(Configuration)\$(HitbloqBuildProfile)\</OutputPath>
-        <ErrorOnMismatchedVersions Condition="'$(HitbloqBuildProfile)' != '1.43.0'">False</ErrorOnMismatchedVersions>
+        <ErrorOnMismatchedVersions Condition="'$(HitbloqBuildProfile)' != '1.44.0'">False</ErrorOnMismatchedVersions>
     </PropertyGroup>
 
     <PropertyGroup Condition="$(DefineConstants.Contains('CIBuild')) OR '$(NCrunch)' == '1'">
@@ -114,7 +114,7 @@
             <HintPath>$(HitbloqBeatSaberDir)\Libs\Newtonsoft.Json.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="OculusStudios.Platform.Core" Condition="'$(HitbloqBuildProfile)' == '1.43.0'">
+        <Reference Include="OculusStudios.Platform.Core" Condition="'$(HitbloqBuildProfile)' == '1.44.0'">
           <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\OculusStudios.Platform.Core.dll</HintPath>
         </Reference>
         <Reference Include="PlatformUserModel" Condition="Exists('$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\PlatformUserModel.dll')">
