@@ -48,6 +48,7 @@ namespace Hitbloq.Managers
 		private int _leaderboardRequestVersion;
 		private bool _scoreAlreadyUploaded;
 		private bool _scoreUploadRefreshInProgress;
+		private bool _selectedMapRankedOnAnyPool;
 		private int _scoreUploadRefreshVersion;
 
 		private BeatmapKey? _selectedBeatmapKey;
@@ -125,6 +126,14 @@ namespace Hitbloq.Managers
 
 			lock (_scoreUploadRefreshLock)
 			{
+				// Edited by GPT-5 Codex 2026-05-28
+				// BeatLeader can report local replay saves even when Hitbloq has no pool for the map.
+				// Skip refresh work unless the current map is ranked on at least one Hitbloq pool.
+				if (!_selectedMapRankedOnAnyPool)
+				{
+					return;
+				}
+
 				if (_scoreAlreadyUploaded || _scoreUploadRefreshInProgress)
 				{
 					return;
@@ -197,6 +206,11 @@ namespace Hitbloq.Managers
 						levelInfoEntry = null;
 					}
 				}
+
+				// Edited by GPT-5 Codex 2026-05-28
+				// Upload refresh should only run for maps Hitbloq can actually score.
+				// The upload callback reads this cached state before scheduling a refresh.
+				_selectedMapRankedOnAnyPool = levelInfoEntry != null;
 				
 				foreach (var beatmapKeyUpdater in _beatmapKeyUpdaters)
 				{

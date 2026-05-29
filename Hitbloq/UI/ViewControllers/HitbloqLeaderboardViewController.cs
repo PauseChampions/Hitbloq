@@ -22,8 +22,6 @@ namespace Hitbloq.UI.ViewControllers
 	[ViewDefinition("Hitbloq.UI.Views.HitbloqLeaderboardView.bsml")]
 	internal class HitbloqLeaderboardViewController : BSMLAutomaticViewController, IBeatmapKeyUpdater, ILeaderboardEntriesUpdater, IPoolUpdater
 	{
-		private const int LeaderboardPageChangeLoadingDelayMilliseconds = 250;
-
 		[UIComponent("vertical-icon-segments")]
 		private readonly IconSegmentedControl? _iconSegmentedControl = null!;
 		
@@ -230,7 +228,10 @@ namespace Hitbloq.UI.ViewControllers
 				}
 			});
 
-			await Task.Delay(LeaderboardPageChangeLoadingDelayMilliseconds);
+			// Edited by GPT-5 Codex 2026-05-27
+			// The click target reuse fix removes the delayed-destroy race this wait was hiding.
+			// Keep score rendering immediate so pool changes can be tested without artificial delay.
+			await Task.CompletedTask;
 
 			if (renderVersion != _renderVersion)
 			{
