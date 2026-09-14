@@ -22,6 +22,13 @@
         <DefineConstants>$(DefineConstants);HITBLOQ_BS_1_45_0</DefineConstants>
     </PropertyGroup>
 
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug-1.45.0' OR '$(Configuration)' == 'Release-1.45.0'">
+        <HitbloqBuildProfile>1.45.0</HitbloqBuildProfile>
+        <HitbloqConfigurationType Condition="'$(Configuration)' == 'Debug-1.45.0'">Debug</HitbloqConfigurationType>
+        <HitbloqConfigurationType Condition="'$(Configuration)' == 'Release-1.45.0'">Release</HitbloqConfigurationType>
+        <DefineConstants>$(DefineConstants);HITBLOQ_BS_1_45_0</DefineConstants>
+    </PropertyGroup>
+
     <PropertyGroup Condition="'$(Configuration)' == 'Debug-1.40.8' OR '$(Configuration)' == 'Release-1.40.8'">
         <HitbloqBuildProfile>1.40.8</HitbloqBuildProfile>
         <HitbloqConfigurationType Condition="'$(Configuration)' == 'Debug-1.40.8'">Debug</HitbloqConfigurationType>
