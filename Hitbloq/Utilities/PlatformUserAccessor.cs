@@ -63,6 +63,42 @@ namespace Hitbloq.Utilities
 			var userIds = await _platformUserModel.GetUserFriendsUserIds(includeSteamFriends);
 			return userIds is IReadOnlyCollection<string> collection ? collection : new List<string>(userIds);
 		}
+#elif HITBLOQ_BS_1_45_0
+		private readonly PlatformAuthenticationTokenProvider _platformAuthenticationTokenProvider;
+
+		public PlatformUserAccessor(PlatformAuthenticationTokenProvider platformAuthenticationTokenProvider)
+		{
+			_platformAuthenticationTokenProvider = platformAuthenticationTokenProvider;
+		}
+
+		public Task<UserInfo?> GetUserInfo(CancellationToken cancellationToken = default)
+		{
+			cancellationToken.ThrowIfCancellationRequested();
+			var userId = _platformAuthenticationTokenProvider.hashedUserId;
+			if (string.IsNullOrEmpty(userId))
+			{
+				return Task.FromResult<UserInfo?>(null);
+			}
+
+			return Task.FromResult<UserInfo?>(new UserInfo(GetPlatform(), userId, _platformAuthenticationTokenProvider.userName));
+		}
+
+		public Task<IReadOnlyCollection<string>?> GetUserFriendsUserIds(bool includeSteamFriends)
+		{
+			return Task.FromResult<IReadOnlyCollection<string>?>(null);
+		}
+
+		private UserInfo.Platform GetPlatform()
+		{
+			return _platformAuthenticationTokenProvider.platformType.ToString() switch
+			{
+				"Steam" => UserInfo.Platform.Steam,
+				"Oculus" or "OculusRift" or "OculusQuest" => UserInfo.Platform.Oculus,
+				"PS4" => UserInfo.Platform.PS4,
+				"PS5" => UserInfo.Platform.PS5,
+				_ => UserInfo.Platform.Test
+			};
+		}
 #else
 		private readonly IPlatformUserModel _platformUserModel;
 
