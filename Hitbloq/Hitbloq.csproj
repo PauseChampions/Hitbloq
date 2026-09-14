@@ -83,6 +83,10 @@
         <Reference Include="BeatSaber.Multiplayer.Core" Condition="Exists('$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\BeatSaber.Multiplayer.Core.dll')">
           <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\BeatSaber.Multiplayer.Core.dll</HintPath>
         </Reference>
+        <Reference Include="BS_Utils" Condition="Exists('$(HitbloqBeatSaberDir)\Plugins\BS_Utils.dll')">
+          <HintPath>$(HitbloqBeatSaberDir)\Plugins\BS_Utils.dll</HintPath>
+          <Private>false</Private>
+        </Reference>
         <Reference Include="BeatSaberPlaylistsLib">
             <HintPath>$(HitbloqBeatSaberDir)\Libs\BeatSaberPlaylistsLib.dll</HintPath>
             <Private>False</Private>

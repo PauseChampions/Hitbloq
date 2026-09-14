@@ -64,23 +64,16 @@ namespace Hitbloq.Utilities
 			return userIds is IReadOnlyCollection<string> collection ? collection : new List<string>(userIds);
 		}
 #elif HITBLOQ_BS_1_45_0
-		private readonly UserInfo _userInfo;
-
-		public PlatformUserAccessor(UserInfo userInfo)
+		public PlatformUserAccessor()
 		{
-			_userInfo = userInfo;
 		}
 
-		public Task<UserInfo?> GetUserInfo(CancellationToken cancellationToken = default)
+		public async Task<UserInfo?> GetUserInfo(CancellationToken cancellationToken = default)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-			var userId = _userInfo.platformUserId;
-			if (string.IsNullOrEmpty(userId))
-			{
-				return Task.FromResult<UserInfo?>(null);
-			}
-
-			return Task.FromResult<UserInfo?>(_userInfo);
+			var userInfo = await BS_Utils.Gameplay.GetUserInfo.GetUserAsync();
+			cancellationToken.ThrowIfCancellationRequested();
+			return userInfo;
 		}
 
 		public Task<IReadOnlyCollection<string>?> GetUserFriendsUserIds(bool includeSteamFriends)
@@ -88,17 +81,6 @@ namespace Hitbloq.Utilities
 			return Task.FromResult<IReadOnlyCollection<string>?>(null);
 		}
 
-		private UserInfo.Platform GetPlatform()
-		{
-			return _userInfo.platform.ToString() switch
-			{
-				"Steam" => UserInfo.Platform.Steam,
-				"Oculus" or "OculusRift" or "OculusQuest" => UserInfo.Platform.Oculus,
-				"PS4" => UserInfo.Platform.PS4,
-				"PS5" => UserInfo.Platform.PS5,
-				_ => UserInfo.Platform.Test
-			};
-		}
 #else
 		private readonly IPlatformUserModel _platformUserModel;
 
