@@ -64,23 +64,23 @@ namespace Hitbloq.Utilities
 			return userIds is IReadOnlyCollection<string> collection ? collection : new List<string>(userIds);
 		}
 #elif HITBLOQ_BS_1_45_0
-		private readonly PlatformAuthenticationTokenProvider _platformAuthenticationTokenProvider;
+		private readonly UserInfo _userInfo;
 
-		public PlatformUserAccessor(PlatformAuthenticationTokenProvider platformAuthenticationTokenProvider)
+		public PlatformUserAccessor(UserInfo userInfo)
 		{
-			_platformAuthenticationTokenProvider = platformAuthenticationTokenProvider;
+			_userInfo = userInfo;
 		}
 
 		public Task<UserInfo?> GetUserInfo(CancellationToken cancellationToken = default)
 		{
 			cancellationToken.ThrowIfCancellationRequested();
-			var userId = _platformAuthenticationTokenProvider.hashedUserId;
+			var userId = _userInfo.platformUserId;
 			if (string.IsNullOrEmpty(userId))
 			{
 				return Task.FromResult<UserInfo?>(null);
 			}
 
-			return Task.FromResult<UserInfo?>(new UserInfo(GetPlatform(), userId, _platformAuthenticationTokenProvider.userName));
+			return Task.FromResult<UserInfo?>(_userInfo);
 		}
 
 		public Task<IReadOnlyCollection<string>?> GetUserFriendsUserIds(bool includeSteamFriends)
@@ -90,7 +90,7 @@ namespace Hitbloq.Utilities
 
 		private UserInfo.Platform GetPlatform()
 		{
-			return _platformAuthenticationTokenProvider.platformType.ToString() switch
+			return _userInfo.platform.ToString() switch
 			{
 				"Steam" => UserInfo.Platform.Steam,
 				"Oculus" or "OculusRift" or "OculusQuest" => UserInfo.Platform.Oculus,

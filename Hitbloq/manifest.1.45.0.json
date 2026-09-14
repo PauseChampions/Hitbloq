@@ -4,10 +4,7 @@
   "name": "Hitbloq",
   "author": "PauseChampions & DaFluffyPotato",
   "version": "1.5.5",
-  "description": [
-    "#![Hitbloq.Description.md]",
-    "Hitbloq offers a unique competitive experience for Beat Saber through its use of map pools and the relative ranking algorithm."
-  ],
+  "description": "Hitbloq offers a unique competitive experience for Beat Saber through its use of map pools and the relative ranking algorithm.",
   "gameVersion": "1.45.0",
   "icon": "Hitbloq.Images.Logo.png",
   "dependsOn": {
