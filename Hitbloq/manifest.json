@@ -5,7 +5,7 @@
   "author": "PauseChampions & DaFluffyPotato",
   "version": "1.5.5",
   "description": "Hitbloq offers a unique competitive experience for Beat Saber through its use of map pools and the relative ranking algorithm.",
-  "gameVersion": "1.45.0",
+  "gameVersion": "1.45.1",
   "icon": "Hitbloq.Images.Logo.png",
   "dependsOn": {
     "BSIPA": "^4.3.5",

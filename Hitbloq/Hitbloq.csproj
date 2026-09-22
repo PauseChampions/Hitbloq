@@ -6,7 +6,7 @@
         <LangVersion>9</LangVersion>
         <Nullable>enable</Nullable>
         <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-        <Configurations>Debug;Release;Debug-Latest;Release-Latest;Debug-1.45.0;Release-1.45.0;Debug-1.40.8;Release-1.40.8;Debug-1.29.1;Release-1.29.1</Configurations>
+        <Configurations>Debug;Release;Debug-Latest;Release-Latest;Debug-1.45.0;Release-1.45.0;Debug-1.40.8;Release-1.40.8;Debug-1.29.1;Release-1.29.1;Debug-1.45.1;Release-1.45.1</Configurations>
         <LocalRefsDir Condition="Exists('..\Refs')">..\Refs</LocalRefsDir>
         <BeatSaberDir>$(LocalRefsDir)</BeatSaberDir>
         <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
