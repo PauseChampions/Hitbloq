@@ -10,15 +10,22 @@
         <LocalRefsDir Condition="Exists('..\Refs')">..\Refs</LocalRefsDir>
         <BeatSaberDir>$(LocalRefsDir)</BeatSaberDir>
         <AppOutputBase>$(MSBuildProjectDirectory)\</AppOutputBase>
-        <HitbloqBuildProfile Condition="'$(HitbloqBuildProfile)' == ''">1.45.0</HitbloqBuildProfile>
+        <HitbloqBuildProfile Condition="'$(HitbloqBuildProfile)' == ''">1.45.1</HitbloqBuildProfile>
         <BeatSaberBaseDir Condition="'$(BeatSaberBaseDir)' == ''">D:\BSManager\BSInstances</BeatSaberBaseDir>
         <DebugType>portable</DebugType>
     </PropertyGroup>
 
     <PropertyGroup Condition="'$(Configuration)' == 'Debug-Latest' OR '$(Configuration)' == 'Release-Latest'">
-        <HitbloqBuildProfile>1.45.0</HitbloqBuildProfile>
+        <HitbloqBuildProfile>1.45.1</HitbloqBuildProfile>
         <HitbloqConfigurationType Condition="'$(Configuration)' == 'Debug-Latest'">Debug</HitbloqConfigurationType>
         <HitbloqConfigurationType Condition="'$(Configuration)' == 'Release-Latest'">Release</HitbloqConfigurationType>
+        <DefineConstants>$(DefineConstants);HITBLOQ_BS_1_45_0</DefineConstants>
+    </PropertyGroup>
+
+    <PropertyGroup Condition="'$(Configuration)' == 'Debug-1.45.1' OR '$(Configuration)' == 'Release-1.45.1'">
+        <HitbloqBuildProfile>1.45.1</HitbloqBuildProfile>
+        <HitbloqConfigurationType Condition="'$(Configuration)' == 'Debug-1.45.1'">Debug</HitbloqConfigurationType>
+        <HitbloqConfigurationType Condition="'$(Configuration)' == 'Release-1.45.1'">Release</HitbloqConfigurationType>
         <DefineConstants>$(DefineConstants);HITBLOQ_BS_1_45_0</DefineConstants>
     </PropertyGroup>
 
@@ -50,7 +57,7 @@
         <HitbloqBeatSaberDir>$(BeatSaberBaseDir)\$(HitbloqBuildProfile)</HitbloqBeatSaberDir>
         <HitbloqBeatSaberDir Condition="'$(HitbloqBeatSaberDirOverride)' != ''">$(HitbloqBeatSaberDirOverride)</HitbloqBeatSaberDir>
         <OutputPath>bin\$(Configuration)\$(HitbloqBuildProfile)\</OutputPath>
-        <ErrorOnMismatchedVersions Condition="'$(HitbloqBuildProfile)' != '1.45.0'">False</ErrorOnMismatchedVersions>
+        <ErrorOnMismatchedVersions Condition="'$(HitbloqBuildProfile)' != '1.45.0' AND '$(HitbloqBuildProfile)' != '1.45.1'">False</ErrorOnMismatchedVersions>
     </PropertyGroup>
 
     <PropertyGroup Condition="$(DefineConstants.Contains('CIBuild')) OR '$(NCrunch)' == '1'">
@@ -128,7 +135,7 @@
             <HintPath>$(HitbloqBeatSaberDir)\Libs\Newtonsoft.Json.dll</HintPath>
             <Private>False</Private>
         </Reference>
-        <Reference Include="OculusStudios.Platform.Core" Condition="'$(HitbloqBuildProfile)' == '1.45.0'">
+        <Reference Include="OculusStudios.Platform.Core" Condition="'$(HitbloqBuildProfile)' == '1.45.0' OR '$(HitbloqBuildProfile)' == '1.45.1'">
           <HintPath>$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\OculusStudios.Platform.Core.dll</HintPath>
         </Reference>
         <Reference Include="PlatformUserModel" Condition="Exists('$(HitbloqBeatSaberDir)\Beat Saber_Data\Managed\PlatformUserModel.dll')">
