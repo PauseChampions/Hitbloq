@@ -243,7 +243,9 @@ namespace Hitbloq.UI.ViewControllers
 			// A bit of explanation of what is going on
 			// I want to make a maximum of 2 cells visible, however I first need to parse exactly 2 cells and clean them up
 			// After that I populate the current pool options
-			BSMLCompat.Dropdown(_dropDownListSetting!).SetField("_numberOfVisibleCells", 2);
+			if (_dropDownListSetting == null)
+				throw new InvalidOperationException("Hitbloq pool dropdown was not bound.");
+			BSMLCompat.Dropdown(_dropDownListSetting).SetField("_numberOfVisibleCells", 2);
 			BSMLCompat.SetValues(_dropDownListSetting, new List<object> {"1", "2"});
 			_dropDownListSetting.UpdateChoices();
 			BSMLCompat.SetValues(_dropDownListSetting, _pools.Count != 0 ? _pools : new List<object> {"None"});
