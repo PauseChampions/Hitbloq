@@ -49,7 +49,7 @@ namespace Hitbloq.Utilities
 				var hash = Collections.GetCustomLevelHash(beatmapKey.levelId);
 #endif
 				var difficulty = beatmapKey.difficulty.ToString();
-				var characteristic = beatmapKey.characteristic.ToString();
+				var characteristic = beatmapKey.characteristic.SerializedName();
 				return $"{hash}%7C_{difficulty}_Solo{characteristic}";
 			}
 
