@@ -63,6 +63,9 @@ namespace Hitbloq.Other
 		public void Dispose()
 		{
 			Events.playlistSelected -= OnPlaylistSelected;
+			_tokenSource?.Cancel();
+			_tokenSource?.Dispose();
+			_tokenSource = null;
 		}
 
 		public void Initialize()
@@ -81,22 +84,31 @@ namespace Hitbloq.Other
 		{
 			_tokenSource?.Cancel();
 			_tokenSource?.Dispose();
-			_tokenSource = new CancellationTokenSource();
-			var playlistToSelect = await GetPlaylist(poolID, _tokenSource.Token);
-
-			if (playlistToSelect == null)
+			var tokenSource = new CancellationTokenSource();
+			_tokenSource = tokenSource;
+			try
 			{
-				return;
+				var playlistToSelect = await GetPlaylist(poolID, tokenSource.Token);
+				if (playlistToSelect == null || tokenSource.IsCancellationRequested)
+				{
+					return;
+				}
+
+				await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+				{
+					if (tokenSource.IsCancellationRequested) return;
+					onDownloadComplete?.Invoke();
+					OpenPlaylist(playlistToSelect);
+				});
 			}
-
-			await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+			catch (OperationCanceledException)
 			{
-				onDownloadComplete?.Invoke();
-				OpenPlaylist(playlistToSelect);
-			});
-
-			_tokenSource.Dispose();
-			_tokenSource = null;
+			}
+			finally
+			{
+				if (ReferenceEquals(_tokenSource, tokenSource)) _tokenSource = null;
+				tokenSource.Dispose();
+			}
 		}
 
 		public void CancelDownload()
@@ -112,6 +124,7 @@ namespace Hitbloq.Other
 				return localPlaylist;
 			}
 
+			token.ThrowIfCancellationRequested();
 			return await DownloadPlaylistFromPoolID(poolID, token);
 		}
 
@@ -123,9 +136,9 @@ namespace Hitbloq.Other
 				{
 					var syncURL = $"https://hitbloq.com/static/hashlists/{poolID}.bplist";
 
-					var playlists = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.GetAllPlaylists(true).ToArray();
-					foreach (var playlist in playlists)
+					foreach (var playlist in BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.GetAllPlaylists(true))
 					{
+						token.ThrowIfCancellationRequested();
 						if (playlist.TryGetCustomData("syncURL", out var url) && url is string urlString)
 						{
 							if (urlString == syncURL)
@@ -143,7 +156,7 @@ namespace Hitbloq.Other
 				return playlist?.PlaylistLevelPack;
 #endif
 			}
-			catch (TaskCanceledException)
+			catch (OperationCanceledException)
 			{
 				return null;
 			}
@@ -155,9 +168,12 @@ namespace Hitbloq.Other
 			{
 				var syncURL = $"https://hitbloq.com/static/hashlists/{poolID}.bplist";
 				var webResponse = await _siraHttpService.GetAsync(syncURL, cancellationToken: token);
-				Stream playlistStream = new MemoryStream(await webResponse.ReadAsByteArrayAsync());
+				var playlistBytes = await webResponse.ReadAsByteArrayAsync();
+				token.ThrowIfCancellationRequested();
+				using Stream playlistStream = new MemoryStream(playlistBytes);
 				var newPlaylist = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.DefaultHandler?.Deserialize(playlistStream);
 
+				token.ThrowIfCancellationRequested();
 				if (newPlaylist != null)
 				{
 					var playlistManager = BeatSaberPlaylistsLib.PlaylistManager.DefaultManager.CreateChildManager("Hitbloq");
@@ -170,7 +186,7 @@ namespace Hitbloq.Other
 				return newPlaylist?.PlaylistLevelPack;
 #endif
 			}
-			catch (TaskCanceledException)
+			catch (OperationCanceledException)
 			{
 				return null;
 			}

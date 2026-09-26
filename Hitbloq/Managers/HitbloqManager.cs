@@ -46,6 +46,7 @@ namespace Hitbloq.Managers
 		private CancellationTokenSource? _levelInfoTokenSource;
 		private CancellationTokenSource? _scoreUploadRefreshTokenSource;
 		private int _leaderboardRequestVersion;
+		private int _levelInfoRequestVersion;
 		private bool _scoreAlreadyUploaded;
 		private bool _scoreUploadRefreshInProgress;
 		private bool _selectedMapRankedOnAnyPool;
@@ -88,6 +89,10 @@ namespace Hitbloq.Managers
 
 			_scoreUploadRefreshTokenSource?.Cancel();
 			_scoreUploadRefreshTokenSource?.Dispose();
+			_levelInfoTokenSource?.Cancel();
+			_levelInfoTokenSource?.Dispose();
+			_leaderboardTokenSource?.Cancel();
+			_leaderboardTokenSource?.Dispose();
 		}
 
 		public void Initialize()
@@ -186,17 +191,23 @@ namespace Hitbloq.Managers
 
 		private async Task OnLeaderboardSetAsync(BeatmapKey? beatmapKey)
 		{
+			var requestVersion = ++_levelInfoRequestVersion;
+			_levelInfoTokenSource?.Cancel();
+			_levelInfoTokenSource?.Dispose();
+			_levelInfoTokenSource = null;
+			_selectedBeatmapKey = beatmapKey;
+			_selectedMapRankedOnAnyPool = false;
+
 			if (beatmapKey != null)
 			{
-				_selectedBeatmapKey = beatmapKey;
 				HitbloqLevelInfo? levelInfoEntry = null;
 
 				if (beatmapKey.Value.levelId.Contains("custom_level_"))
 				{
-					_levelInfoTokenSource?.Cancel();
-					_levelInfoTokenSource?.Dispose();
 					_levelInfoTokenSource = new CancellationTokenSource();
-					levelInfoEntry = await _levelInfoSource.GetLevelInfoAsync(beatmapKey.Value, _levelInfoTokenSource.Token);
+					var token = _levelInfoTokenSource.Token;
+					levelInfoEntry = await _levelInfoSource.GetLevelInfoAsync(beatmapKey.Value, token);
+					if (token.IsCancellationRequested || requestVersion != _levelInfoRequestVersion) return;
 				}
 
 				if (levelInfoEntry != null)
@@ -212,10 +223,14 @@ namespace Hitbloq.Managers
 				// The upload callback reads this cached state before scheduling a refresh.
 				_selectedMapRankedOnAnyPool = levelInfoEntry != null;
 				
-				foreach (var beatmapKeyUpdater in _beatmapKeyUpdaters)
+				await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
 				{
-					await UnityMainThreadTaskScheduler.Factory.StartNew(() => beatmapKeyUpdater.BeatmapKeyUpdated(beatmapKey.Value, levelInfoEntry));
-				}
+					if (requestVersion != _levelInfoRequestVersion) return;
+					foreach (var beatmapKeyUpdater in _beatmapKeyUpdaters)
+					{
+						beatmapKeyUpdater.BeatmapKeyUpdated(beatmapKey.Value, levelInfoEntry);
+					}
+				});
 			}
 		}
 
@@ -267,18 +282,17 @@ namespace Hitbloq.Managers
 				}
 			}
 
-			foreach (var leaderboardEntriesUpdater in _leaderboardEntriesUpdaters)
+			await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
 			{
-				await UnityMainThreadTaskScheduler.Factory.StartNew(() =>
+				if (leaderboardToken.IsCancellationRequested || requestVersion != _leaderboardRequestVersion)
 				{
-					if (leaderboardToken.IsCancellationRequested || requestVersion != _leaderboardRequestVersion)
-					{
-						return;
-					}
-
+					return;
+				}
+				foreach (var leaderboardEntriesUpdater in _leaderboardEntriesUpdaters)
+				{
 					leaderboardEntriesUpdater.LeaderboardEntriesUpdated(leaderboardEntries);
-				});
-			}
+				}
+			});
 		}
 
 		private void OnPoolChanged(string pool)
